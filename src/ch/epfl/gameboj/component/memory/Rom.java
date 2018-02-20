@@ -21,7 +21,7 @@ public final class Rom {
      * @param data, un tableau de byte
      */
     public Rom(byte[] data) {
-        Preconditions.checkArgument(data.length>0);
+        Preconditions.checkArgument(data.length>=0);
         this.data = new byte[data.length];
         for (int i = 0; i < data.length; ++i) {
             this.data[i] = data[i];
@@ -35,10 +35,12 @@ public final class Rom {
     }
     /**
      * @param index l'index 
-     * @return l'élément se trouvant à 
+     * @return l'élément se trouvant à l'indexe spécifié
      */
     public int read(int index) {
-       Preconditions.checkArgument(index<data.length);
+       if (index>=data.length){
+           throw new IndexOutOfBoundsException();
+       }
        return Byte.toUnsignedInt(data[index]);
     }
 }
