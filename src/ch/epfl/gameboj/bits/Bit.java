@@ -16,7 +16,7 @@ interface Bit {
 	 * @return an int : the index
 	 */
 	default int index(){
-		return ((Enum)this).ordinal();
+		return ((Enum<?>)this).ordinal();
 	}
 	
 	/**

@@ -92,7 +92,7 @@ class BitsTest {
         for (int i = 0; i < Integer.SIZE; ++i) {
             int m = ALL_MASKS[i];
             for (Bit b: AllBits.values()) {
-                assertEquals(i == b.ordinal(), Bits.test(m, b));
+                assertEquals(i == b.index(), Bits.test(m, b));
             }
         }
     }

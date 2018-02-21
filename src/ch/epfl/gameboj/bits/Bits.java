@@ -24,7 +24,7 @@ public final class Bits{
 	 */
 	public static int mask(int index) throws IndexOutOfBoundsException{
 		Objects.checkIndex(index, Integer.SIZE);
-		return (1<<index);
+		return (0b01<<index);
 		
 	}
 	
@@ -39,6 +39,7 @@ public final class Bits{
 	public static boolean test(int bits, int index) throws IndexOutOfBoundsException {
 		Objects.checkIndex(index,Integer.SIZE);
 		bits = bits & mask(index);
+		bits = bits>>index;
 		return (bits==1);
 	}
 	
@@ -195,7 +196,7 @@ public final class Bits{
 		Preconditions.checkBits8(highB);
 		Preconditions.checkBits8(lowB);
 		
-		return highB<<8 | lowB ;
+		return (highB<<8) | lowB ;
 		
 	}
 	
