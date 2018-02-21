@@ -127,9 +127,9 @@ class BitsTest {
     @Test
     void clipFailsForInvalidSize() {
         assertThrows(IllegalArgumentException.class,
-                () -> Bits.clip(0, -1));
+                () -> Bits.clip(-1, 0));
         assertThrows(IllegalArgumentException.class,
-                () -> Bits.clip(0, Integer.SIZE + 1));
+                () -> Bits.clip(Integer.SIZE + 1, 0));
     }
 
     @Test
@@ -147,7 +147,7 @@ class BitsTest {
         Random rng = newRandom();
         for (int i = 0; i < Integer.SIZE; ++i) {
             for (int j = 0; j < RANDOM_ITERATIONS; ++j) {
-                int b = Bits.clip(rng.nextInt(), i);
+                int b = Bits.clip(i, rng.nextInt());
                 assertTrue(0 <= b && b <= ALL_MASKS[i] - 1);
             }
         }
