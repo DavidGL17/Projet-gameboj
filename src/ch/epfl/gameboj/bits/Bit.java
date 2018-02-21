@@ -12,13 +12,17 @@ import java.lang.Enum;
 interface Bit {
 	
 	/**
-	 * 
-	 * @return
+	 * Computes the index
+	 * @return an int : the index
 	 */
 	default int index(){
 		return ((Enum)this).ordinal();
 	}
 	
+	/**
+	 * Computes the mask
+	 * @return an int : the mask
+	 */
 	default int mask(){
 		
 		int j = this.index();
