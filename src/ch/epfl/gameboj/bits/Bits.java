@@ -6,7 +6,7 @@ import ch.epfl.gameboj.Preconditions;
 
 /*
  * 
- * @author Melvin Malonga-Matouba
+ * @author Melvin Malonga-Matouba (288405)
  * @author David González León (270845)
  * 
  */
@@ -138,15 +138,12 @@ public final class Bits{
 	 * ---------------------------------------------------------------
 	 */
 	public static int rotate(int size, int bits, int distance) {
-	    if (size<=0||size>32) {
+	    if ((size<=0||size>32) || (bits>= (0b1<<size))) {
             throw new IllegalArgumentException();
         }
         int annulator =0;
         for (int i = 0;i<size;++i) {
             annulator += mask(i);
-        }
-        if (((0^annulator)&bits)>0) {
-            throw new IllegalArgumentException();
         }
         if ((bits&annulator)==annulator || (distance%size)==(int)(distance/size)) {
             return bits;
@@ -154,7 +151,7 @@ public final class Bits{
         int checkMSBIsOne = mask(size-1);
         int finalDistance = distance;
         while (finalDistance<0) {
-            finalDistance += distance;
+            finalDistance += size;
         }
         boolean MSBIsOne = false;
         int finalBits = bits;
@@ -162,7 +159,7 @@ public final class Bits{
             if ((checkMSBIsOne& finalBits)>0) {
                 MSBIsOne = true;
             }
-            finalBits <<= 1;
+            finalBits = finalBits << 1;
             if (MSBIsOne) {
                 MSBIsOne = false;
                 finalBits |= 1;
