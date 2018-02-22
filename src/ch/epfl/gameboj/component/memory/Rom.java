@@ -15,7 +15,7 @@ public final class Rom {
     private final byte[] data;
 
     /**
-     * Copies the elements of the parameter in the data array of the class
+     * Constructs a rom memory and copies the elements of the parameter in the data array of the memory
      * 
      * @param data,
      *            a byte array

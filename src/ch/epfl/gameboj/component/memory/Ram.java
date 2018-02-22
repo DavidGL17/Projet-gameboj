@@ -14,7 +14,7 @@ public final class Ram {
     private final byte[] data;
 
     /**
-     * Creates a new memory of the size given
+     * Creates a new ram memory of the size given
      * 
      * @param size,
      *            the size we want the memory to be

@@ -8,27 +8,38 @@ import ch.epfl.gameboj.Bus;
  */
 public interface Component {
     public static final int NO_DATA = 0x100;
-    
+
     /**
-     * Cette méthode fournit l'élément se trouvant à l'adresse spécifiée
+     * Returns the element located at the given index
      * 
-     * @param address l'adresse où se trouve l'élément désiré
-     * @return l'élément se trouvant à l'adresse ou NO_DATA si le composnant ne possède aucune valeur à cette adresse
-     * @throws IllegalArgumentException si l'adresse n'est pas un élément de 16 bits
+     * @param address
+     *            The address where the element is located
+     * @return The element located at the given address or NO_DATA if the
+     *         component does not have any element at that address
+     * @throws IllegalArgumentException
+     *             if the address is not a 16 bits value
      */
     public abstract int read(int address);
 
     /**
-     * Cette méthode stocke la valeur donnée à l'adresse donnée, ou ne fais rien si le composants ne permet pas de stocker d'adresse à cette emplacement
+     * Storages the given value at the given address or does nothing if the
+     * component can't stock anything at that address
      * 
-     * @param address l'adresse où l'on veut stocker notre valeur
-     * @param data la valeur que l'on veut stocker
-     * @throws IllegalArgumentException si l'adresse n'est pas un élément de 16 bit ou si la valeur n'est pas un élément de 8 bit
+     * @param address
+     *            the address where we want to locate our element
+     * @param data
+     *            the data we want to storage
+     * @throws IllegalArgumentException
+     *             if the address is not a 16 bits value or if the data is not a
+     *             8 bits value
      */
     public abstract void write(int address, int data);
 
     /**
+     * Attaches the component to the given bus
+     * 
      * @param bus
+     *            the bus we want to attach our component to
      */
     public default void attachTo(Bus bus) {
         bus.attach(this);
