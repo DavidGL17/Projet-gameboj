@@ -20,14 +20,14 @@ public interface Preconditions {
             throw new IllegalArgumentException();
         }
     }
-    
+
     /**
-     * Checks if an int is in the range of 0 to 255
+     * Checks if an int is in the range of 0 to 0xff
      * 
      * @param v
      * @return v
      * @throws IllegalArgumentException
-     *             if v is not in the range of 0 to 255
+     *             if v is not in the range of 0 to 0xff
      */
     public static int checkBits8(int v) {
         if (0 <= v && v <= 0xff) {
@@ -38,12 +38,12 @@ public interface Preconditions {
     }
 
     /**
-     * Checks if an int is in the range of 0 to 65535
+     * Checks if an int is in the range of 0 to 0xffff
      * 
      * @param v
      * @return v
      * @throws IllegalArgumentException
-     *             if v is not in the range of 0 to 65535
+     *             if v is not in the range of 0 to 0xffff
      */
     public static int checkBits16(int v) {
         if (0 <= v && v <= 0xffff) {
