@@ -144,10 +144,12 @@ public final class Bits{
         }
 	    if (size<31) {  		//Le cas size proche de 31 est tricky car après 0b1<<size est négatif
 	    		if (bits >= (0b1<<size)) {
-	    			 throw new IllegalArgumentException();
+	    			System.out.println("Par là , bits vaut: " + bits + " size vaut: " + size + " distance vaut: " + distance );
+	    			throw new IllegalArgumentException();
 	    		}
-	    } else {
+	    } else if (size==31){
 	    		if (bits >>>1 >= 0b1<<(size-1)) {
+	    			System.out.println("Ouhou , bits vaut: " + bits + " size vaut: " + size + " distance vaut: " + distance );
 	    			 throw new IllegalArgumentException();
 	    		}
 	    }
