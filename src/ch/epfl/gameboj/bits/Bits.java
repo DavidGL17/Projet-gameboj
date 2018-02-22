@@ -137,7 +137,38 @@ public final class Bits{
 	 * ---------------------------------------------------------------
 	 */
 	public static int rotate(int size, int bits, int distance) {
-		return 2;
+	    if (size<=0||size>32) {
+            throw new IllegalArgumentException();
+        }
+        int annulator =0;
+        for (int i = 0;i<=size;++i) {
+            annulator += mask(i);
+        }
+        if (((0^annulator)&bits)<0) {
+            throw new IllegalArgumentException();
+        }
+        if ((bits&annulator)==annulator || (distance%size)==(int)(distance/size)) {
+            return bits;
+        }
+        int checkMSBIsOne = mask(size-1);
+        int finalDistance = distance;
+        while (finalDistance<0) {
+            finalDistance += distance;
+        }
+        boolean MSBIsOne = false;
+        int finalBits = bits;
+        for (int i = 0;i<finalDistance;++i) {
+            if ((checkMSBIsOne& finalBits)>0) {
+                MSBIsOne = true;
+            }
+            finalBits <<= 1;
+            if (MSBIsOne) {
+                MSBIsOne = false;
+                finalBits |= 1;
+            }
+            finalBits &= annulator;
+        }
+	    return finalBits;
 	}
 	
 	
