@@ -40,12 +40,12 @@ public final class Bits{
 	 * @param index - an int : the weight of the bit
 	 * @return a boolean : wether the bit of weight index is activated in bits
 	 * @throws IndexOutOfBoundsException
-	 * 			If the index is invalid for a bit in a byte
+	 * 			If the index is invalid for a bit in a int
 	 */
 	public static boolean test(int bits, int index) throws IndexOutOfBoundsException {
 		Objects.checkIndex(index,Integer.SIZE);
 		bits = bits & mask(index);
-		bits = bits>>index;
+		bits = bits>>>index;
 		return (bits==1);
 	}
 	
