@@ -137,38 +137,43 @@ public final class Bits{
 	 * Pas sur d'avoir compris l'objectif
 	 * ---------------------------------------------------------------
 	 */
-	public static int rotate(int size, int bits, int distance) {
-	    if ((size<=0||size>32) || (bits>= (0b1<<size))) {
+	public static int rotate(int size, int bits, int distance) throws IllegalArgumentException, IndexOutOfBoundsException {
+	    if ((size<=0)||(size>Integer.SIZE) ) {
+	    		System.out.println("Par ici , bits vaut: " + bits + " size vaut: " + size + " distance vaut: " + distance );
             throw new IllegalArgumentException();
         }
-        int annulator =0;
-        for (int i = 0;i<size;++i) {
-            annulator += mask(i);
-        }
-        if ((bits&annulator)==annulator || (distance%size)==(int)(distance/size)) {
-            return bits;
-        }
-        int checkMSBIsOne = mask(size-1);
-        int finalDistance = distance;
-        while (finalDistance<0) {
-            finalDistance += size;
-        }
-        boolean MSBIsOne = false;
-        int finalBits = bits;
-        for (int i = 0;i<finalDistance;++i) {
-            if ((checkMSBIsOne& finalBits)>0) {
-                MSBIsOne = true;
-            }
-            finalBits = finalBits << 1;
-            if (MSBIsOne) {
-                MSBIsOne = false;
-                finalBits |= 1;
-            }
-            finalBits &= annulator;
-        }
-	    return finalBits;
+	    if (size<31) {  		//Le cas size proche de 31 est tricky car après 0b1<<size est négatif
+	    		if (bits >= (0b1<<size)) {
+	    			 throw new IllegalArgumentException();
+	    		}
+	    } else {
+	    		if (bits >>>1 >= 0b1<<(size-1)) {
+	    			 throw new IllegalArgumentException();
+	    		}
+	    }
+	    int res=0;
+	    int decalage = distance%size; //permet de controler module de décalage
+	    
+	    /* Peu esthétique a%b renvoie c : [0;a] et c ≡ a[b]
+	     * En faisant d=distance%size on obtient donc si a et positif d=décalage sinon on obtient d=décalage-size
+	     * Pour palier à ce problème il faut dans le cas positif obtenir le même nombre et négatif obtenir le nombre+size
+	     * Faire décalage = (d+size)%size fonctionne car dans le cas ou a est positif décalage vaut d, dans le cas contraire
+	     * on obtient décalage = d+size
+	     * 
+	     * Enfin pour distance = 0, on obtient bien un décalage nul;
+	     * 
+	     * Les opérations de congruences sont rapides car elle revienne toujours à une complémentarité près faire un "clip". (On aurait pu 's'amuser' à le faire nous-même)
+	     * 
+	     *  Enfin 
+	     */
+	    for (int i=0 ; i<size ; i++) { //i indice du bit dans le nombre de sortie
+	    		if (test(bits, ( (i+size-decalage)%size ) )) { //controle module decalage permet de controler signe de size-decalage
+	    			res+=mask(i);
+	    		}
+	    }
+	    
+	    return res;
 	}
-	
 	
 	/**
 	 * Computes from a byte the int where the 8 LSB are the same and the rest of the sign of the MSB
