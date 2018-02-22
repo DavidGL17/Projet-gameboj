@@ -4,6 +4,12 @@ import java.util.Objects;
 
 import ch.epfl.gameboj.Preconditions;
 
+/*
+ * 
+ * @author Melvin Malonga-Matouba
+ * 
+ * 
+ */
 
 public final class Bits{
 	private Bits(){};
@@ -89,13 +95,13 @@ public final class Bits{
 	 */
 	/**
 	 * Computes the int corresponding to the (size) least significant bits
-	 * @param bits - an int : the original code
 	 * @param size - an int : the number of bits
+	 * @param bits - an int : the original code
 	 * @return an int : the code corresponding to the (size) LSB
 	 * @throw IllegalArgumentException
 	 * 			if parameter size isn't within [0,32]
 	 */
-	public static int clip(int bits, int size) throws IllegalArgumentException {
+	public static int clip(int size, int bits) throws IllegalArgumentException {
 		
 		if ((size<0)||(size>32)){
 			throw new IllegalArgumentException("!"); //Est-ce bien cette exception à lancer ? dans le sujet IllegalArgumentException(!) On utilise pas checkIndex car il lance OutOfBoundsExeption
@@ -109,22 +115,20 @@ public final class Bits{
 		return (bits & mask);
 	}
 	
-	/* Est-ce bien ce qu'il faut faire ?
-	 * à appliquer aux bytes ou aux int ? : byte - 114 "8", int - 114 "32"
-	 */
+	
 	/**
-	 * Computes an int where the (size) LSB are replaced by another sequence of bits from the int
+	 * Extract the bits from index start to start+size
 	 * @param bits - an int : the int
 	 * @param start - an int : the index of the first replacement bit
 	 * @param size - an int : the number of LSB to replace
 	 * @return an int : the à compléter /!\ <-------------------------------------
 	 * @throws IndexOutOfBoundsException
-	 * 			if the start and size is invalid for a bit-sequence in a byte
+	 * 			if the start and size is invalid for a bit-sequence in an int
 	 */
 	public static int extract(int bits, int start, int size) throws IndexOutOfBoundsException {
 		Objects.checkFromIndexSize(start,size,Integer.SIZE);
 		
-		return ( (bits & ( (~clip(bits,size)) % (Byte.MAX_VALUE+1) ) )| clip(bits>>>start,size) );
+		return  clip(size,bits>>>start) ;
 	}
 	
 	
