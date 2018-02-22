@@ -7,7 +7,7 @@ import ch.epfl.gameboj.Preconditions;
 /*
  * 
  * @author Melvin Malonga-Matouba
- * 
+ * @author David González León (270845)
  * 
  */
 
@@ -92,6 +92,7 @@ public final class Bits{
 	
 	/*
 	 * Est-ce bien cette exception à lancer ? (String dans le constructeur)
+	 * (réponse) je penses que oui
 	 */
 	/**
 	 * Computes the int corresponding to the (size) least significant bits
@@ -141,10 +142,10 @@ public final class Bits{
             throw new IllegalArgumentException();
         }
         int annulator =0;
-        for (int i = 0;i<=size;++i) {
+        for (int i = 0;i<size;++i) {
             annulator += mask(i);
         }
-        if (((0^annulator)&bits)<0) {
+        if (((0^annulator)&bits)>0) {
             throw new IllegalArgumentException();
         }
         if ((bits&annulator)==annulator || (distance%size)==(int)(distance/size)) {
