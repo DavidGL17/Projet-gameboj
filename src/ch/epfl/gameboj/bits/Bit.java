@@ -1,6 +1,5 @@
 package ch.epfl.gameboj.bits;
 
-import java.lang.Enum;
 
 /*
  * 
@@ -9,14 +8,22 @@ import java.lang.Enum;
  * 
  */
 
-interface Bit {
+public interface Bit {
+	
+	
+	/**
+	 * Uses automatically inherited method from type enum
+	 * @return the ordinal of this enumeration constant
+	 */
+	abstract int ordinal();
+	
 	
 	/**
 	 * Computes the index
 	 * @return an int : the index
 	 */
 	default int index(){
-		return ((Enum<?>)this).ordinal();
+		return ordinal();
 	}
 	
 	/**
