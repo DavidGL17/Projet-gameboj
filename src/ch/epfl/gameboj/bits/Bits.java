@@ -170,10 +170,8 @@ public final class Bits{
 	 */
     public static int signExtend8(int b)  {
         if (test(Preconditions.checkBits8(b), 7)) {
-        	System.out.println("Par ici, " + b + " retour : " + (b | (0xFFFFFF80)));
             return b | (0xFFFFFF80);
         } else {
-        	System.out.println("Par là " + b +" retour : " + b );
             return b;
         }
     }
