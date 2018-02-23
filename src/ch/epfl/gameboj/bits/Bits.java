@@ -13,14 +13,6 @@ import ch.epfl.gameboj.Preconditions;
 
 public final class Bits{
 	private Bits(){};
-	
-	/*
-	 * Adapter le String du constructeur de l'exception ? l-98
-	 * Que doit faire la méthode rotate ?
-	 * 
-	 */
-	
-	
 	/**
 	 * Computes the mask corresponding to a certain index
 	 * @param index - an int : the index of the bit to activate
@@ -29,8 +21,7 @@ public final class Bits{
 	 * 			If parameter i doesn't belong to [0,31]
 	 */
 	public static int mask(int index) throws IndexOutOfBoundsException{
-		Objects.checkIndex(index, Integer.SIZE);
-		return (0b01<<index);
+		return (0b01<<Objects.checkIndex(index, Integer.SIZE));
 		
 	}
 	
@@ -127,9 +118,7 @@ public final class Bits{
 	 * 			if the start and size is invalid for a bit-sequence in an int
 	 */
 	public static int extract(int bits, int start, int size) throws IndexOutOfBoundsException {
-		Objects.checkFromIndexSize(start,size,Integer.SIZE);
-		
-		return  clip(size,bits>>>start) ;
+		return  clip(size,bits>>>Objects.checkFromIndexSize(start,size,Integer.SIZE)) ;
 	}
 	
 	
@@ -184,14 +173,14 @@ public final class Bits{
 	 * @throws IllegalArgumentException
 	 * 			if b isn't a byte
 	 */
-	public static int signExtend8(int b) throws IllegalArgumentException {
-		Preconditions.checkBits8(b);
-			if (test(b,7)) {
-				return b | (Integer.MAX_VALUE-Byte.MAX_VALUE);
-			} else {
-				return b;
-			}
-		}
+    public static int signExtend8(int b) throws IllegalArgumentException {
+        Preconditions.checkBits8(b);
+        if (test(b, 6)) {
+            return b | (0xFFFFFF80);
+        } else {
+            return b;
+        }
+    }
 	
 	/**
 	 * Computes a byte where the bits are reversed relative to center
@@ -219,9 +208,7 @@ public final class Bits{
 	 * 			if b isn't a byte
 	 */
 	public static int complement8(int b) throws IllegalArgumentException {
-		Preconditions.checkBits8(b);
-		
-		return ((~b)%(Byte.MAX_VALUE+1));
+		return (0xff^Preconditions.checkBits8(b));
 	}
 	
 	/**
@@ -233,10 +220,7 @@ public final class Bits{
 	 * 			if either highB or lowB isn't a byte
 	 */
 	public static int make16(int highB, int lowB) throws IllegalArgumentException {
-		Preconditions.checkBits8(highB);
-		Preconditions.checkBits8(lowB);
-		
-		return (highB<<8) | lowB ;
+		return (Preconditions.checkBits8(highB)<<8) | Preconditions.checkBits8(lowB) ;
 		
 	}
 	
