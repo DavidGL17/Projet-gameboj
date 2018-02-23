@@ -36,11 +36,9 @@ public final class RamController implements Component {
         if (ram == null) {
             throw new NullPointerException();
         }
-        Preconditions.checkBits16(endAddress);
-        Preconditions.checkBits16(startAddress);
         Preconditions.checkArgument(endAddress - startAddress == ram.size());
-        this.startAddress = startAddress;
-        this.endAddress = endAddress;
+        this.startAddress = Preconditions.checkBits16(startAddress);
+        this.endAddress = Preconditions.checkBits16(endAddress);
         this.ram = ram;
     }
 
@@ -80,8 +78,7 @@ public final class RamController implements Component {
      */
     @Override
     public int read(int address) {
-        Preconditions.checkBits16(address);
-        if (checkAdressIsBetweenBounds(address)) {
+        if (checkAdressIsBetweenBounds(Preconditions.checkBits16(address))) {
             return ram.read(address - startAddress);
         } else {
             return Component.NO_DATA;
@@ -102,10 +99,8 @@ public final class RamController implements Component {
      */
     @Override
     public void write(int address, int data) {
-        Preconditions.checkBits16(address);
-        Preconditions.checkBits8(data);
-        if (checkAdressIsBetweenBounds(address)) {
-            ram.write(address - startAddress, data);
+        if (checkAdressIsBetweenBounds(Preconditions.checkBits16(address))) {
+            ram.write(address - startAddress, Preconditions.checkBits8(data));
         }
     }
 

@@ -23,8 +23,7 @@ public final class Rom {
      *             if the parameter is null
      */
     public Rom(byte[] data) {
-        Objects.requireNonNull(data);
-        this.data = new byte[data.length];
+        this.data = new byte[Objects.requireNonNull(data).length];
         for (int i = 0; i < data.length; ++i) {
             this.data[i] = data[i];
         }
@@ -50,9 +49,6 @@ public final class Rom {
      *             if the index is bigger or smaller than the size of the rom's memory
      */
     public int read(int index) {
-        if (index >= data.length) {
-            throw new IndexOutOfBoundsException();
-        }
-        return Byte.toUnsignedInt(data[index]);
+        return Byte.toUnsignedInt(data[Objects.checkIndex(index, data.length)]);
     }
 }

@@ -24,8 +24,7 @@ public final class Bus {
      *             if the component is null
      */
     public void attach(Component component) {
-        Objects.requireNonNull(component);
-        composants.add(component);
+        composants.add(Objects.requireNonNull(component));
     }
 
     /**
