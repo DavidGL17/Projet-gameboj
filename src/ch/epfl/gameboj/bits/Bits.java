@@ -20,7 +20,7 @@ public final class Bits{
 	 * @throws IndexOutOfBoundsException
 	 * 			If parameter i doesn't belong to [0,31]
 	 */
-	public static int mask(int index) throws IndexOutOfBoundsException{
+	public static int mask(int index) {
 		return (0b01<<Objects.checkIndex(index, Integer.SIZE));
 		
 	}
@@ -33,7 +33,7 @@ public final class Bits{
 	 * @throws IndexOutOfBoundsException
 	 * 			If the index is invalid for a bit in a int
 	 */
-	public static boolean test(int bits, int index) throws IndexOutOfBoundsException {
+	public static boolean test(int bits, int index)  {
 		Objects.checkIndex(index,Integer.SIZE);
 		bits = bits & mask(index);
 		bits = bits>>>index;
@@ -48,13 +48,11 @@ public final class Bits{
 	 * @throws IndexOutOfBoundsException
 	 * 			If the return of bit.index() is out of [0,31] ---> Check the class of bit
 	 */
-	public static boolean test ( int bits, Bit bit) throws IndexOutOfBoundsException {
+	public static boolean test ( int bits, Bit bit)  {
 		return test(bits, bit.index());
 	}
 	
-	/*
-	 * S'applique bien toujours aux int ?
-	 */
+	
 	/**
 	 * Computes a byte where the bit of weight index is set to 1 or 0
 	 * @param bits - an int : the original byte
@@ -64,7 +62,7 @@ public final class Bits{
 	 * @throws IndexOutOfBoundsException
 	 * 			If the index is invalid for a bit in an int
 	 */
-	public static int set(int bits, int index, boolean newValue) throws IndexOutOfBoundsException {
+	public static int set(int bits, int index, boolean newValue)  {
 		Objects.checkIndex(index,Integer.SIZE);
 		if (test(bits,index)) {
 			if (newValue) {
@@ -93,7 +91,7 @@ public final class Bits{
 	 * @throw IllegalArgumentException
 	 * 			if parameter size isn't within [0,32]
 	 */
-	public static int clip(int size, int bits) throws IllegalArgumentException {
+	public static int clip(int size, int bits)  {
 		
 		if ((size<0)||(size>32)){
 			throw new IllegalArgumentException("!"); //Est-ce bien cette exception à lancer ? dans le sujet IllegalArgumentException(!) On utilise pas checkIndex car il lance OutOfBoundsExeption
@@ -109,56 +107,53 @@ public final class Bits{
 	
 	
 	/**
-	 * Extract the bits from index start to start+size
+	 * Extract the bits from index start to start+size of an int
 	 * @param bits - an int : the int
-	 * @param start - an int : the index of the first replacement bit
-	 * @param size - an int : the number of LSB to replace
-	 * @return an int : the à compléter /!\ <-------------------------------------
+	 * @param start - an int : the index of the first extracted bit
+	 * @param size - an int : the number of bits to extract
+	 * @return an int : the extracted bit-sequence
 	 * @throws IndexOutOfBoundsException
 	 * 			if the start and size is invalid for a bit-sequence in an int
 	 */
-	public static int extract(int bits, int start, int size) throws IndexOutOfBoundsException {
+	public static int extract(int bits, int start, int size)  {
 		return  clip(size,bits>>>Objects.checkFromIndexSize(start,size,Integer.SIZE)) ;
 	}
 	
 	
-	/*
-	 * Pas sur d'avoir compris l'objectif
-	 * ---------------------------------------------------------------
+	/**
+	 * Computes the rotation of a number given the size of the number and distance of rotation
+	 * @param size - an int : the size of the number
+	 * @param bits - an int : the value of a number
+	 * @param distance _ an int : the number by which the bits are rotated
+	 * @return the rotated int sequence
+	 * @throws IllegalArgumentException
+	 * @throws IndexOutOfBoundsException
 	 */
-	public static int rotate(int size, int bits, int distance) throws IllegalArgumentException, IndexOutOfBoundsException {
+	public static int rotate(int size, int bits, int distance) {
 	    if ((size<=0)||(size>Integer.SIZE) ) {
-	    		System.out.println("Par ici , bits vaut: " + bits + " size vaut: " + size + " distance vaut: " + distance );
             throw new IllegalArgumentException();
         }
-	    if (size<31) {  		//Le cas size proche de 31 est tricky car après 0b1<<size est négatif
+	    
+	    /*On veut vérifier bits <= C ou C est une valeur de size bits tous à l'état 1. 
+	     *  Le plus simple serait donc de vérifier l'inégalité strict, bits < 2^size
+	     *  
+	     *  Cependant on ne veut pas prendre en compte le signe donc on prend des précautions si size est proche de 32;
+	     */
+	    
+	    if (size<31) {  		
 	    		if (bits >= (0b1<<size)) {
-	    			System.out.println("Par là , bits vaut: " + bits + " size vaut: " + size + " distance vaut: " + distance );
 	    			throw new IllegalArgumentException();
 	    		}
 	    } else if (size==31){
 	    		if (bits >>>1 >= 0b1<<(size-1)) {
-	    			System.out.println("Ouhou , bits vaut: " + bits + " size vaut: " + size + " distance vaut: " + distance );
-	    			 throw new IllegalArgumentException();
+	    			throw new IllegalArgumentException();
 	    		}
 	    }
 	    int res=0;
-	    int decalage = distance%size; //permet de controler module de décalage
+	    int decalage = distance%size; 
 	    
-	    /* Peu esthétique a%b renvoie c : [0;a] et c ≡ a[b]
-	     * En faisant d=distance%size on obtient donc si a et positif d=décalage sinon on obtient d=décalage-size
-	     * Pour palier à ce problème il faut dans le cas positif obtenir le même nombre et négatif obtenir le nombre+size
-	     * Faire décalage = (d+size)%size fonctionne car dans le cas ou a est positif décalage vaut d, dans le cas contraire
-	     * on obtient décalage = d+size
-	     * 
-	     * Enfin pour distance = 0, on obtient bien un décalage nul;
-	     * 
-	     * Les opérations de congruences sont rapides car elle revienne toujours à une complémentarité près faire un "clip". (On aurait pu 's'amuser' à le faire nous-même)
-	     * 
-	     *  Enfin 
-	     */
-	    for (int i=0 ; i<size ; i++) { //i indice du bit dans le nombre de sortie
-	    		if (test(bits, ( (i+size-decalage)%size ) )) { //controle module decalage permet de controler signe de size-decalage
+	    for (int i=0 ; i<size ; i++) { 
+	    		if (test(bits, ( (i+size-decalage)%size ) )) { 
 	    			res+=mask(i);
 	    		}
 	    }
@@ -167,17 +162,18 @@ public final class Bits{
 	}
 	
 	/**
-	 * Computes from a byte the int where the 8 LSB are the same and the rest of the sign of the MSB
-	 * @param b - an int : the byte
+	 * Computes from a byte the int where the 8 LSB are the same and the rest is of the sign of the MSB
+	 * @param b - an int : a byte
 	 * @return an int : the int code
 	 * @throws IllegalArgumentException
 	 * 			if b isn't a byte
 	 */
-    public static int signExtend8(int b) throws IllegalArgumentException {
-        Preconditions.checkBits8(b);
-        if (test(b, 6)) {
+    public static int signExtend8(int b)  {
+        if (test(Preconditions.checkBits8(b), 7)) {
+        	System.out.println("Par ici, " + b + " retour : " + (b | (0xFFFFFF80)));
             return b | (0xFFFFFF80);
         } else {
+        	System.out.println("Par là " + b +" retour : " + b );
             return b;
         }
     }
@@ -189,7 +185,7 @@ public final class Bits{
 	 * @throws IllegalArgumentException
 	 * 			if b isn't a byte
 	 */
-	public static int reverse8(int b) throws IllegalArgumentException {
+	public static int reverse8(int b)  {
 		Preconditions.checkBits8(b);
 		int res=0;
 		for( int i=0 ; i<8 ; i++) {
@@ -207,7 +203,7 @@ public final class Bits{
 	 * @throws IllegalArgumentException
 	 * 			if b isn't a byte
 	 */
-	public static int complement8(int b) throws IllegalArgumentException {
+	public static int complement8(int b)  {
 		return (0xff^Preconditions.checkBits8(b));
 	}
 	
@@ -219,7 +215,7 @@ public final class Bits{
 	 * @throws IllegalArgumentException
 	 * 			if either highB or lowB isn't a byte
 	 */
-	public static int make16(int highB, int lowB) throws IllegalArgumentException {
+	public static int make16(int highB, int lowB)  {
 		return (Preconditions.checkBits8(highB)<<8) | Preconditions.checkBits8(lowB) ;
 		
 	}
