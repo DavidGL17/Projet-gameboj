@@ -79,10 +79,6 @@ public final class Bits{
 		}
 	}
 	
-	/*
-	 * Est-ce bien cette exception à lancer ? (String dans le constructeur)
-	 * (réponse) je penses que oui
-	 */
 	/**
 	 * Computes the int corresponding to the (size) least significant bits
 	 * @param size - an int : the number of bits
