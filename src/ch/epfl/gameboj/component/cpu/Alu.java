@@ -37,6 +37,27 @@ public final class Alu {
 		RIGHT;
 	}
 	
+	public static int maskZNHC(boolean z, boolean n, boolean h, boolean c) {
+		
+		int res=0;
+		
+		if (z) {
+			res+=Flag.Z.mask();
+		}
+		if (n) {
+			res+=Flag.N.mask();
+		}
+		if (h) {
+			res+=Flag.H.mask();
+		}
+		if (c) {
+			res+=Flag.C.mask();
+		}
+
+		return res;
+
+	}
+	
 	/**
 	 * Computes the AND operation and corresponding flags
 	 * @param l - an int, first term
@@ -272,7 +293,7 @@ public final class Alu {
 	 * @return
 	 */
 	private static int pack(boolean z, boolean n, boolean h, boolean c, int value ) {
-		return pack(maskZNHC(z,n,h,c,value),value);
+		return pack(maskZNHC(z,n,h,c),value);
 	}
 	
 	/**
