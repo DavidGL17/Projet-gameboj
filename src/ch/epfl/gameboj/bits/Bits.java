@@ -55,10 +55,10 @@ public final class Bits{
 	
 	/**
 	 * Computes a byte where the bit of weight index is set to 1 or 0
-	 * @param bits - an int : the original byte
+	 * @param bits - an int : the original int
 	 * @param index - an int : the weight of the bit
 	 * @param newValue - a boolean : true iff the bit should be set to 1, false to 0
-	 * @return an int : the byte with index-th bit's value set
+	 * @return an int : the int with index-th bit's value set
 	 * @throws IndexOutOfBoundsException
 	 * 			If the index is invalid for a bit in an int
 	 */
@@ -129,12 +129,6 @@ public final class Bits{
 	    if ((size<=0)||(size>Integer.SIZE) ) {
             throw new IllegalArgumentException();
         }
-	    
-	    /*On veut vérifier bits <= C ou C est une valeur de size bits tous à l'état 1. 
-	     *  Le plus simple serait donc de vérifier l'inégalité strict, bits < 2^size
-	     *  
-	     *  Cependant on ne veut pas prendre en compte le signe donc on prend des précautions si size est proche de 32;
-	     */
 	    
 	    if (size<31) {  		
 	    		if (bits >= (0b1<<size)) {
