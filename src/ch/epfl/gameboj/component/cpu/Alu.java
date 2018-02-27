@@ -111,7 +111,7 @@ public final class Alu {
         return packValueFlags(sum, (sum == 0), false, fanionH, carry);
     }
 
-    public int add(int l, int r) {
+    public static int add(int l, int r) {
         return add(l, r, false);
     }
 	
