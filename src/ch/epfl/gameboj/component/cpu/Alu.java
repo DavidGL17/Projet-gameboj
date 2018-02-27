@@ -58,6 +58,44 @@ public final class Alu {
 
 	}
 	
+	public static int unpackValue(int valueFlags) {
+		return -1;
+	}
+	
+	public static int unpackFlags(int valueFlags) {
+		return -1;
+	}
+	
+	public static int add(int l, int r, boolean c0) {
+		return -1;
+	}
+	
+	public static int add(int l, int r) {
+		return -1;
+	}
+	
+	public static int add16L(int l, int r) {
+		return -1;
+	}
+	
+	public static int add16H (int l, int r) {
+		return -1;
+	}
+	
+	public static int sub(int l, int r, boolean b0) {
+		return -1;
+	}
+	
+	public static int sub(int l, int r) {
+		return -1;
+	}
+	
+	public static int bcdAdjust(int v, boolean n, boolean h, boolean c) {
+		return 1;
+	}
+	
+	
+	
 	/**
 	 * Computes the AND operation and corresponding flags
 	 * @param l - an int, first term
@@ -253,6 +291,38 @@ public final class Alu {
 		
 		return pack(z,n,h,c);
 		
+	}
+	
+	// Valeur valable : 0x00_**_**_*0 (16 bit) etoile 1-4 décrivent valeur 16 bits et 3-4 8 bits
+	
+	/**
+	 * Checks if value is a correct packed Value where the result is an 8-bit int
+	 * @param value - an int
+	 * @throws IllegalArgumentException if value cannot be a packed value
+	 */
+	private static void check8BitPackedValue(int value) {
+		final int mask=0x11_11_00_01;
+		if((value & mask) != 0) {
+			throw new IllegalArgumentException();
+		}
+		
+	}
+	
+
+	/**
+	 * Checks if value is a correct packed Value where the result is a 16-bit int
+	 * @param value - an int
+	 * @throws IllegalArgumentException if value cannot be a packed value
+	 */
+	private static void check16BitPackedValue(int value) {
+		final int mask = 0x11_00_00_01;
+		if ((value & mask) != 0) {
+			throw new IllegalArgumentException();
+		}
+	}
+	
+	private static void checkPackedValue(int value) {
+		check16BitPackedValue(value);
 	}
 	
 	

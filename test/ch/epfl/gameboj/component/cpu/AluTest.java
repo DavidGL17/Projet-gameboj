@@ -34,7 +34,7 @@ class AluTest {
 		};
 				
 		for (int i=0 ; i<inputs.length; i++) {
-			assertEquals( Alu.maskZNHC(outputs[i], inputs[i][0],inputs[i][1],inputs[i][2],inputs[i][3]));
+			assertEquals(outputs[i], Alu.maskZNHC( inputs[i][0],inputs[i][1],inputs[i][2],inputs[i][3]));
 		}
 	}
 	
@@ -63,8 +63,6 @@ class AluTest {
 		}
 	}
 	
-	
-	//-----------------------------------Unpack lace-t-il des exceptions ? -----------------------------------------
 	
 	
 	
@@ -130,6 +128,7 @@ class AluTest {
 		}
 	}
 	
+	// Valeur valable : 0x00_**_**_*0 (16 bit) etoile 1-4 décrivent valeur 16 bits et 3-4 8 bits
 	@Test
 	void unpackFlagsWorksOnKnownValues() {
 		final int [] inputs = {		
@@ -165,55 +164,211 @@ class AluTest {
 			int input=value<<8+flags<<4;
 			
 			assertEquals(flags<<4, Alu.unpackFlags(input) );
+			}
+	}
+	
+	
+	// Valeur valable : 0x00_**_**_*0 (16 bit) etoile 1-4 décrivent valeur 16 bits et 3-4 8 bits
+	@Test
+	void unpacksFailWithInvalidArgument() {
+		
+		final int[] invalidArguments = {
+				0x10_3f_d2_10,
+				0x01_10_3d_40,
+				0x00_23_f3_21
+		};
+		
+		for (int argument : invalidArguments) {
+			assertThrows(IllegalArgumentException.class,
+					() -> Alu.unpackValue(argument));
+			assertThrows(IllegalArgumentException.class,
+					() -> Alu.unpackFlags(argument));
+		}
+	}
+	
+	@Test
+	void addsAreTransitive() {
+		Random randomGenerator = new Random();
+		int iterations=5;
+		for ( int i=0; i<iterations ; i++) {
+			int l = Bits.clip(8,randomGenerator.nextInt());
+			int r = Bits.clip(8,randomGenerator.nextInt());
+			assertEquals(Alu.add(l,r,true),Alu.add(r,l,true));
+			assertEquals(Alu.add(l,r,false),Alu.add(r,l,false));
+			assertEquals(Alu.add(l,r),Alu.add(r,l));
+		}
+	}
+
+	@Test
+	void add1WorksOnRandomValuesAndTrue() {
+		final int C = 1<<4;
+		final int H = 1<<5;
+		final int Z = 1<<7;
+		Random randomGenerator = new Random();
+		int iterations=5;
+		for ( int i=0; i<iterations ; i++) {
+			int l = Bits.clip(8,randomGenerator.nextInt());
+			int r = Bits.clip(8,randomGenerator.nextInt());
+			int c=0;
+			int h=0;
+			int z=0;
+			
+			int res = l+r;
+			res+=1;
+			
+			if (Bits.test(res,8))
+				c=C;
+			res=Bits.clip(8,res);
+			if (res==0)
+				z=Z;
+			res=res<<8;
+			if (Bits.test(l^r,5)!=Bits.test(l+r,5))
+				h=H;
+			
+			res+=h+c+z;
+			assertEquals(res, Alu.add(l,r,true));
+			}	
+	}
+
+		
+			
+		
+	@Test
+	void add1WorksOnRandomValuesAndFalse() {
+		final int C = 1<<4;
+		final int H = 1<<5;
+		final int Z = 1<<7;
+		Random randomGenerator = new Random();
+		int iterations=5;
+		for ( int i=0; i<iterations ; i++) {
+			int l = Bits.clip(8,randomGenerator.nextInt());
+			int r = Bits.clip(8,randomGenerator.nextInt());
+			int c=0;
+			int h=0;
+			int z=0;
+			
+			int res = l+r;
+			
+			if (Bits.test(res,8))
+				c=C;
+			res=Bits.clip(8,res);
+			res=res<<8;
+			if (Bits.test(l^r,5)!=Bits.test(l+r,5))
+				h=H;
+			if (res==0)
+					z=Z;
+			res+=h+c+z;
+			
+			assertEquals(res, Alu.add(l,r,true));
+			}	
+	}
+	
+	@Test
+	void add1WorksOnTwoComplementRandomValues() {
+		final int C = 1<<4;
+		final int H = 1<<5;
+		final int Z = 1<<7;
+		final int res=C+Z+H;
+		
+		Random randomGenerator = new Random();
+		int iterations=5;
+		for ( int i=0; i<iterations ; i++) {
+			int l = Bits.clip(8,randomGenerator.nextInt());
+			int r = Bits.complement8(l)+1;
+			
+			assertEquals(res, Alu.add(l,r,false));
+			assertEquals(res, Alu.add(l,r-1,true));
+			}	
+	}
+		
+	@Test
+	void addsFailWithInvalidArgument() {
+			
+			final int[] invalidArguments = {
+					0x10_3f_d2_10,
+					0x01_10_3d_40,
+					0x00_23_f3_21
+			};
+			
+			for (int i=0 ; i<invalidArguments.length ; i++) {
+				
+				for (int j=0 ; j<invalidArguments.length ; j++) {
+					int k=i;
+					int l=j;
+					assertThrows(IllegalArgumentException.class,
+					() -> Alu.unpackValue(invalidArguments[k]));
+					assertThrows(IllegalArgumentException.class,
+					() -> Alu.unpackFlags(invalidArguments[l]));
+				}
+			}
+			
+		}
+	
+	
+	@Test
+	void add16HIsCompatibleWith8BitAdd() {
+		Random randomGenerator = new Random();
+		final int ITERATIONS=5;
+		final int C=1 << 4;
+		for ( int i=0; i<ITERATIONS ; i++) {
+			int l = Bits.clip(16,randomGenerator.nextInt());
+			int r = Bits.clip(16,randomGenerator.nextInt());
+			int highR = Bits.extract(r,8,8)<<8;
+			int highL=Bits.extract(l,8,8)<<8;
+			int lowL=Bits.clip(8,l);
+			int lowR=Bits.clip(8,l);
+			
+			int res = Alu.add(highL,highR+( (Alu.unpackFlags(Alu.add(lowL,lowR,false)) & C)/C) )+ pack(0,Alu.unpackValue(Alu.add(lowL,lowR)));	;	
+			assertEquals(res, Alu.add16H(l,r));
+		}
+		
+	}
+	
+	@Test
+	void add16LIsCompatibleWith8BitAdd() {
+		Random randomGenerator = new Random();
+		final int ITERATIONS=5;
+		final int C=1 << 4;
+		for ( int i=0; i<ITERATIONS ; i++) {
+			int l = Bits.clip(16,randomGenerator.nextInt());
+			int r = Bits.clip(16,randomGenerator.nextInt());
+			int highR = Bits.extract(r,8,8)<<8;
+			int highL=Bits.extract(l,8,8)<<8;
+			int lowL=Bits.clip(8,l);
+			int lowR=Bits.clip(8,l);
+			
+			int res = Alu.add(lowL,lowR) + pack(0,Alu.unpackValue(Alu.add(highL,highR+( (Alu.unpackFlags(Alu.add(lowL,lowR,false)) & C)/C) )));	;	
+			assertEquals(res, Alu.add16H(l,r));
 		}
 		
 	}
 	
 	
-	//----------------------------------------------------------REPRENDRE ICI-------------------------------------
 	
-	@Test
-	void add1WorksOnRandomValuesAndFalse() {
-		Random randomGenerator = new Random();
-		int iterations=5;
-		for ( int i=0; i<iterations ; i++) {
-			int l = Bits.clip(8,randomGenerator.nextInt());
-			int r = Bits.clip(8,randomGenerator.nextInt());
-			
-			assertEquals(l+r, Alu.add(l,r,false));
-			}	
-	
-	@Test
-	void add1WorksOnRandomValuesAndFalse() {
-		Random randomGenerator = new Random();
-		int iterations=5;
-		for ( int i=0; i<iterations ; i++) {
-			int l = Bits.clip(8,randomGenerator.nextInt());
-			int r = Bits.clip(8,randomGenerator.nextInt());
-			
-			assertEquals(l+r, Alu.add(l,r,true));
-			}	
-	}
-		
-	
-	
-	//------------------------------------PROBABLEMENT BON---------------------------------------------------
 	
 	
 	@Test
-	void add2WorksOnRandomValues() {
-		Random randomGenerator = new Random();
-		int iterations=5;
-		for ( int i=0; i<iterations ; i++) {
-			int l = Bits.clip(8,randomGenerator.nextInt());
-			int r = Bits.clip(8,randomGenerator.nextInt());
-			
-			assertEquals(l+r, Alu.add(l,r));
+	void add16sFailWithInvalidArgument() {
+		final int[] invalidArguments = {
+				0x10_3f_d2_10,
+				0x01_10_3d_40,
+				0x00_23_f3_21
+		};
+		for (int i=0 ; i<invalidArguments.length ; i++) {
+			for ( int j=0 ; j<invalidArguments.length ; j++) {
+				int k=i;
+				int l=j;
+				assertThrows(IllegalArgumentException.class,
+						() -> Alu.add16L(invalidArguments[k],invalidArguments[l]));
 			}
+		}
 	}
+	
 	
 	
 
+	
+	
 	@Test
 	void AndFailsForInvalidIntegers() {
 		
@@ -224,6 +379,11 @@ class AluTest {
 	}
 	
 	
+	
+	
+	private static int pack(int flags, int value) {
+		return (flags+(value<<8));
+	}
 	
 	
 	
