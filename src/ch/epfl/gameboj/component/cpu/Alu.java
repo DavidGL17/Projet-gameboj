@@ -37,42 +37,72 @@ public final class Alu {
 		RIGHT;
 	}
 	
-	public static int maskZNHC(boolean z, boolean n, boolean h, boolean c) {
-		
-		int res=0;
-		
-		if (z) {
-			res+=Flag.Z.mask();
-		}
-		if (n) {
-			res+=Flag.N.mask();
-		}
-		if (h) {
-			res+=Flag.H.mask();
-		}
-		if (c) {
-			res+=Flag.C.mask();
-		}
+    public int maskZNHC(boolean z, boolean n, boolean h, boolean c) {
+        int value = 0;
+        boolean[] fanion = { c, h, n, z };
+        for (int i = 0; i < 4; ++i) {
+            if (fanion[i]) {
+                value += Bits.mask(i);
+            }
+        }
+        return value << 4;
+    }
 
-		return res;
+    // return une valeur de 16 bits avec la valeur dasn les 8 MSB et les flags
+    // dans les 8 LSB
+    private int packValueFlags(int value, boolean z, boolean n, boolean h,
+            boolean c) {
+        return (value << 8) | maskZNHC(z, n, h, c);
+    }
 
-	}
-	
-	public static int unpackValue(int valueFlags) {
-		return -1;
-	}
-	
-	public static int unpackFlags(int valueFlags) {
-		return -1;
-	}
-	
-	public static int add(int l, int r, boolean c0) {
-		return -1;
-	}
-	
-	public static int add(int l, int r) {
-		return -1;
-	}
+    public int unpackValue(int valueFlags) {
+        return (Preconditions.checkBits16(valueFlags) & 0xff00) >> 8;
+    }
+
+    public int unpackFlags(int valueFlags) {
+        return (Preconditions.checkBits16(valueFlags) & 0xff);
+    }
+
+    public int add(int l, int r, boolean c0) {
+        Preconditions.checkBits8(r);
+        Preconditions.checkBits8(l);
+        int sum = 0;
+        boolean carry = c0;
+        boolean fanionH = false;
+        for (int i = 0; i < 8; ++i) {
+            int count = 0;
+            boolean[] bits = { Bits.test(l, i), Bits.test(r, i), carry };
+            for (int j = 0; j < 3; ++j) {
+                if (bits[j]) {
+                    ++count;
+                }
+            }
+            switch (count) {
+            case 0:
+                carry = false;
+                break;
+            case 1:
+                sum += Bits.mask(i);
+                carry = false;
+                break;
+            case 2:
+                carry = true;
+                break;
+            case 3:
+                carry = true;
+                sum += Bits.mask(i);
+                break;
+            }
+            if (i == 3) {
+                fanionH = carry;
+            }
+        }
+        return packValueFlags(sum, (sum == 0), false, fanionH, carry);
+    }
+
+    public int add(int l, int r) {
+        return add(l, r, false);
+    }
 	
 	public static int add16L(int l, int r) {
 		return -1;
