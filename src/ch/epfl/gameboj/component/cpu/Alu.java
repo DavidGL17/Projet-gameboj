@@ -172,6 +172,7 @@ public final class Alu {
      * @param r, the second 8 bit int
      * @param c0, the initial carry bit
      * @return a 16 bit int with the value and the flags
+     * @throws IllegalArgumentException if one of the ints is not an 8 bit value
      */
     public static int add(int l, int r, boolean c0) {
         Preconditions.checkBits8(r);
@@ -186,6 +187,7 @@ public final class Alu {
      * @param l, the first 8 bit int
      * @param r, the second 8 bit int
      * @return a 16 bit int with the value and the flags
+     * @throws IllegalArgumentException if one of the ints is not an 8 bit value
      */
     public static int add(int l, int r) {
         return add(l, r, false);
@@ -197,6 +199,7 @@ public final class Alu {
      * @param l, the first 16 bit int
      * @param r, the second 16 bit int
      * @return a 24 bit int with the value and the flags
+     * @throws IllegalArgumentException if one of the ints is not an 16 bit value
      */
 	public static int add16L(int l, int r) {
 	    Preconditions.checkBits16(r);
@@ -211,6 +214,7 @@ public final class Alu {
      * @param l, the first 16 bit int
      * @param r, the second 16 bit int
      * @return a 24 bit int with the value and the flags
+     * @throws IllegalArgumentException if one of the ints is not an 16 bit value
      */
 	public static int add16H (int l, int r) {
 	    Preconditions.checkBits16(r);
@@ -226,6 +230,7 @@ public final class Alu {
 	 * @param r, a 8 bit int
 	 * @param b0, the initial carry bit
 	 * @return the result and the flags in a same int
+	 * @throws IllegalArgumentException if one of the ints is not an 8 bit value
 	 */
 	public static int sub(int l, int r, boolean b0) {
 	    Preconditions.checkBits8(r);
@@ -257,6 +262,7 @@ public final class Alu {
      * @param l, a 8 bit int
      * @param r, a 8 bit int
      * @return the result and the flags in a same int
+     * @throws IllegalArgumentException if one of the ints is not an 8 bit value
      */
 	public static int sub(int l, int r) {
 		return sub(l, r, false);
@@ -270,9 +276,10 @@ public final class Alu {
 	 * @param h, the flag h
 	 * @param c, the flag c
 	 * @return the value, adjusted to the DCB format
+	 * @throws IllegalArgumentException if the value is not an 8 bit int
 	 */
 	public static int bcdAdjust(int v, boolean n, boolean h, boolean c) {
-		boolean fixL = h|(!n & ((Bits.clip(4, v))>9));
+		boolean fixL = h|(!n & ((Bits.clip(4, Preconditions.checkBits8(v)))>9));
 		boolean fixH = c | (!n & (v>0x99));
 		int fix = 0x60 * (fixH?1:0) + 0x06*(fixL?1:0);
 		int Va = n?v-fix:v+fix;
