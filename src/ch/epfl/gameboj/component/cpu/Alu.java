@@ -63,11 +63,11 @@ public final class Alu {
     }
 
     public static int unpackValue(int valueFlags) {
-        return (Preconditions.checkBits16(valueFlags) & 0xff00) >>> 8;
+        return (valueFlags & 0xffff00) >>> 8;
     }
 
     public static int unpackFlags(int valueFlags) {
-        return (Preconditions.checkBits16(valueFlags) & 0xff);
+        return (valueFlags & 0xff);
     }
 
 //    private static int addition(int size, int carryH, int carryC) {
@@ -198,7 +198,27 @@ public final class Alu {
 	}
 	
 	public static int sub(int l, int r, boolean b0) {
-		return -1;
+	    Preconditions.checkBits8(r);
+        Preconditions.checkBits8(l);
+        int difference = 0;
+        boolean carry = b0;
+        boolean fanionH = false;
+        for (int i = 0; i < 8; ++i) {
+            if (!Bits.test(l, i)&&Bits.test(r, i)&&!carry) {
+                carry = true;
+            } else {
+                if (Bits.test(l, i)||carry|| (Bits.test(l, i)&&Bits.test(r, i)&&carry)) {
+                    difference += Bits.mask(i);
+                    carry = false;
+                } else {
+                    carry = false;
+                }
+            }
+            if (i == 3) {
+                fanionH = carry;
+            }
+        }
+        return packValueFlags(difference, (difference == 0), false, fanionH, carry);
 	}
 	
 	public static int sub(int l, int r) {
