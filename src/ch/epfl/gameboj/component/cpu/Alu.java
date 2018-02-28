@@ -525,4 +525,18 @@ public final class Alu {
 		return (flags+(value<<8));
 	}
 	
+	/**
+	 * AUXILIARY
+	 * 
+	 * @param packedValue
+	 * @param newValue
+	 */
+	private static int packNewValue(int packedValue , int newValue) {
+		return pack(unpackFlags(packedValue), newValue);
+	}
+	
+	private static int packValue(int value) {
+		return pack(0,value);
+	}
+	
 }

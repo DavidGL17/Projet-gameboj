@@ -313,12 +313,21 @@ class AluTest {
 		for ( int i=0; i<ITERATIONS ; i++) {
 			int l = Bits.clip(16,randomGenerator.nextInt());
 			int r = Bits.clip(16,randomGenerator.nextInt());
-			int highR = Bits.extract(r,8,8)<<8;
-			int highL=Bits.extract(l,8,8)<<8;
+			int highR = Bits.extract(r,8,8);
+			int highL=Bits.extract(l,8,8);
 			int lowL=Bits.clip(8,l);
 			int lowR=Bits.clip(8,l);
 			
-			int res = Alu.add(highL,highR+( (Alu.unpackFlags(Alu.add(lowL,lowR,false)) & C)/C) )+ pack(0,Alu.unpackValue(Alu.add(lowL,lowR)));	;	
+			
+			int highSumAndFlags=Alu.add(highR,highL, Bits.test(lowL+lowR,8));  // Calcul du packed qui contient 
+			int newValue = Bits.clip(8,highR+highL)<<8;
+			highSumAndFlags=packNewValue(highSumAndFlags, newValue);
+			int lowSumNoFlags=packValue(Bits.clip(8,lowL+lowR));
+			
+			int res=highSumAndFlags+lowSumNoFlags;
+			
+			
+				
 			assertEquals(res, Alu.add16H(l,r));
 		}
 		
@@ -383,6 +392,17 @@ class AluTest {
 	
 	private static int pack(int flags, int value) {
 		return (flags+(value<<8));
+		
+		
+	}
+	
+	
+	private static int packNewValue(int packedValue , int newValue) {
+		return pack(Alu.unpackFlags(packedValue), newValue);
+	}
+	
+	private static int packValue(int value) {
+		return pack(0,value);
 	}
 	
 	
