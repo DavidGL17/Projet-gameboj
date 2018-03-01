@@ -408,6 +408,58 @@ class AluTest {
 	}
 	
 	
+	@Test
+	void subFailsForInvalidArguments() {
+		final int[] invalidArguments = {
+				0x10_3f_d2_10,
+				0x01_10_3d_40,
+				0x00_23_f3_21,
+				0xc_12_23,
+				0x2_12_32,
+				0x1_a3_56
+		};
+		
+		for (int i : invalidArguments) {
+			for (int j: invalidArguments) {
+			assertThrows( IllegalArgumentException.class,
+					() -> Alu.sub(i,j,false));
+			assertThrows( IllegalArgumentException.class,
+					() -> Alu.sub(i,j,true));
+			}
+		}
+		
+	}
+	
+	@Test
+	void subWorksForSameValues() {
+		Random randomGenerator = new Random();
+		final int ITERATIONS = 50;
+		final int res=Alu.maskZNHC(true,true,false,false);
+		for (int i=0 ; i<ITERATIONS ; i++) {
+			int input = randomGenerator.nextInt();
+			input = Bits.clip(8,input);
+			assertEquals(res,Alu.sub(input,input));
+		}
+	}
+	
+	
+	@Test
+	void subWorksForRandomValues() {
+		Random randomGenerator = new Random();
+		final int ITERATIONS = 50 ; 
+		
+		for (int i=0 ; i<ITERATIONS ; i++) {
+			int l = Bits.clip(8,randomGenerator.nextInt());
+			int r = Bits.clip(8,randomGenerator.nextInt());
+			
+			int res=l-r;
+			if Bits.extract(3,1,res)==Bits.clip(1,Bits.extract(3,1,l)-Bits.extract(3,1,r))){
+				
+			}
+		}
+	}
+	
+	
 	
 
 	
