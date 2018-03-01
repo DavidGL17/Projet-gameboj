@@ -137,8 +137,13 @@ class AluTest {
 		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int value = Bits.clip(16,randomGenerator.nextInt());  //Bits 8-24
+<<<<<<< HEAD
 			boolean z = (value==0) ? true : false ;
 			int input=(value<<8)+(Alu.maskZNHC(z,randomGenerator.nextBoolean(),randomGenerator.nextBoolean(),randomGenerator.nextBoolean()));
+=======
+			int group1 = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
+			int input=(value<<8)+(group1<<4);
+>>>>>>> 815cf8b72302aa35d2cfcc46889f45b22fa72430
 			
 			assertEquals(value, Alu.unpackValue(input) );
 			
@@ -594,7 +599,70 @@ class AluTest {
             assertEquals((Alu.maskZNHC(Bits.clip(8, l>>>1)==0, false, false, Bits.test(l, 0))<<8)|Bits.clip(8, l>>>1), Alu.unpackValue(Alu.shiftRightL(l)));
         }
     }
-    
+    @Test
+    void rotateFailsForInvalidInput() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.rotate(Alu.RotDir.LEFT, 0x100));
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.rotate(null, 0));
+    }
+    @Test
+    void rotateReturnsGoodFlags() {
+        assertEquals(0x10, Alu.unpackFlags(Alu.rotate(Alu.RotDir.LEFT, 0x80)));
+        assertEquals(0, Alu.unpackFlags(Alu.rotate(Alu.RotDir.RIGHT, 0x80)));
+    }
+    @Test
+    void rotateReturnsGoodValue() {
+        assertEquals(0x01, Alu.unpackValue(Alu.rotate(Alu.RotDir.LEFT, 0x80)));
+        assertEquals(0x40, Alu.unpackValue(Alu.rotate(Alu.RotDir.RIGHT, 0x80)));
+    }
+    @Test
+    void rotateCarryFailsForInvalidInput() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.rotate(Alu.RotDir.LEFT, 0x100, false));
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.rotate(null, 0, false));
+    }
+    @Test
+    void rotateCarryReturnsGoodFlags() {
+        assertEquals(0x90, Alu.unpackFlags(Alu.rotate(Alu.RotDir.LEFT, 0x80, false)));
+        assertEquals(0, Alu.unpackFlags(Alu.rotate(Alu.RotDir.LEFT, 0x00, true)));
+    }
+    @Test
+    void rotateCarryReturnsGoodValue() {
+        assertEquals(0x00, Alu.unpackValue(Alu.rotate(Alu.RotDir.LEFT, 0x80, false)));
+        assertEquals(0x01, Alu.unpackValue(Alu.rotate(Alu.RotDir.LEFT, 0x00, true)));
+    }
+    @Test
+    void swapFailsForInvalidInput() {
+        assertThrows(IllegalArgumentException.class, () -> Alu.swap(0x100));
+    }
+    @Test
+    void swapReturnsGoodValue() {
+        assertEquals(0x23, Alu.unpackValue(Alu.swap(0x32)));
+        assertEquals(0xa1, Alu.unpackValue(Alu.swap(0x1a)));
+    }
+    @Test
+    void swapReturnsGoodFlags() {
+        assertEquals(0, Alu.unpackFlags(Alu.swap(0x32)));
+        assertEquals(0x80, Alu.unpackValue(Alu.swap(0)));
+    }
+    @Test
+    void testBitFailsForInvalidInput() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.testBit(0x100, 1));
+        assertThrows(IndexOutOfBoundsException.class,
+                () -> Alu.testBit(0, 10));
+        assertThrows(IndexOutOfBoundsException.class,
+                () -> Alu.testBit(0, -1));
+    }
+    @Test
+    void testBitReturnsGoodFlagAndNoValue() {
+        assertEquals(0xA0, Alu.unpackFlags(Alu.testBit(0x20, 5)));
+        assertEquals(0x20, Alu.unpackFlags(Alu.testBit(0x20, 6)));
+        assertEquals(0, Alu.unpackValue(Alu.testBit(0x20, 5)));
+
+    }
     
     
 	private static int pack(int flags, int value) {

@@ -40,7 +40,7 @@ public final class Alu {
 	}
 	
 	
-	public enum RotDir {
+	public static enum RotDir {
 		LEFT,
 		RIGHT;
 	}
