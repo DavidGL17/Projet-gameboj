@@ -174,7 +174,7 @@ class AluTest {
 	@Test
 	void unpackFlagsWorksOnRandomValues() {
 		Random randomGenerator = new Random();
-		int iterations=5;
+		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int value = Bits.clip(16,randomGenerator.nextInt());  //Bits 8-24
 			int flags = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
@@ -309,7 +309,6 @@ class AluTest {
 			int r = Bits.complement8(l)+1;
 			
 			assertEquals(res, Alu.add(l,r,false));
-			assertEquals(res, Alu.add(l,r-1,true));
 			}	
 	}
 		
@@ -340,7 +339,7 @@ class AluTest {
 	@Test
 	void add16HIsCompatibleWith8BitAdd() {
 		Random randomGenerator = new Random();
-		final int ITERATIONS=5;
+		final int ITERATIONS=50;
 		
 		for ( int i=0; i<ITERATIONS ; i++) {
 			int l = Bits.clip(16,randomGenerator.nextInt());
@@ -348,14 +347,10 @@ class AluTest {
 			int highR = Bits.extract(r,8,8);
 			int highL=Bits.extract(l,8,8);
 			int lowL=Bits.clip(8,l);
-			int lowR=Bits.clip(8,l);
+			int lowR=Bits.clip(8,r);
 			int lowSum=Alu.add(lowR,lowL);
 			boolean carry = (Bits.test(lowSum,4));
-			
-			System.out.println(l);
-			System.out.println(r);
-			System.out.println("Max : " + (1<<16) );
-			
+					
 			int highSum=Alu.add(highR,highL,carry);
 			int res=packNewValue(highSum,(Alu.unpackValue(highSum)<<8)+Alu.unpackValue(lowSum));
 			
@@ -369,18 +364,24 @@ class AluTest {
 	@Test
 	void add16LIsCompatibleWith8BitAdd() {
 		Random randomGenerator = new Random();
-		final int ITERATIONS=5;
-		final int C=1 << 4;
+		final int ITERATIONS=50;
+		
 		for ( int i=0; i<ITERATIONS ; i++) {
 			int l = Bits.clip(16,randomGenerator.nextInt());
 			int r = Bits.clip(16,randomGenerator.nextInt());
-			int highR = Bits.extract(r,8,8)<<8;
-			int highL=Bits.extract(l,8,8)<<8;
+			int highR = Bits.extract(r,8,8);
+			int highL=Bits.extract(l,8,8);
 			int lowL=Bits.clip(8,l);
-			int lowR=Bits.clip(8,l);
+			int lowR=Bits.clip(8,r);
+			int lowSum=Alu.add(lowR,lowL);
+			boolean carry = (Bits.test(lowSum,4));
+					
+			int highSum=Alu.add(highR,highL,carry);
+			int res=packNewValue(lowSum,(Alu.unpackValue(highSum)<<8)+Alu.unpackValue(lowSum));
 			
-			int res = Alu.add(lowL,lowR) + pack(0,Alu.unpackValue(Alu.add(highL,highR+( (Alu.unpackFlags(Alu.add(lowL,lowR,false)) & C)/C) )));	;	
-			assertEquals(res, Alu.add16H(l,r));
+			
+				
+			assertEquals(res, Alu.add16L(l,r));
 		}
 		
 	}
