@@ -304,21 +304,24 @@ public final class Alu {
 		final boolean h = false;
 		boolean c = false;
 		
-		if (Bits.test(v,7))
-			c=true;
-		
 		int result=v<<1;
 		
+		if (Bits.test(v,8))
+			c=true;
+		
+		result=Bits.clip(8,result);
+				
+				
 		return pack(n,h,c,result);
 		
 	}
 	
 	/**
-	 * Computes the rigth shift and corresponding flags
+	 * Computes the arithmetic rigth shift and corresponding flags
 	 * @param v - an int, the value to shift
 	 * @return the packed valueFlags
 	*/
-	public static int shiftRight(int v) {
+	public static int shiftRightA(int v) {
 		
 		Preconditions.checkBits8(v);
 
@@ -326,13 +329,40 @@ public final class Alu {
 		final boolean h = false;
 		boolean c = false;
 		
-		if (Bits.test(v,7))
+		if (Bits.test(v,0))
 			c=true;
 		
 		int result = v>>1;
 		
+		result=Bits.clip(8,result);
+		
 		return pack(n,h,c,result);
 	}
+	
+	/**
+	 * Computes the logical rigth shift and corresponding flags
+	 * @param v - an int, the value to shift
+	 * @return the packed valueFlags
+	*/
+	public static int shiftRightL(int v) {
+		
+		Preconditions.checkBits8(v);
+
+		final boolean n = false;
+		final boolean h = false;
+		boolean c = false;
+		
+		if (Bits.test(v,0))
+			c=true;
+		
+		int result = v>>>1;
+		
+		result=Bits.clip(8,result);
+		
+		return pack(n,h,c,result);
+	}
+	
+	
 	
 	/**
 	 * Computes the rotation in a direction and corresponding flags
