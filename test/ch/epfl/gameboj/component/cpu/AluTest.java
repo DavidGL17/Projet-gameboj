@@ -112,7 +112,7 @@ class AluTest {
 		for (int i=0 ; i<iterations ; i++ ) {
 			int value = Bits.clip(8,randomGenerator.nextInt());  //Bits 8-15
 			int group1 = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
-			int input=value<<8+group1<<4;
+			int input=(value<<8)+(group1<<4);
 			
 			assertEquals(value, Alu.unpackValue(input) );
 		}
@@ -164,7 +164,7 @@ class AluTest {
 		for ( int i=0; i<iterations ; i++) {
 			int value = Bits.clip(16,randomGenerator.nextInt());  //Bits 8-24
 			int flags = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
-			int input=value<<8+flags<<4;
+			int input=(value<<8)+(flags<<4);
 			
 			assertEquals(flags<<4, Alu.unpackFlags(input) );
 			}
@@ -262,7 +262,7 @@ class AluTest {
 					z=Z;
 			res+=h+c+z;
 			
-			assertEquals(res, Alu.add(l,r,true));
+			assertEquals(res, Alu.add(l,r,false));
 			}	
 	}
 	

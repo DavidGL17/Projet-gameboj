@@ -87,7 +87,7 @@ public final class Alu {
      * @return the value
      */
     public static int unpackValue(int valueFlags) {
-        return (valueFlags & 0xffff00) >>> 8;
+        return ((valueFlags & 0xffff00) >>> 8);
     }
 
     /**
