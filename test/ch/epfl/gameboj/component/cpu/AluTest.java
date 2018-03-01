@@ -3,6 +3,9 @@
 package ch.epfl.gameboj.component.cpu;
 
 import org.junit.jupiter.api.Test;
+
+import com.sun.source.doctree.InlineTagTree;
+
 import static ch.epfl.test.TestRandomizer.RANDOM_ITERATIONS;
 import static ch.epfl.test.TestRandomizer.newRandom;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -386,10 +389,131 @@ class AluTest {
 		assertThrows(IllegalArgumentException.class,
 				() -> Alu.and(0b01011_1100, 0b1<<8));
 	}
-	
-	
-	
-	
+	@Test
+    void AndReturnsGoodFlags() {
+	    assertEquals(0b1010_0000, Alu.unpackFlags(Alu.and(0, 0)));
+	    assertEquals(0b0010_0000, Alu.unpackFlags(Alu.and(1, 1)));
+	}
+	@Test
+    void AndReturnsGoodValue() {
+	    Random randomGenerator = new Random();
+	    final int ITERATIONS=5;
+	    for (int i = 0;i<ITERATIONS;++i) {
+	        int l = randomGenerator.nextInt(0b1_0000_0000);
+	        int r = randomGenerator.nextInt(0b1_0000_0000);
+	        assertEquals(l&r, Alu.unpackValue(Alu.and(l, r)));
+	    }
+	}
+	@Test
+    void OrFailsForInvalidIntegers() {
+        
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.or(0b1<<8,0b0100_1000) );
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.or(0b01011_1100, 0b1<<8));
+    }
+    @Test
+    void OrReturnsGoodFlags() {
+        assertEquals(0b1000_0000, Alu.unpackFlags(Alu.or(0, 0)));
+        assertEquals(0b0000_0000, Alu.unpackFlags(Alu.or(1, 1)));
+    }
+    @Test
+    void orReturnsGoodValue() {
+        Random randomGenerator = new Random();
+        final int ITERATIONS=5;
+        for (int i = 0;i<ITERATIONS;++i) {
+            int l = randomGenerator.nextInt(0b1_0000_0000);
+            int r = randomGenerator.nextInt(0b1_0000_0000);
+            assertEquals(l|r, Alu.unpackValue(Alu.or(l, r)));
+        }
+    }
+    @Test
+    void XorFailsForInvalidIntegers() {
+        
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.xor(0b1<<8,0b0100_1000) );
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.xor(0b01011_1100, 0b1<<8));
+    }
+    @Test
+    void XorReturnsGoodFlags() {
+        assertEquals(0b1000_0000, Alu.unpackFlags(Alu.xor(0, 0)));
+        assertEquals(0b0000_0000, Alu.unpackFlags(Alu.xor(1, 0)));
+    }
+    @Test
+    void XorReturnsGoodValue() {
+        Random randomGenerator = new Random();
+        final int ITERATIONS=5;
+        for (int i = 0;i<ITERATIONS;++i) {
+            int l = randomGenerator.nextInt(0b1_0000_0000);
+            int r = randomGenerator.nextInt(0b1_0000_0000);
+            assertEquals(l^r, Alu.unpackValue(Alu.xor(l, r)));
+        }
+    }
+    
+    @Test
+    void shiftLeftFailsForInvalidIntegers() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.shiftLeft(0b1<<8) );
+    }
+    @Test
+    void shiftLeftReturnsGoodFlags() {
+        assertEquals(0b1000_0000, Alu.unpackFlags(Alu.shiftLeft(0)));
+        assertEquals(0b1001_0000, Alu.unpackFlags(Alu.shiftLeft(0b1000_0000)));
+        assertEquals(0b0000_0000, Alu.unpackFlags(Alu.shiftLeft(0b0100_0000)));
+    }
+    @Test
+    void shiftLeftReturnsGoodValue() {
+        Random randomGenerator = new Random();
+        final int ITERATIONS=5;
+        for (int i = 0;i<ITERATIONS;++i) {
+            int l = randomGenerator.nextInt(0b1000_0000);
+            assertEquals((Alu.maskZNHC(Bits.clip(8, l<<1)==0, false, false, Bits.test(l, 7))<<8)|Bits.clip(8, l<<1), Alu.unpackValue(Alu.shiftLeft(l)));
+        }
+    }
+    @Test
+    void shiftRightAFailsForInvalidIntegers() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.shiftRightA(0b1<<8) );
+    }
+    @Test
+    void shiftRightAReturnsGoodFlags() {
+        assertEquals(0b1000_0000, Alu.unpackFlags(Alu.shiftRightA(0)));
+        assertEquals(0b1001_0000, Alu.unpackFlags(Alu.shiftRightA(0b0000_0001)));
+        assertEquals(0b0000_0000, Alu.unpackFlags(Alu.shiftRightA(0b0100_0000)));
+    }
+    @Test
+    void shiftRightAReturnsGoodValue() {
+        Random randomGenerator = new Random();
+        final int ITERATIONS=5;
+        for (int i = 0;i<ITERATIONS;++i) {
+            int l = randomGenerator.nextInt(0b1000_0000);
+            assertEquals((Alu.maskZNHC(Bits.clip(8, l>>1)==0, false, false, Bits.test(l, 0))<<8)|Bits.clip(8, l>>1), Alu.unpackValue(Alu.shiftRightA(l)));
+        }
+    }
+    @Test
+    void shiftRightLFailsForInvalidIntegers() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.shiftRightL(0b1<<8) );
+    }
+    @Test
+    void shiftRightLReturnsGoodFlags() {
+        assertEquals(0b1000_0000, Alu.unpackFlags(Alu.shiftRightL(0)));
+        assertEquals(0b1001_0000, Alu.unpackFlags(Alu.shiftRightL(0b0000_0001)));
+        assertEquals(0b0000_0000, Alu.unpackFlags(Alu.shiftRightL(0b0100_0000)));
+    }
+    @Test
+    void shiftRightLReturnsGoodValue() {
+        Random randomGenerator = new Random();
+        final int ITERATIONS=5;
+        for (int i = 0;i<ITERATIONS;++i) {
+            int l = randomGenerator.nextInt(0b1000_0000);
+            assertEquals((Alu.maskZNHC(Bits.clip(8, l>>>1)==0, false, false, Bits.test(l, 0))<<8)|Bits.clip(8, l>>>1), Alu.unpackValue(Alu.shiftRightL(l)));
+        }
+    }
+    
+    
+    
 	private static int pack(int flags, int value) {
 		return (flags+(value<<8));
 		
