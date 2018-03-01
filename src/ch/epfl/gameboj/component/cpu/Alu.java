@@ -45,6 +45,15 @@ public final class Alu {
 		RIGHT;
 	}
 	
+    /**
+     * Returns a value where the bits corresponding to each fanion are 1 if the corresponding fanion is true
+     * 
+     * @param z, the flag z
+     * @param n, the flag n
+     * @param h, the flag h
+     * @param c, the flag c
+     * @return an 8 bits int with the flags encoded in their respective bit
+     */
     public static int maskZNHC(boolean z, boolean n, boolean h, boolean c) {
         int value = 0;
         boolean[] fanion = { c, h, n, z };
@@ -56,31 +65,56 @@ public final class Alu {
         return value << 4;
     }
 
-    // return une valeur de 8 bits plus grande avec les flags dans les 8 LSB et la valeur dans le reste
+    /**
+     * Returns an 8 bits bigger value with the flags in the 8 LSB and the value in the rest of the bits
+     * 
+     * @param value, the value
+     * @param z, the flag z
+     * @param n, the flag n
+     * @param h, the flag h
+     * @param c, the flag c
+     * @return The value and the flags in the same int
+     */
     private static int packValueFlags(int value, boolean z, boolean n, boolean h,
             boolean c) {
         return (value << 8) | maskZNHC(z, n, h, c);
     }
 
+    /**
+     * Extracts the value from an int, supressing the flags
+     * 
+     * @param valueFlags, the int we want to extract the value from
+     * @return the value
+     */
     public static int unpackValue(int valueFlags) {
         return (valueFlags & 0xffff00) >>> 8;
     }
 
+    /**
+     * Extracts the flags from an int, supressing the value
+     * 
+     * @param valueFlags, the int we want to extract the flags from
+     * @return the flags in a 8 bit int
+     */
     public static int unpackFlags(int valueFlags) {
         return (valueFlags & 0xff);
     }
-
-//    private static int addition(int size, int carryH, int carryC) {
-//        
-//    }
     
-    public static int add(int l, int r, boolean c0) {
-        Preconditions.checkBits8(r);
-        Preconditions.checkBits8(l);
-        int sum = 0;
-        boolean carry = c0;
-        boolean fanionH = false;
-        for (int i = 0; i < 8; ++i) {
+    /**
+     * Ads two ints bit by bit up to the size bit, and also adds the initial carry bit. 
+     * 
+     * @param l, an int 
+     * @param r, an int 
+     * @param size, the number of bit by bit addition it makes
+     * @param carryH, the index at the point in which the method has to register the flag H
+     * @param carryC, the index at the point in which the method has to register the flag C
+     * @param firstCarry, the initial carry bit
+     * @return an array, containing the result, and the value of the flags H and C as 1 if they are true
+     */
+    private static int[] addition(int l, int r,int size, int carryH, int carryC, boolean firstCarry) {
+        int[] results = new int[3];
+        boolean carry = firstCarry;
+        for (int i = 0; i < size; ++i) {
             int count = 0;
             boolean[] bits = { Bits.test(l, i), Bits.test(r, i), carry };
             for (int j = 0; j < 3; ++j) {
@@ -93,7 +127,7 @@ public final class Alu {
                 carry = false;
                 break;
             case 1:
-                sum += Bits.mask(i);
+                results[0] += Bits.mask(i);
                 carry = false;
                 break;
             case 2:
@@ -101,102 +135,103 @@ public final class Alu {
                 break;
             case 3:
                 carry = true;
-                sum += Bits.mask(i);
+                results[0] += Bits.mask(i);
                 break;
             }
-            if (i == 3) {
-                fanionH = carry;
+            if (i == carryH) {
+                if (carry) {
+                    results[1] = 1;
+                }
+            }
+            if (i == carryC) {
+                if (carry) {
+                    results[2] = 1;
+                }
             }
         }
-        return packValueFlags(sum, (sum == 0), false, fanionH, carry);
+        return results;
+    }
+    /**
+     * Ads two ints bit by bit up to the size bit
+     * 
+     * @param l, an int 
+     * @param r, an int 
+     * @param size, the number of bit by bit addition it makes
+     * @param carryH, the index at the point in which the method has to register the flag H
+     * @param carryC, the index at the point in which the method has to register the flag C
+     * @return an array, containing the result, and the value of the flags H and C as 1 if they are true
+     */
+    private static int[] addition(int l, int r,int size, int carryH, int carryC) {
+        return addition(l, r, size, carryH, carryC, false);
+    }
+    
+    /**
+     * Returns the sum of the two 8 bits ints and of the initial carry bit and the flags Z0HC 
+     * 
+     * @param l, the first 8 bit int
+     * @param r, the second 8 bit int
+     * @param c0, the initial carry bit
+     * @return a 16 bit int with the value and the flags
+     * @throws IllegalArgumentException if one of the ints is not an 8 bit value
+     */
+    public static int add(int l, int r, boolean c0) {
+        Preconditions.checkBits8(r);
+        Preconditions.checkBits8(l);
+        int sum[] = addition(l, r, 8, 3, 7,c0);
+        return packValueFlags(sum[0], (sum[0] == 0), false, sum[1]==1, sum[2]==1);
     }
 
+    /**
+     * Returns the sum of the two 8 bits ints and the flags Z0HC 
+     * 
+     * @param l, the first 8 bit int
+     * @param r, the second 8 bit int
+     * @return a 16 bit int with the value and the flags
+     * @throws IllegalArgumentException if one of the ints is not an 8 bit value
+     */
     public static int add(int l, int r) {
         return add(l, r, false);
     }
 	
+    /**
+     * Returns the sum of the two 16 bits ints and the flags 00HC, where H and C correspond to the addition of the 8 LSB
+     * 
+     * @param l, the first 16 bit int
+     * @param r, the second 16 bit int
+     * @return a 24 bit int with the value and the flags
+     * @throws IllegalArgumentException if one of the ints is not an 16 bit value
+     */
 	public static int add16L(int l, int r) {
 	    Preconditions.checkBits16(r);
         Preconditions.checkBits16(l);
-        int sum = 0;
-        boolean carry = false;
-        boolean fanionH = false;
-        boolean fanionC = false;
-        for (int i = 0; i < 16; ++i) {
-            int count = 0;
-            boolean[] bits = { Bits.test(l, i), Bits.test(r, i), carry };
-            for (int j = 0; j < 3; ++j) {
-                if (bits[j]) {
-                    ++count;
-                }
-            }
-            switch (count) {
-            case 0:
-                carry = false;
-                break;
-            case 1:
-                sum += Bits.mask(i);
-                carry = false;
-                break;
-            case 2:
-                carry = true;
-                break;
-            case 3:
-                carry = true;
-                sum += Bits.mask(i);
-                break;
-            }
-            if (i == 3) {
-                fanionH = carry;
-            }
-            if (i == 7) {
-                fanionC = carry;
-            }
-        }
-        return packValueFlags(sum, false, false, fanionH, fanionC);
+        int sum[] = addition(l, r, 16, 3, 7);
+        return packValueFlags(sum[0], false, false, sum[1]==1, sum[2]==1);
 	}
 	
+	/**
+     * Returns the sum of the two 16 bits ints and the flags 00HC, where H and C correspond to the addition of the 8 MSB
+     * 
+     * @param l, the first 16 bit int
+     * @param r, the second 16 bit int
+     * @return a 24 bit int with the value and the flags
+     * @throws IllegalArgumentException if one of the ints is not an 16 bit value
+     */
 	public static int add16H (int l, int r) {
 	    Preconditions.checkBits16(r);
         Preconditions.checkBits16(l);
-        int sum = 0;
-        boolean carry = false;
-        boolean fanionH = false;
-        boolean fanionC = false;
-        for (int i = 0; i < 16; ++i) {
-            int count = 0;
-            boolean[] bits = { Bits.test(l, i), Bits.test(r, i), carry };
-            for (int j = 0; j < 3; ++j) {
-                if (bits[j]) {
-                    ++count;
-                }
-            }
-            switch (count) {
-            case 0:
-                carry = false;
-                break;
-            case 1:
-                sum += Bits.mask(i);
-                carry = false;
-                break;
-            case 2:
-                carry = true;
-                break;
-            case 3:
-                carry = true;
-                sum += Bits.mask(i);
-                break;
-            }
-            if (i == 11) {
-                fanionH = carry;
-            }
-            if (i == 15) {
-                fanionC = carry;
-            }
-        }
-        return packValueFlags(sum, false, false, fanionH, fanionC);
+        int sum[] = addition(l, r, 16, 11, 15);
+        return packValueFlags(sum[0], false, false, sum[1]==1, sum[2]==1);
 	}
 	
+	/**
+	 * Computes the substraction of two 8 bits int and of the initial carry bit, returns the result and the flags Z1HC
+	 * 
+	 * @param l, a 8 bit int
+	 * @param r, a 8 bit int
+	 * @param b0, the initial carry bit
+	 * @return the result and the flags in a same int
+	 * @throws IllegalArgumentException if one of the ints is not an 8 bit value
+	 */
 	public static int sub(int l, int r, boolean b0) {
 	    Preconditions.checkBits8(r);
         Preconditions.checkBits8(l);
@@ -218,15 +253,37 @@ public final class Alu {
                 fanionH = carry;
             }
         }
-        return packValueFlags(difference, (difference == 0), false, fanionH, carry);
+        return packValueFlags(difference, (difference == 0), true, fanionH, carry);
 	}
 	
+	/**
+     * Computes the substraction of two 8 bits int, returns the result and the flags Z1HC
+     * 
+     * @param l, a 8 bit int
+     * @param r, a 8 bit int
+     * @return the result and the flags in a same int
+     * @throws IllegalArgumentException if one of the ints is not an 8 bit value
+     */
 	public static int sub(int l, int r) {
 		return sub(l, r, false);
 	}
 	
+	/**
+	 * Adjusts an 8 bit value so it is in the DCB format
+	 * 
+	 * @param v, the value we want to adjust
+	 * @param n, the flag n
+	 * @param h, the flag h
+	 * @param c, the flag c
+	 * @return the value, adjusted to the DCB format
+	 * @throws IllegalArgumentException if the value is not an 8 bit int
+	 */
 	public static int bcdAdjust(int v, boolean n, boolean h, boolean c) {
-		return 1;
+		boolean fixL = h|(!n & ((Bits.clip(4, Preconditions.checkBits8(v)))>9));
+		boolean fixH = c | (!n & (v>0x99));
+		int fix = 0x60 * (fixH?1:0) + 0x06*(fixL?1:0);
+		int Va = n?v-fix:v+fix;
+	    return packValueFlags(Va, Va==0, n, false, fixH);
 	}
 	
 	
