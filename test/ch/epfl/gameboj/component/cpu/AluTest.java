@@ -43,7 +43,7 @@ class AluTest {
 	
 	@Test
 	void maskZNHCWorksOnRandomValues() {
-		int iterations = 5;
+		int iterations = 50;
 		Random randomGenerator = new Random();
 		
 		final int [] singularOutputs = { 
@@ -75,11 +75,17 @@ class AluTest {
 				0x00_00_14_50, 
 				0x00_00_2f_70, 
 				0x00_00_51_30,
+				0x00_00_14_50,
+				0x00_00_35_20,
+				0x00_00_32_10
 		};
 		final int[] outputs = {
 				0x14,
 				0x2f,
-				0x51
+				0x51,
+				0x14,
+				0x35,
+				0x32
 		};
 		for (int i=0 ; i<inputs.length; i++) {
 			assertEquals( outputs[i], Alu.unpackValue(inputs[i]) );
@@ -92,11 +98,17 @@ class AluTest {
 				0x00_12_14_50, 
 				0x00_34_2f_70, 
 				0x00_a2_51_30,
+				0x00_03_14_50,
+				0x00_10_35_20,
+				0x00_cb_32_10
 		};
 		final int[] outputs = {
 				0x12_14,
 				0x34_2f,
-				0xa2_51
+				0xa2_51,
+				0x03_14,
+				0x10_35,
+				0xcb_32
 		};
 		
 		for (int i=0 ; i<inputs.length; i++) {
@@ -108,11 +120,12 @@ class AluTest {
 	@Test
 	void unpackValueWorksOnRandom8BitValues() {
 		Random randomGenerator = new Random();
-		int iterations=5;
+		int iterations=50;
 		for (int i=0 ; i<iterations ; i++ ) {
 			int value = Bits.clip(8,randomGenerator.nextInt());  //Bits 8-15
-			int group1 = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
-			int input=value<<8+group1<<4;
+			boolean z = (value==0) ? true : false ;
+			int input=(value<<8)+(Alu.maskZNHC(z,randomGenerator.nextBoolean(),randomGenerator.nextBoolean(),randomGenerator.nextBoolean()));
+			
 			
 			assertEquals(value, Alu.unpackValue(input) );
 		}
@@ -121,13 +134,14 @@ class AluTest {
 	@Test 
 	void unpackValueWorksOnRandom16BitValues() {
 		Random randomGenerator = new Random();
-		int iterations=5;
+		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int value = Bits.clip(16,randomGenerator.nextInt());  //Bits 8-24
-			int group1 = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
-			int input=value<<8+group1<<4;
+			boolean z = (value==0) ? true : false ;
+			int input=(value<<8)+(Alu.maskZNHC(z,randomGenerator.nextBoolean(),randomGenerator.nextBoolean(),randomGenerator.nextBoolean()));
 			
 			assertEquals(value, Alu.unpackValue(input) );
+			
 		}
 	}
 	
@@ -164,7 +178,7 @@ class AluTest {
 		for ( int i=0; i<iterations ; i++) {
 			int value = Bits.clip(16,randomGenerator.nextInt());  //Bits 8-24
 			int flags = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
-			int input=value<<8+flags<<4;
+			int input=(value<<8)+(flags<<4);
 			
 			assertEquals(flags<<4, Alu.unpackFlags(input) );
 			}
@@ -192,7 +206,7 @@ class AluTest {
 	@Test
 	void addsAreTransitive() {
 		Random randomGenerator = new Random();
-		int iterations=5;
+		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int l = Bits.clip(8,randomGenerator.nextInt());
 			int r = Bits.clip(8,randomGenerator.nextInt());
@@ -208,7 +222,7 @@ class AluTest {
 		final int H = 1<<5;
 		final int Z = 1<<7;
 		Random randomGenerator = new Random();
-		int iterations=5;
+		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int l = Bits.clip(8,randomGenerator.nextInt());
 			int r = Bits.clip(8,randomGenerator.nextInt());
@@ -224,11 +238,17 @@ class AluTest {
 			res=Bits.clip(8,res);
 			if (res==0)
 				z=Z;
-			res=res<<8;
-			if (Bits.test(l^r,5)!=Bits.test(l+r,5))
+			if ( (Bits.test(l^r,4)!=Bits.test(l+r+1,4)))
 				h=H;
+			res = res << 8;
 			
 			res+=h+c+z;
+			
+			System.out.println("Inputs : " + l + " , " + r);
+			System.out.println( "expected value : " + Alu.unpackValue(res) + " output value : " + Alu.unpackValue(Alu.add(l,r,true)));
+			System.out.println( "expected flags : " + Alu.unpackFlags(res) + " output flags : " + Alu.unpackFlags(Alu.add(l,r,true)));
+			System.out.println();
+			
 			assertEquals(res, Alu.add(l,r,true));
 			}	
 	}
@@ -242,7 +262,7 @@ class AluTest {
 		final int H = 1<<5;
 		final int Z = 1<<7;
 		Random randomGenerator = new Random();
-		int iterations=5;
+		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int l = Bits.clip(8,randomGenerator.nextInt());
 			int r = Bits.clip(8,randomGenerator.nextInt());
@@ -252,19 +272,28 @@ class AluTest {
 			
 			int res = l+r;
 			
+			
 			if (Bits.test(res,8))
 				c=C;
 			res=Bits.clip(8,res);
-			res=res<<8;
-			if (Bits.test(l^r,5)!=Bits.test(l+r,5))
-				h=H;
 			if (res==0)
-					z=Z;
+				z=Z;
+			if (Bits.test(l^r,4)!=Bits.test(l+r,4))
+				h=H;
+			res = res << 8;
+			
 			res+=h+c+z;
 			
-			assertEquals(res, Alu.add(l,r,true));
+			System.out.println("Inputs : " + l + " , " + r);
+			System.out.println( "expected value : " + Alu.unpackValue(res) + " output value : " + Alu.unpackValue(Alu.add(l,r,false)));
+			System.out.println( "expected flags : " + Alu.unpackFlags(res) + " output flags : " + Alu.unpackFlags(Alu.add(l,r,false)));
+			System.out.println();
+			
+			assertEquals(res, Alu.add(l,r,false));
 			}	
 	}
+	
+		
 	
 	@Test
 	void add1WorksOnTwoComplementRandomValues() {
@@ -274,7 +303,7 @@ class AluTest {
 		final int res=C+Z+H;
 		
 		Random randomGenerator = new Random();
-		int iterations=5;
+		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int l = Bits.clip(8,randomGenerator.nextInt());
 			int r = Bits.complement8(l)+1;
@@ -288,9 +317,9 @@ class AluTest {
 	void addsFailWithInvalidArgument() {
 			
 			final int[] invalidArguments = {
-					0x10_3f_d2_10,
-					0x01_10_3d_40,
-					0x00_23_f3_21
+					0xc_12_23,
+					0x2_12_32,
+					0x1_a3_56,
 			};
 			
 			for (int i=0 ; i<invalidArguments.length ; i++) {
@@ -299,9 +328,9 @@ class AluTest {
 					int k=i;
 					int l=j;
 					assertThrows(IllegalArgumentException.class,
-					() -> Alu.unpackValue(invalidArguments[k]));
+					() -> Alu.add(invalidArguments[k],invalidArguments[l]));
 					assertThrows(IllegalArgumentException.class,
-					() -> Alu.unpackFlags(invalidArguments[l]));
+					() -> Alu.add(invalidArguments[l],invalidArguments[k]));
 				}
 			}
 			
@@ -312,7 +341,7 @@ class AluTest {
 	void add16HIsCompatibleWith8BitAdd() {
 		Random randomGenerator = new Random();
 		final int ITERATIONS=5;
-		final int C=1 << 4;
+		
 		for ( int i=0; i<ITERATIONS ; i++) {
 			int l = Bits.clip(16,randomGenerator.nextInt());
 			int r = Bits.clip(16,randomGenerator.nextInt());
@@ -320,14 +349,15 @@ class AluTest {
 			int highL=Bits.extract(l,8,8);
 			int lowL=Bits.clip(8,l);
 			int lowR=Bits.clip(8,l);
+			int lowSum=Alu.add(lowR,lowL);
+			boolean carry = (Bits.test(lowSum,4));
 			
+			System.out.println(l);
+			System.out.println(r);
+			System.out.println("Max : " + (1<<16) );
 			
-			int highSumAndFlags=Alu.add(highR,highL, Bits.test(lowL+lowR,8));  // Calcul du packed qui contient 
-			int newValue = Bits.clip(8,highR+highL)<<8;
-			highSumAndFlags=packNewValue(highSumAndFlags, newValue);
-			int lowSumNoFlags=packValue(Bits.clip(8,lowL+lowR));
-			
-			int res=highSumAndFlags+lowSumNoFlags;
+			int highSum=Alu.add(highR,highL,carry);
+			int res=packNewValue(highSum,(Alu.unpackValue(highSum)<<8)+Alu.unpackValue(lowSum));
 			
 			
 				
