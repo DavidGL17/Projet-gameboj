@@ -290,22 +290,22 @@ class AluTest {
 	
 		
 	
-	@Test
-	void add1WorksOnTwoComplementRandomValues() {
-		final int C = 1<<4;
-		final int H = 1<<5;
-		final int Z = 1<<7;
-		final int res=C+Z+H;
-		
-		Random randomGenerator = new Random();
-		int iterations=50;
-		for ( int i=0; i<iterations ; i++) {
-			int l = Bits.clip(8,randomGenerator.nextInt());
-			int r = Bits.clip(8, Bits.complement8(l)+1);
-			
-			assertEquals(res, Alu.unpackFlags(Alu.add(l,r,false)));
-			}	
-	}
+//	@Test
+//	void add1WorksOnTwoComplementRandomValues() {
+//		final int C = 1<<4;
+//		final int H = 1<<5;
+//		final int Z = 1<<7;
+//		final int res=C+Z+H;
+//		
+//		Random randomGenerator = new Random();
+//		int iterations=5;
+//		for ( int i=0; i<iterations ; i++) {
+//			int l = Bits.clip(8,randomGenerator.nextInt());
+//			int r = Bits.clip(8, Bits.complement8(l)+1);
+//			
+//			assertEquals(res, Alu.unpackFlags(Alu.add(l,r,false)));
+//			}	
+//	}
 		
 	@Test
 	void addsFailWithInvalidArgument() {
@@ -425,96 +425,54 @@ class AluTest {
 		
 	}
 	
-	@Test
-	void subsWorksForSameValues() {
-		Random randomGenerator = new Random();
-		final int ITERATIONS = 50;
-		final int RES1=Alu.maskZNHC(true,true,false,false);
-		final int RES2=(0b1111_1111<<8);
-		for (int i=0 ; i<ITERATIONS ; i++) {
-			int input = randomGenerator.nextInt();
-			input = Bits.clip(8,input);
-			boolean c = (Bits.clip(4,input) < Bits.clip(4,input+1));
-			int res2=Alu.maskZNHC(false, true, c ,true)+RES2;
-			assertEquals(RES1,Alu.sub(input,input));
-			System.out.println(" input : " + input + " res1 = " + RES1 + " res2 = " + RES2);
-			System.out.println( "input-input-1 = " + RES2 );
-			System.out.println( " output1 : " + Alu.sub(input,input) + " output2 : " + Alu.sub(input,input,true));
-			System.out.println(" Distance2 = " + (Alu.sub(input,input,true)-res2));
-			assertEquals(res2,Alu.sub(input,input,true));
-		}
-	}
 	
 	@Test
 	void subsReturnCorrectValue() {
-		Random randomGenerator = new Random();
-		final int ITERATIONS = 50;
-		for (int i=0 ; i<ITERATIONS ; i++) {
-			int input1 = Bits.clip(8,randomGenerator.nextInt());
-			int input2 = Bits.clip(8,randomGenerator.nextInt());
-			
-			assertEquals(Bits.clip(8,input1-input2),Alu.unpackValue(Alu.sub(input1,input2)));
-			assertEquals(Bits.clip(8,input1-input2),Alu.unpackValue(Alu.sub(input1,input2)));
-			}
+        assertEquals(0, Alu.unpackValue(Alu.sub(0x10, 0x10)));
+        assertEquals(0x90, Alu.unpackValue(Alu.sub(0x10, 0x80)));
+        assertEquals(0xFF, Alu.unpackValue(Alu.sub(0x01, 0x01, true)));
 	};
 	
 	@Test
 	void subsReturnCorrectFlags() {
-		final boolean N=true;
-		Random randomGenerator = new Random();
-		final int ITERATIONS = 50;
-		for (int i=0 ; i<ITERATIONS ; i++ ) {
-			int input1 = Bits.clip(8,randomGenerator.nextInt());
-			int input2 = Bits.clip(8,randomGenerator.nextInt());
-			boolean z1 = (Bits.clip(8,input1-input2)==0);
-			boolean z2 = (Bits.clip(8,input1-input2-1)==0);
-			boolean h1 = (Bits.clip(4,input1)<Bits.clip(4,input2));
-			boolean h2 = (Bits.clip(4,input1)<Bits.clip(4,input2+1));
-			boolean c1 = (input1<input2);
-			boolean c2 = (input1<(input2+1));
-			
-			int res1=Alu.maskZNHC(z1,N,h1,c1);
-			int res2=Alu.maskZNHC(z2,N,h2,c2);
-			
-			assertEquals(res1, Alu.sub(input1,input2));
-			assertEquals(res2, Alu.sub(input1,input2));
-			
-		}
+	    assertEquals(0xC0, Alu.unpackFlags(Alu.sub(0x10, 0x10)));
+        assertEquals(0x50, Alu.unpackFlags(Alu.sub(0x10, 0x80)));
+        assertEquals(0x70, Alu.unpackFlags(Alu.sub(0x01, 0x01, true)));
 	}
 		
 		
 		
 	
-	@Test
-	void subWorksOnKnownValuesAndFalse() {
-		final int Z=1<<8;
-		final int N=1<<7;
-		final int C=1<<5;
-		final int H = 1<<6;
-		final int inputs [][]= {
-				{0b1010_0001,0b1010_0001},
-				{0b0010_0010,0b0100_1011},
-				{0b0110_0110,0b0010_0010}
-				
-		};
-		final int expected[]= {
-				Z+N,
-				C+N+H+(0b1101_0111<<8),
-				N+(0b0100_0100<<8)
-				
-		};
-		
-		
-		for (int i=0 ; i<inputs.length ; i++) {
-			System.out.println("inputs " + inputs[i][0] + " - " + inputs[i][1] );
-			System.out.println("expected : " + expected[i] + " output : " + Alu.sub(inputs[i][0],inputs[i][1]));
-			System.out.println("distance = " + (expected[i]-Alu.sub(inputs[i][0],inputs[i][1])) + " ");
-			System.out.println();
-			assertEquals(expected[i], Alu.sub(inputs[i][0],inputs[i][1]));
-		}
-		
-		
-	}
+//	@Test
+//	void subWorksOnKnownValuesAndFalse() {
+//		final int Z=1<<8;
+//		final int N=1<<7;
+//		final int C=1<<5;
+//		final int H = 1<<6;
+//		final int inputs [][]= {
+//				{0b1010_0001,0b1010_0001},
+//				{0b0010_0010,0b0100_1011},
+//				{0b0110_0110,0b0010_0010}
+//				
+//		};
+//		final int expected[]= {
+//				Z+N,
+//				C+N+H+(0b1101_0111<<8),
+//				N+(0b0100_0100<<8)
+//				
+//		};
+//		
+//		
+//		for (int i=0 ; i<inputs.length ; i++) {
+//			System.out.println("inputs " + inputs[i][0] + " - " + inputs[i][1] );
+//			System.out.println("expected : " + expected[i] + " output : " + Alu.sub(inputs[i][0],inputs[i][1]));
+//			System.out.println("distance = " + (expected[i]-Alu.sub(inputs[i][0],inputs[i][1])) + " ");
+//			System.out.println();
+//			assertEquals(expected[i], Alu.sub(inputs[i][0],inputs[i][1]));
+//		}
+//		
+//		
+//	}
 	
 	
 	@Test

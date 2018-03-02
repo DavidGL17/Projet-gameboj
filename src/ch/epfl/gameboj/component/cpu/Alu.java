@@ -257,14 +257,19 @@ public final class Alu {
         boolean carry = b0;
         boolean fanionH = false;
         for (int i = 0; i < 8; ++i) {
-            if (!Bits.test(l, i)&&Bits.test(r, i)&&!carry) {
+            if (!Bits.test(l, i)&&Bits.test(r, i)&&carry) {
                 carry = true;
             } else {
-                if (Bits.test(l, i)||carry|| (Bits.test(l, i)&&Bits.test(r, i)&&carry)) {
+                if((Bits.test(r, i)&&!Bits.test(l, i)&&!carry)||(carry&&!Bits.test(r, i)&&!Bits.test(l, i))||(carry&&Bits.test(r, i)&&Bits.test(l, i))) {
+                    carry = true;
                     difference += Bits.mask(i);
-                    carry = false;
                 } else {
-                    carry = false;
+                    if (!Bits.test(r, i)&&Bits.test(l, i)&&!carry) {
+                        carry = false;
+                        difference += Bits.mask(i);
+                    } else {
+                        carry = false;
+                    }
                 }
             }
             if (i == 3) {
