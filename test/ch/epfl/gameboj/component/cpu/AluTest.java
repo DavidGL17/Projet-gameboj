@@ -437,15 +437,61 @@ class AluTest {
 	void subsWorksForSameValues() {
 		Random randomGenerator = new Random();
 		final int ITERATIONS = 50;
-		final int res1=Alu.maskZNHC(true,true,false,false);
-		final int res2=Alu.maskZNHC(false,true,true,true)+(0b1111_1111<<8);
+		final int RES1=Alu.maskZNHC(true,true,false,false);
+		final int RES2=(0b1111_1111<<8);
 		for (int i=0 ; i<ITERATIONS ; i++) {
 			int input = randomGenerator.nextInt();
 			input = Bits.clip(8,input);
-			assertEquals(res1,Alu.sub(input,input));
+			boolean c = (Bits.clip(4,input) < Bits.clip(4,input+1));
+			int res2=Alu.maskZNHC(false, true, c ,true)+RES2;
+			assertEquals(RES1,Alu.sub(input,input));
+			System.out.println(" input : " + input + " res1 = " + RES1 + " res2 = " + RES2);
+			System.out.println( "input-input-1 = " + RES2 );
+			System.out.println( " output1 : " + Alu.sub(input,input) + " output2 : " + Alu.sub(input,input,true));
+			System.out.println(" Distance2 = " + (Alu.sub(input,input,true)-res2));
 			assertEquals(res2,Alu.sub(input,input,true));
 		}
 	}
+	
+	@Test
+	void subsReturnCorrectValue() {
+		Random randomGenerator = new Random();
+		final int ITERATIONS = 50;
+		for (int i=0 ; i<ITERATIONS ; i++) {
+			int input1 = Bits.clip(8,randomGenerator.nextInt());
+			int input2 = Bits.clip(8,randomGenerator.nextInt());
+			
+			assertEquals(Bits.clip(8,input1-input2),Alu.unpackValue(Alu.sub(input1,input2)));
+			assertEquals(Bits.clip(8,input1-input2),Alu.unpackValue(Alu.sub(input1,input2)));
+			}
+	};
+	
+	@Test
+	void subsReturnCorrectFlags() {
+		final boolean N=true;
+		Random randomGenerator = new Random();
+		final int ITERATIONS = 50;
+		for (int i=0 ; i<ITERATIONS ; i++ ) {
+			int input1 = Bits.clip(8,randomGenerator.nextInt());
+			int input2 = Bits.clip(8,randomGenerator.nextInt());
+			boolean z1 = (Bits.clip(8,input1-input2)==0);
+			boolean z2 = (Bits.clip(8,input1-input2-1)==0);
+			boolean h1 = (Bits.clip(4,input1)<Bits.clip(4,input2));
+			boolean h2 = (Bits.clip(4,input1)<Bits.clip(4,input2+1));
+			boolean c1 = (input1<input2);
+			boolean c2 = (input1<(input2+1));
+			
+			int res1=Alu.maskZNHC(z1,true,h1,c1);
+			int res2=Alu.maskZNHC(z2,true,h2,c2);
+			
+			assertEquals(res1, Alu.sub(input1,input2));
+			assertEquals(res2, Alu.sub(input1,input2));
+			
+		}
+	}
+		
+		
+		
 	
 	@Test
 	void subWorksOnKnownValuesAndFalse() {
@@ -470,6 +516,7 @@ class AluTest {
 		for (int i=0 ; i<inputs.length ; i++) {
 			System.out.println("inputs " + inputs[i][0] + " - " + inputs[i][1] );
 			System.out.println("expected : " + expected[i] + " output : " + Alu.sub(inputs[i][0],inputs[i][1]));
+			System.out.println("distance = " + (expected[i]-Alu.sub(inputs[i][0],inputs[i][1])) + " ");
 			System.out.println();
 			assertEquals(expected[i], Alu.sub(inputs[i][0],inputs[i][1]));
 		}
@@ -509,6 +556,12 @@ class AluTest {
 			} 
 			
 				
+	}
+	
+	
+	@Test
+	void bcdAdjustFailsForInvalidArgument() {
+		
 	}
 	
 	
@@ -650,7 +703,7 @@ class AluTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Alu.rotate(Alu.RotDir.LEFT, 0x100));
         assertThrows(IllegalArgumentException.class,
-                () -> Alu.rotate(null, 0));
+                () -> Alu.rotate(null, 0)); //---- Sure qu'il faut lancer IllegalArgumentException ????
     }
     @Test
     void rotateReturnsGoodFlags() {
