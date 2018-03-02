@@ -751,7 +751,10 @@ class AluTest {
     void swapReturnsGoodValue() {
         assertEquals(0x23, Alu.unpackValue(Alu.swap(0x32)));
         assertEquals(0xa1, Alu.unpackValue(Alu.swap(0x1a)));
+        assertEquals(0x0, Alu.unpackValue(Alu.swap(0)));
     }
+    
+  
     @Test
     void swapReturnsGoodFlags() {
         assertEquals(0, Alu.unpackFlags(Alu.swap(0x32)));

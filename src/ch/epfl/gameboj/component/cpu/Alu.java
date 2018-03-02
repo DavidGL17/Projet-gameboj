@@ -473,8 +473,9 @@ public final class Alu {
 		
 		Preconditions.checkBits8(v);
 
-		final boolean n=false;
-		final boolean h=false;
+		final boolean N=false;
+		final boolean H=false;
+		boolean flagC=false;
 		
 		int result=v;
 		if (c)
@@ -482,12 +483,12 @@ public final class Alu {
 		
 		
 		result = Bits.rotate(9,result,rotate(d));
-		if (result >= 1<<8)
-			c=true;
+		if (Bits.test(result,8))
+			flagC=true;
 		
-		result = Bits.set(result,8,false);
+		result = Bits.clip(8,result);
 		
-		return pack(n,h,c,result);
+		return pack(N,H,flagC,result);
 		
 	}
 	
@@ -500,16 +501,16 @@ public final class Alu {
 		
 		Preconditions.checkBits8(v);
 
-		final boolean n = false;
-		final boolean h = false;
-		final boolean c = false;
+		final boolean N = false;
+		final boolean H = false;
+		final boolean C = false;
 		
-		int lsb=Bits.extract(v,0,4);
+		int lsb=Bits.clip(4,v);
 		int msb=Bits.extract(v,4,4);
 		
-		int result=lsb<<4 + msb;
+		int result= Bits.clip(8, (lsb<<4) + msb);
 		
-		return pack(n,h,c,result);
+		return pack(N,H,C,result);
 	}
 	
 	
@@ -573,7 +574,7 @@ public final class Alu {
 	 * @return
 	 */
 	private static int rotate(RotDir d) {
-		return (d.ordinal()*2-1);
+		return (d==RotDir.LEFT) ? 1 : -1;
 	}
 	
 	/**
@@ -586,10 +587,7 @@ public final class Alu {
 	 * @return
 	 */
 	private static int pack(boolean n, boolean h, boolean c, int value ) {
-		boolean z = false;
-		if (value==0)
-			z=true;
-		return pack(z,n,h,c,value);
+		return pack((value==0),n,h,c,value);
 	}
 	
 	/**
