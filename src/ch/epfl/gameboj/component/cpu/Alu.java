@@ -375,19 +375,19 @@ public final class Alu {
 		
 		Preconditions.checkBits8(v);
 		
-		final boolean n = false;
-		final boolean h = false;
+		final boolean N = false;
+		final boolean H = false;
 		boolean c = false;
 		
 		int result=v<<1;
 		
-		if (Bits.test(v,8))
+		if (Bits.test(result,8))
 			c=true;
 		
 		result=Bits.clip(8,result);
 				
 				
-		return pack(n,h,c,result);
+		return pack(N,H,c,result);
 		
 	}
 	
