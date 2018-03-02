@@ -328,7 +328,7 @@ public final class Alu {
 		
 		int result = l & r;
 		
-		return pack(n,h,c,result);
+		return packValueFlags(result,(result==0),n,h,c);
 	}
 	
 	/**
@@ -347,7 +347,7 @@ public final class Alu {
 		final boolean c = false;
 		
 		int result = l | r;
-		return pack(n,h,c,result);
+		return packValueFlags(result,(result==0),n,h,c);
 	}
 	
 	/**
@@ -367,7 +367,7 @@ public final class Alu {
 		
 		int result = l ^ r;
 		
-		return pack(n,h,c,result);
+		return packValueFlags(result,(result==0),n,h,c);
 	}
 	
 	
@@ -392,7 +392,7 @@ public final class Alu {
 		result=Bits.clip(8,result);
 				
 				
-		return pack(N,H,c,result);
+		return packValueFlags(result,(result==0),N,H,c);
 		
 	}
 	
@@ -416,7 +416,7 @@ public final class Alu {
 		
 		result=Bits.clip(8,result);
 		
-		return pack(n,h,c,result);
+		return packValueFlags(result,(result==0),n,h,c);
 	}
 	
 	/**
@@ -439,7 +439,7 @@ public final class Alu {
 		
 		result=Bits.clip(8,result);
 		
-		return pack(n,h,c,result);
+		return packValueFlags(result,(result==0),n,h,c);
 	}
 	
 	
@@ -465,7 +465,7 @@ public final class Alu {
 		c=Bits.test(v,(7+d.ordinal())%8);
 		result=Bits.rotate(8,v,rotate(d));
 		
-		return pack(n,h,c,result);
+		return packValueFlags(result,(result==0),n,h,c);
 		
 	}
 	
@@ -498,7 +498,7 @@ public final class Alu {
 		
 		result = Bits.clip(8,result);
 		
-		return pack(N,H,flagC,result);
+		return packValueFlags(result,(result==0),N,H,flagC);
 		
 	}
 	
@@ -520,7 +520,7 @@ public final class Alu {
 		
 		int result= Bits.clip(8, (lsb<<4) + msb);
 		
-		return pack(N,H,C,result);
+		return packValueFlags(result,(result==0),N,H,C);
 	}
 	
 	
@@ -535,45 +535,13 @@ public final class Alu {
 		Preconditions.checkBits8(v);
 		Objects.checkIndex(bitIndex,8);
 		
-		final boolean z = Bits.test(v,bitIndex);
-		final boolean n = false;
-		final boolean h = true;
-		final boolean c = false;
+		final boolean Z = !Bits.test(v,bitIndex);
+		final boolean N = false;
+		final boolean H = true;
+		final boolean C = false;
 		
-		return pack(z,n,h,c);
+		return packValueFlags(0,Z,N,H,C);
 		
-	}
-	
-	// Valeur valable : 0x00_**_**_*0 (16 bit) etoile 1-4 décrivent valeur 16 bits et 3-4 8 bits
-	
-	/**
-	 * Checks if value is a correct packed Value where the result is an 8-bit int
-	 * @param value - an int
-	 * @throws IllegalArgumentException if value cannot be a packed value
-	 */
-	private static void check8BitPackedValue(int value) {
-		final int mask=0x11_11_00_01;
-		if((value & mask) != 0) {
-			throw new IllegalArgumentException();
-		}
-		
-	}
-	
-
-	/**
-	 * Checks if value is a correct packed Value where the result is a 16-bit int
-	 * @param value - an int
-	 * @throws IllegalArgumentException if value cannot be a packed value
-	 */
-	private static void check16BitPackedValue(int value) {
-		final int mask = 0x11_00_00_01;
-		if ((value & mask) != 0) {
-			throw new IllegalArgumentException();
-		}
-	}
-	
-	private static void checkPackedValue(int value) {
-		check16BitPackedValue(value);
 	}
 	
 	
@@ -587,69 +555,6 @@ public final class Alu {
 		return (d==RotDir.LEFT) ? 1 : -1;
 	}
 	
-	/**
-	 * AUXILIARY
-	 * 
-	 * @param n
-	 * @param h
-	 * @param c
-	 * @param value
-	 * @return
-	 */
-	private static int pack(boolean n, boolean h, boolean c, int value ) {
-		return pack((value==0),n,h,c,value);
-	}
 	
-	/**
-	 * AUXILIARY
-	 * 
-	 * @param z
-	 * @param n
-	 * @param h
-	 * @param c
-	 * @param value
-	 * @return
-	 */
-	private static int pack(boolean z, boolean n, boolean h, boolean c, int value ) {
-		return pack(maskZNHC(z,n,h,c),value);
-	}
-	
-	/**
-	 * AUXILIARY
-	 * 
-	 * @param z
-	 * @param n
-	 * @param h
-	 * @param c
-	 * @return
-	 */
-	private static int pack(boolean z, boolean n, boolean h, boolean c) {
-		return pack(z,n,h,c,0);
-	}
-	
-	/**
-	 * AUXILIARY
-	 * 
-	 * @param flags
-	 * @param value
-	 * @return
-	 */
-	private static int pack(int flags, int value) {
-		return (flags+(value<<8));
-	}
-	
-	/**
-	 * AUXILIARY
-	 * 
-	 * @param packedValue
-	 * @param newValue
-	 */
-	private static int packNewValue(int packedValue , int newValue) {
-		return pack(unpackFlags(packedValue), newValue);
-	}
-	
-	private static int packValue(int value) {
-		return pack(0,value);
-	}
 	
 }
