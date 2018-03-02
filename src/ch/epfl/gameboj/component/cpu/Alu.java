@@ -453,6 +453,8 @@ public final class Alu {
 	public static int rotate(RotDir d, int v) {
 		
 		Preconditions.checkBits8(v);
+		if (d ==null)
+			throw new IllegalArgumentException();
 
 		final boolean n=false;
 		final boolean h=false;
@@ -477,6 +479,9 @@ public final class Alu {
 	public static int rotate(RotDir d, int v, boolean c) {
 		
 		Preconditions.checkBits8(v);
+		
+		if (d==null)
+			throw new IllegalArgumentException();
 
 		final boolean N=false;
 		final boolean H=false;

@@ -716,7 +716,7 @@ class AluTest {
     @Test
     void swapReturnsGoodFlags() {
         assertEquals(0, Alu.unpackFlags(Alu.swap(0x32)));
-        assertEquals(0x80, Alu.unpackValue(Alu.swap(0)));
+        assertEquals(0x80, Alu.unpackFlags(Alu.swap(0)));
     }
     @Test
     void testBitFailsForInvalidInput() {
