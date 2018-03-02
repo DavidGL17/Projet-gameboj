@@ -30,7 +30,7 @@ public class GameBoy {
      * 
      * @return bus The gameBoys bus
      */
-    public Bus Bus() {
+    public Bus bus() {
         return bus;
     }
 }

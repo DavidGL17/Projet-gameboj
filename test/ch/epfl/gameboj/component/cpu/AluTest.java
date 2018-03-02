@@ -309,9 +309,9 @@ class AluTest {
 		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int l = Bits.clip(8,randomGenerator.nextInt());
-			int r = Bits.complement8(l)+1;
+			int r = Bits.clip(8, Bits.complement8(l)+1);
 			
-			assertEquals(res, Alu.add(l,r,false));
+			assertEquals(res, Alu.unpackFlags(Alu.add(l,r,false)));
 			}	
 	}
 		
@@ -495,10 +495,10 @@ class AluTest {
 	
 	@Test
 	void subWorksOnKnownValuesAndFalse() {
-		final int Z=1<<7;
-		final int N=1<<6;
-		final int C=1<<4;
-		final int H = 1<<5;
+		final int Z=1<<8;
+		final int N=1<<7;
+		final int C=1<<5;
+		final int H = 1<<6;
 		final int inputs [][]= {
 				{0b1010_0001,0b1010_0001},
 				{0b0010_0010,0b0100_1011},
@@ -574,34 +574,15 @@ class AluTest {
 	}
 	
 	@Test
-	void bcdAdjustWorksOnKnownValues() {
-		Random randomGenerator= new Random();
-		final int[] INPUTS = {
-				24,
-				0,
-				125,
-				46
-		};
-		
-		final int[] EXPECTED = {
-				0b0010_0100,
-				0b0000_0000,
-				0b0001_0010_0101,
-				0b0100_0110
-		};
-		
-		for (int i=0 ; i<INPUTS.length ; i++) {
-			boolean z = (INPUTS[i]==0);
-			boolean n = randomGenerator.nextBoolean();
-			boolean h = randomGenerator.nextBoolean();
-			boolean c = randomGenerator.nextBoolean();
-			
-			int expected=pack(z,n,h,c,EXPECTED[i]);
-			
-			assertEquals(EXPECTED[i] , Alu.bcdAdjust(expected, n, h,c));
-		}
+	void bcdAdjustWorksValues() {
+		assertEquals(0x73, Alu.unpackValue(Alu.bcdAdjust(0x6D, false, false, false)));
+	    assertEquals(0x09, Alu.unpackValue(Alu.bcdAdjust(0x0F, true, true, false)));
 	}
-	
+	@Test
+    void bcdAdjustWorksFlags() {
+        assertEquals(0x00, Alu.unpackFlags(Alu.bcdAdjust(0x6D, false, false, false)));
+        assertEquals(0x40, Alu.unpackFlags(Alu.bcdAdjust(0x0F, true, true, false)));
+    }
 	
 
 	
@@ -693,7 +674,7 @@ class AluTest {
         final int ITERATIONS=5;
         for (int i = 0;i<ITERATIONS;++i) {
             int l = randomGenerator.nextInt(0b1000_0000);
-            assertEquals((Alu.maskZNHC(Bits.clip(8, l<<1)==0, false, false, Bits.test(l, 7))<<8)|Bits.clip(8, l<<1), Alu.unpackValue(Alu.shiftLeft(l)));
+            assertEquals(Bits.clip(8, l<<1), Alu.unpackValue(Alu.shiftLeft(l)));
         }
     }
     @Test
@@ -713,7 +694,7 @@ class AluTest {
         final int ITERATIONS=5;
         for (int i = 0;i<ITERATIONS;++i) {
             int l = randomGenerator.nextInt(0b1000_0000);
-            assertEquals((Alu.maskZNHC(Bits.clip(8, l>>1)==0, false, false, Bits.test(l, 0))<<8)|Bits.clip(8, l>>1), Alu.unpackValue(Alu.shiftRightA(l)));
+            assertEquals(Bits.clip(8, l>>1), Alu.unpackValue(Alu.shiftRightA(l)));
         }
     }
     @Test
@@ -733,7 +714,7 @@ class AluTest {
         final int ITERATIONS=5;
         for (int i = 0;i<ITERATIONS;++i) {
             int l = randomGenerator.nextInt(0b1000_0000);
-            assertEquals((Alu.maskZNHC(Bits.clip(8, l>>>1)==0, false, false, Bits.test(l, 0))<<8)|Bits.clip(8, l>>>1), Alu.unpackValue(Alu.shiftRightL(l)));
+            assertEquals(Bits.clip(8, l>>>1), Alu.unpackValue(Alu.shiftRightL(l)));
         }
     }
     @Test
