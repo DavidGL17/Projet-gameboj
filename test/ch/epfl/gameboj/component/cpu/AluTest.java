@@ -137,13 +137,11 @@ class AluTest {
 		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int value = Bits.clip(16,randomGenerator.nextInt());  //Bits 8-24
-<<<<<<< HEAD
+
 			boolean z = (value==0) ? true : false ;
 			int input=(value<<8)+(Alu.maskZNHC(z,randomGenerator.nextBoolean(),randomGenerator.nextBoolean(),randomGenerator.nextBoolean()));
-=======
 			int group1 = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
-			int input=(value<<8)+(group1<<4);
->>>>>>> 815cf8b72302aa35d2cfcc46889f45b22fa72430
+
 			
 			assertEquals(value, Alu.unpackValue(input) );
 			
@@ -436,34 +434,82 @@ class AluTest {
 	}
 	
 	@Test
-	void subWorksForSameValues() {
+	void subsWorksForSameValues() {
 		Random randomGenerator = new Random();
 		final int ITERATIONS = 50;
-		final int res=Alu.maskZNHC(true,true,false,false);
+		final int res1=Alu.maskZNHC(true,true,false,false);
+		final int res2=Alu.maskZNHC(false,true,true,true)+(0b1111_1111<<8);
 		for (int i=0 ; i<ITERATIONS ; i++) {
 			int input = randomGenerator.nextInt();
 			input = Bits.clip(8,input);
-			assertEquals(res,Alu.sub(input,input));
+			assertEquals(res1,Alu.sub(input,input));
+			assertEquals(res2,Alu.sub(input,input,true));
 		}
+	}
+	
+	@Test
+	void subWorksOnKnownValuesAndFalse() {
+		final int Z=1<<7;
+		final int N=1<<6;
+		final int C=1<<4;
+		final int H = 1<<5;
+		final int inputs [][]= {
+				{0b1010_0001,0b1010_0001},
+				{0b0010_0010,0b0100_1011},
+				{0b0110_0110,0b0010_0010}
+				
+		};
+		final int expected[]= {
+				Z+N,
+				C+N+H+(0b1101_0111<<8),
+				N+(0b0100_0100<<8)
+				
+		};
+		
+		
+		for (int i=0 ; i<inputs.length ; i++) {
+			System.out.println("inputs " + inputs[i][0] + " - " + inputs[i][1] );
+			System.out.println("expected : " + expected[i] + " output : " + Alu.sub(inputs[i][0],inputs[i][1]));
+			System.out.println();
+			assertEquals(expected[i], Alu.sub(inputs[i][0],inputs[i][1]));
+		}
+		
+		
 	}
 	
 	
 	@Test
 	void subWorksForRandomValues() {
 		Random randomGenerator = new Random();
+		boolean z;
+		boolean c;
+		boolean h;
 		final int ITERATIONS = 50 ; 
 		
 		for (int i=0 ; i<ITERATIONS ; i++) {
 			int l = Bits.clip(8,randomGenerator.nextInt());
 			int r = Bits.clip(8,randomGenerator.nextInt());
 			
-			int res=l-r;
-			if Bits.extract(3,1,res)==Bits.clip(1,Bits.extract(3,1,l)-Bits.extract(3,1,r))){
+			int lowL = Bits.clip(4,l);
+			int lowR = Bits.clip(4,r);
+			
+			int res=Bits.clip(8,l-r);
+			
+			c=(l<r);
+			h=(lowL<lowR);
+			
+			z=(res==0);
+			
+			res=pack(Alu.maskZNHC(z,true,h,c),res);
+			
+			System.out.println("inputs " + l + " - " + r );
+			System.out.println("expected : " + res + " output : " + Alu.sub(l,r));
+			System.out.println();
+			assertEquals(res, Alu.sub(l,r));
+			} 
+			
 				
-			}
-		}
 	}
-	
 	
 	
 
