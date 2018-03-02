@@ -87,7 +87,7 @@ public final class Alu {
      * @return the value
      */
     public static int unpackValue(int valueFlags) {
-        return (valueFlags & 0xffff00) >>> 8;
+        return (checkFlagValueIsWithinRange(valueFlags) & 0xffff00) >>> 8;
     }
 
     /**
@@ -97,7 +97,22 @@ public final class Alu {
      * @return the flags in a 8 bit int
      */
     public static int unpackFlags(int valueFlags) {
-        return (valueFlags & 0xff);
+        return (checkFlagValueIsWithinRange(valueFlags) & 0xff);
+    }
+    
+    /**
+     * Checks if the input composed of a value and the flags is within the possible range
+     * 
+     * @param valueFlags, the value and the flags
+     * @return valueFlags, if it is within the range
+     * @throws IllegalArgumentException if the value is not within range
+     */
+    private static int checkFlagValueIsWithinRange(int valueFlags) {
+        if ((valueFlags&0x0F) != 0 || valueFlags>= 0x1000000) {
+            throw new IllegalArgumentException();
+        } else {
+            return valueFlags;
+        }
     }
     
     /**
@@ -235,6 +250,9 @@ public final class Alu {
 	public static int sub(int l, int r, boolean b0) {
 	    Preconditions.checkBits8(r);
         Preconditions.checkBits8(l);
+        if(l==r && !b0) {
+            return packValueFlags(0, true, true, false, false);
+        }
         int difference = 0;
         boolean carry = b0;
         boolean fanionH = false;
