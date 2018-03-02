@@ -137,13 +137,10 @@ class AluTest {
 		int iterations=50;
 		for ( int i=0; i<iterations ; i++) {
 			int value = Bits.clip(16,randomGenerator.nextInt());  //Bits 8-24
-<<<<<<< HEAD
 			boolean z = (value==0) ? true : false ;
 			int input=(value<<8)+(Alu.maskZNHC(z,randomGenerator.nextBoolean(),randomGenerator.nextBoolean(),randomGenerator.nextBoolean()));
-=======
 			int group1 = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
 			int input=(value<<8)+(group1<<4);
->>>>>>> 815cf8b72302aa35d2cfcc46889f45b22fa72430
 			
 			assertEquals(value, Alu.unpackValue(input) );
 			
@@ -458,7 +455,7 @@ class AluTest {
 			int r = Bits.clip(8,randomGenerator.nextInt());
 			
 			int res=l-r;
-			if Bits.extract(3,1,res)==Bits.clip(1,Bits.extract(3,1,l)-Bits.extract(3,1,r))){
+			if (Bits.extract(3,1,res)==Bits.clip(1,Bits.extract(3,1,l)-Bits.extract(3,1,r))){
 				
 			}
 		}
