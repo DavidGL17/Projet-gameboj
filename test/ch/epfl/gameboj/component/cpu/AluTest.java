@@ -2,19 +2,13 @@
 
 package ch.epfl.gameboj.component.cpu;
 
-import org.junit.jupiter.api.Test;
-
-import com.sun.source.doctree.InlineTagTree;
-
-import static ch.epfl.test.TestRandomizer.RANDOM_ITERATIONS;
-import static ch.epfl.test.TestRandomizer.newRandom;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 
-import ch.epfl.gameboj.component.cpu.Alu;
+import org.junit.jupiter.api.Test;
+
 import ch.epfl.gameboj.bits.Bits;
 
 
@@ -140,7 +134,6 @@ class AluTest {
 
 			boolean z = (value==0) ? true : false ;
 			int input=(value<<8)+(Alu.maskZNHC(z,randomGenerator.nextBoolean(),randomGenerator.nextBoolean(),randomGenerator.nextBoolean()));
-			int group1 = Bits.clip(4,randomGenerator.nextInt()); //Bits 4-7
 
 			
 			assertEquals(value, Alu.unpackValue(input) );
@@ -741,29 +734,6 @@ class AluTest {
 		
 		
 	}
-	
-	
-	private static int packNewValue(int packedValue , int newValue) {
-		return pack(Alu.unpackFlags(packedValue), newValue);
-	}
-	
-	private static int packValue(int value) {
-		return pack(0,value);
-	}
-	
-	private static int pack(boolean z, boolean n, boolean h, boolean c, int value ) {
-		return pack(Alu.maskZNHC(z,n,h,c),value);
-	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
 
 
