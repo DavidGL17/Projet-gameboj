@@ -481,8 +481,8 @@ class AluTest {
 			boolean c1 = (input1<input2);
 			boolean c2 = (input1<(input2+1));
 			
-			int res1=Alu.maskZNHC(z1,true,h1,c1);
-			int res2=Alu.maskZNHC(z2,true,h2,c2);
+			int res1=Alu.maskZNHC(z1,N,h1,c1);
+			int res2=Alu.maskZNHC(z2,N,h2,c2);
 			
 			assertEquals(res1, Alu.sub(input1,input2));
 			assertEquals(res2, Alu.sub(input1,input2));
@@ -561,7 +561,45 @@ class AluTest {
 	
 	@Test
 	void bcdAdjustFailsForInvalidArgument() {
+		final int[] VINPUTS={
+			0x1_20,
+			0xc0_01
+		};
+		Random randomGenerator = new Random();
+			
+		for( int i : VINPUTS) {
+			assertThrows(IllegalArgumentException.class,
+					() -> Alu.bcdAdjust(i,randomGenerator.nextBoolean(),randomGenerator.nextBoolean(),randomGenerator.nextBoolean()));
+		}
+	}
+	
+	@Test
+	void bcdAdjustWorksOnKnownValues() {
+		Random randomGenerator= new Random();
+		final int[] INPUTS = {
+				24,
+				0,
+				125,
+				46
+		};
 		
+		final int[] EXPECTED = {
+				0b0010_0100,
+				0b0000_0000,
+				0b0001_0010_0101,
+				0b0100_0110
+		};
+		
+		for (int i=0 ; i<INPUTS.length ; i++) {
+			boolean z = (INPUTS[i]==0);
+			boolean n = randomGenerator.nextBoolean();
+			boolean h = randomGenerator.nextBoolean();
+			boolean c = randomGenerator.nextBoolean();
+			
+			int expected=pack(z,n,h,c,EXPECTED[i]);
+			
+			assertEquals(EXPECTED[i] , Alu.bcdAdjust(expected, n, h,c));
+		}
 	}
 	
 	
@@ -778,6 +816,11 @@ class AluTest {
 	private static int packValue(int value) {
 		return pack(0,value);
 	}
+	
+	private static int pack(boolean z, boolean n, boolean h, boolean c, int value ) {
+		return pack(Alu.maskZNHC(z,n,h,c),value);
+	}
+
 	
 	
 	
