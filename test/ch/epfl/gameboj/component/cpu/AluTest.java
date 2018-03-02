@@ -247,10 +247,6 @@ class AluTest {
 			
 			res+=h+c+z;
 			
-			System.out.println("Inputs : " + l + " , " + r);
-			System.out.println( "expected value : " + Alu.unpackValue(res) + " output value : " + Alu.unpackValue(Alu.add(l,r,true)));
-			System.out.println( "expected flags : " + Alu.unpackFlags(res) + " output flags : " + Alu.unpackFlags(Alu.add(l,r,true)));
-			System.out.println();
 			
 			assertEquals(res, Alu.add(l,r,true));
 			}	
@@ -287,10 +283,6 @@ class AluTest {
 			
 			res+=h+c+z;
 			
-			System.out.println("Inputs : " + l + " , " + r);
-			System.out.println( "expected value : " + Alu.unpackValue(res) + " output value : " + Alu.unpackValue(Alu.add(l,r,false)));
-			System.out.println( "expected flags : " + Alu.unpackFlags(res) + " output flags : " + Alu.unpackFlags(Alu.add(l,r,false)));
-			System.out.println();
 			
 			assertEquals(res, Alu.add(l,r,false));
 			}	
@@ -710,7 +702,7 @@ class AluTest {
     @Test
     void shiftRightAReturnsGoodValue() {
         Random randomGenerator = new Random();
-        final int ITERATIONS=5;
+        final int ITERATIONS=50;
         for (int i = 0;i<ITERATIONS;++i) {
             int l = randomGenerator.nextInt(0b1000_0000);
             assertEquals((Alu.maskZNHC(Bits.clip(8, l>>1)==0, false, false, Bits.test(l, 0))<<8)|Bits.clip(8, l>>1), Alu.unpackValue(Alu.shiftRightA(l)));
