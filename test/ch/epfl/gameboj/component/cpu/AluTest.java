@@ -492,9 +492,9 @@ class AluTest {
 			
 			res=pack(Alu.maskZNHC(z,true,h,c),res);
 			
-			System.out.println("inputs " + l + " - " + r );
-			System.out.println("expected : " + res + " output : " + Alu.sub(l,r));
-			System.out.println();
+//			System.out.println("inputs " + l + " - " + r );
+//			System.out.println("expected : " + res + " output : " + Alu.sub(l,r));
+//			System.out.println();
 			assertEquals(res, Alu.sub(l,r));
 			} 
 			
