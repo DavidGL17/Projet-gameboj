@@ -25,9 +25,17 @@ public class Cpu implements Component, Clocked {
     private long nextNonIdleCycle;
     private Bus bus;
     private RegisterFile<Reg> Regs = new RegisterFile<>(Reg.values());
-    private RegisterFile<Reg16> Regs16 = new RegisterFile<>(Reg16.values());
-
+    private int PC;
+    private int SP;
+    private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.DIRECT);
     
+    
+    private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
+        Opcode[] table = new Opcode[Opcode.Kind.values()];
+        for (Opcode o : Opcode.values()) {
+            
+        }
+    }
     /* (non-Javadoc)
      * @see ch.epfl.gameboj.component.Component#attachTo(ch.epfl.gameboj.Bus)
      */
@@ -61,7 +69,7 @@ public class Cpu implements Component, Clocked {
     @Override
     public void cycle(long cycle) {
         if(cycle >=nextNonIdleCycle) {
-            dispatch(translateToOpcode(bus.));
+            dispatch(translateToOpcode());
         }
     }
     
