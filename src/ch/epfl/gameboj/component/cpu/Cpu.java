@@ -4,6 +4,7 @@
 package ch.epfl.gameboj.component.cpu;
 
 import ch.epfl.gameboj.Bus;
+import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.component.Clocked;
@@ -35,17 +36,6 @@ public class Cpu implements Component, Clocked {
         this.bus = bus;
         Component.super.attachTo(bus);
     }
-
-    /* (non-Javadoc)
-     * @see ch.epfl.gameboj.component.Clocked#cycle(long)
-     */
-    @Override
-    public void cycle(long cycle) {
-        if(cycle >=nextNonIdleCycle) {
-            
-        }
-    }
-
     /* (non-Javadoc)
      * @see ch.epfl.gameboj.component.Component#read(int)
      */
@@ -53,7 +43,7 @@ public class Cpu implements Component, Clocked {
     public int read(int address) {
         return NO_DATA;
     }
-
+    
     /* (non-Javadoc)
      * @see ch.epfl.gameboj.component.Component#write(int, int)
      */
@@ -63,5 +53,66 @@ public class Cpu implements Component, Clocked {
     
     public int[] _testGetPcSpAFBCDEHL() {
         return null;    
+    }
+
+    /* (non-Javadoc)
+     * @see ch.epfl.gameboj.component.Clocked#cycle(long)
+     */
+    @Override
+    public void cycle(long cycle) {
+        if(cycle >=nextNonIdleCycle) {
+            dispatch(translateToOpcode(bus.));
+        }
+    }
+    
+    private void dispatch(Opcode opcode) {
+        switch(opcode) {
+        case NOP: {
+        } break;
+        case LD_R8_HLR: {
+        } break;
+        case LD_A_HLRU: {
+        } break;
+        case LD_A_N8R: {
+        } break;
+        case LD_A_CR: {
+        } break;
+        case LD_A_N16R: {
+        } break;
+        case LD_A_BCR: {
+        } break;
+        case LD_A_DER: {
+        } break;
+        case LD_R8_N8: {
+        } break;
+        case LD_R16SP_N16: {
+        } break;
+        case POP_R16: {
+        } break;
+        case LD_HLR_R8: {
+        } break;
+        case LD_HLRU_A: {
+        } break;
+        case LD_N8R_A: {
+        } break;
+        case LD_CR_A: {
+        } break;
+        case LD_N16R_A: {
+        } break;
+        case LD_BCR_A: {
+        } break;
+        case LD_DER_A: {
+        } break;
+        case LD_HLR_N8: {
+        } break;
+        case LD_N16R_SP: {
+        } break;
+        case LD_R8_R8: {
+        } break;
+        case LD_SP_HL: {
+        } break;
+        case PUSH_R16: {
+        } break;
+        }
     }
 }
