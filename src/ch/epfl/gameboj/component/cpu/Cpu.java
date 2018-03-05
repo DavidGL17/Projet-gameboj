@@ -9,6 +9,7 @@ import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
+import ch.epfl.gameboj.component.cpu.Opcode.Kind;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -31,10 +32,15 @@ public class Cpu implements Component, Clocked {
     
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[Opcode.Kind.values()];
+        Opcode[] table = new Opcode[256];
+        int i = 0;
         for (Opcode o : Opcode.values()) {
-            
+            if (o.kind == Kind.DIRECT) {
+                table[i] = o;
+                ++i;
+            }
         }
+        return table;
     }
     /* (non-Javadoc)
      * @see ch.epfl.gameboj.component.Component#attachTo(ch.epfl.gameboj.Bus)
@@ -69,8 +75,17 @@ public class Cpu implements Component, Clocked {
     @Override
     public void cycle(long cycle) {
         if(cycle >=nextNonIdleCycle) {
-            dispatch(translateToOpcode());
+            dispatch(getOpcode(PC));
         }
+    }
+    
+    private Opcode getOpcode (int value) {
+        for (int i = 0;i<DIRECT_OPCODE_TABLE.length;++i) {
+            if (value==DIRECT_OPCODE_TABLE[i].encoding) {
+                return DIRECT_OPCODE_TABLE[i];
+            }
+        }
+        return null;
     }
     
     private void dispatch(Opcode opcode) {
