@@ -7,6 +7,7 @@ import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
+import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Opcode.Kind;
@@ -138,4 +139,46 @@ public class Cpu implements Component, Clocked {
         } break;
         }
     }
+    
+    
+    private int read8(int adress) {
+    		Preconditions.checkBits16(adress);
+    		return bus.read(adress);
+    }
+    
+    private int read8AtHl() {
+    		return read8(Reg16(Reg16.HL));
+    }
+    
+    private int read8AfterOpcode() {
+    		return read8(PC+1);
+    }
+    
+    private int read16(int adress) {
+    		return Bits.make16(read8(adress),read8(adress));
+    }
+    
+    private int read16AfterOpcode() {
+    		return read16(PC+1);
+    }
+    
+    private void write8(int adress, int v) {
+    		bus.write(adress,v);
+    }
+    
+    private void write16(int adress, int v) {
+    		write8(adress, Bits.clip(8,v));
+    		write8(adress + 1, Bits.extract(8,8,v));
+    }
+    
+    private void write8AtHl(int v) {
+    		write8(Reg16(Reg16.HL) , v);
+    		
+    }
+    private void push16(int v) {
+    		SP=SP-2;
+    		
+    }
+    
+    
 }
