@@ -372,7 +372,7 @@ public final class Alu {
                 | (!n & ((Bits.clip(4, Preconditions.checkBits8(v))) > 9));
         boolean fixH = c | (!n & (v > 0x99));
         int fix = 0x60 * (fixH ? 1 : 0) + 0x06 * (fixL ? 1 : 0);
-        int Va = n ? v - fix : v + fix;
+        int Va = Bits.clip(8, n ? v - fix : v + fix);
         return packValueFlags(Va, Va == 0, n, false, fixH);
     }
 
