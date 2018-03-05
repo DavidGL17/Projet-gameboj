@@ -143,7 +143,6 @@ public class Cpu implements Component, Clocked {
         }
     }
     
-<<<<<<< HEAD
     
     private int read8(int adress) {
     		Preconditions.checkBits16(adress);
@@ -185,7 +184,6 @@ public class Cpu implements Component, Clocked {
     }
     
     
-=======
     private int reg16(Reg16 r) {
         Preconditions.checkArgument(r!=null);
         switch (r) {
@@ -231,5 +229,49 @@ public class Cpu implements Component, Clocked {
             setReg16(r, newV);
         }
     }
->>>>>>> c78d377161f7261a87dfe0002b31078d9654dbab
+    
+    private int getRegValue(int opcodeValue, int startBit, int length) {
+        int value = 0;
+        for (int i = 0;i<length;++i) {
+            if(Bits.test(opcodeValue, i+startBit)) {
+                value += Bits.mask(length-1-i);
+            }
+        }
+        return value;
+    }
+    
+    private Reg extractReg(Opcode opcode, int startBit) {
+        switch(getRegValue(opcode.encoding, startBit, 3)) {
+        case 0b000 :
+            return Reg.B;
+        case 0b001 :
+            return Reg.C;
+        case 0b010 :
+            return Reg.D;
+        case 0b011 :
+            return Reg.E;
+        case 0b100 :
+            return Reg.H;
+        case 0b101 :
+            return Reg.L;
+        case 0b111 :
+            return Reg.A;
+        default :
+            return null;
+        }
+    }
+    private Reg16 extractReg16(Opcode opcode) {
+        switch (getRegValue(opcode.encoding, 4, 2)) {
+        case 0b00:
+            return Reg16.BC;
+        case 0b01:
+            return Reg16.DE;
+        case 0b10:
+            return Reg16.HL;
+        case 0b11:
+            return Reg16.AF;
+        default :
+            return null;
+        }
+    }
 }
