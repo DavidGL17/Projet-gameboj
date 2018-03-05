@@ -484,15 +484,23 @@ public final class Alu {
         final boolean n = false;
         final boolean h = false;
         boolean c = false;
-
+        
+        
+        
         if (Bits.test(v, 0))
             c = true;
-
-        int result = v >> 1;
-
-        result = Bits.clip(8, result);
-
-        return packValueFlags(result, (result == 0), n, h, c);
+        int result=v;
+        
+        if (Bits.test(v,7)){
+        		result+=Bits.mask(8);
+        }
+        
+        result = result >>> 1;
+        
+        
+        result = Bits.clip(8,result);
+        
+         return packValueFlags(result, (result == 0), n, h, c);
     }
 
     /**
