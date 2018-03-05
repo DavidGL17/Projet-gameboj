@@ -75,7 +75,7 @@ public class Cpu implements Component, Clocked {
     @Override
     public void cycle(long cycle) {
         if(cycle >=nextNonIdleCycle) {
-            dispatch(getOpcode(PC));
+            dispatch(getOpcode(bus.read(PC)));
         }
     }
     
