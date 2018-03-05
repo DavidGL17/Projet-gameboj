@@ -3,6 +3,8 @@
  */
 package ch.epfl.gameboj.component.cpu;
 
+import java.util.Objects;
+
 import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
@@ -18,7 +20,7 @@ import ch.epfl.gameboj.component.cpu.Opcode.Kind;
  */
 public class Cpu implements Component, Clocked {
     private enum Reg implements Register{
-        A,F,C,D,E,H,L
+        A,F,B,C,D,E,H,L
     }
     private enum Reg16 implements Register{
         AF,BC,DE,HL
@@ -115,6 +117,7 @@ public class Cpu implements Component, Clocked {
         } break;
         case LD_HLR_R8: {
         } break;
+        
         case LD_HLRU_A: {
         } break;
         case LD_N8R_A: {
@@ -140,6 +143,7 @@ public class Cpu implements Component, Clocked {
         }
     }
     
+<<<<<<< HEAD
     
     private int read8(int adress) {
     		Preconditions.checkBits16(adress);
@@ -181,4 +185,51 @@ public class Cpu implements Component, Clocked {
     }
     
     
+=======
+    private int reg16(Reg16 r) {
+        Preconditions.checkArgument(r!=null);
+        switch (r) {
+        case AF :
+            return (Regs.get(Reg.A)<<8)+(Regs.get(Reg.F));
+        case BC :
+            return (Regs.get(Reg.B)<<8)+(Regs.get(Reg.C));
+        case DE :
+            return (Regs.get(Reg.D)<<8)+(Regs.get(Reg.E));
+        case HL :
+            return (Regs.get(Reg.H)<<8)+(Regs.get(Reg.L));
+        default :
+            return 0;
+        }
+    }
+    private void setReg16(Reg16 r, int newV) {
+        Preconditions.checkArgument(r!=null);
+        Preconditions.checkBits16(newV);
+        switch (r) {
+        case AF :
+            Regs.set(Reg.A, newV>>>8);
+            Regs.set(Reg.C, Bits.clip(8, newV)&0xF0);
+            break;
+        case BC :
+            Regs.set(Reg.B, newV>>>8);
+            Regs.set(Reg.C, Bits.clip(8, newV));
+            break;
+        case DE :
+            Regs.set(Reg.D, newV>>>8);
+            Regs.set(Reg.E, Bits.clip(8, newV));
+            break;
+        case HL :
+            Regs.set(Reg.H, newV>>>8);
+            Regs.set(Reg.L, Bits.clip(8, newV));
+            break;
+        }
+    }
+    private void setReg16SP(Reg16 r, int newV) {
+        switch (r) {
+        case AF :
+            SP = Preconditions.checkBits16(newV);
+        default :
+            setReg16(r, newV);
+        }
+    }
+>>>>>>> c78d377161f7261a87dfe0002b31078d9654dbab
 }
