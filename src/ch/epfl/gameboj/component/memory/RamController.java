@@ -36,7 +36,7 @@ public final class RamController implements Component {
         if (ram == null) {
             throw new NullPointerException();
         }
-        Preconditions.checkArgument(endAddress - startAddress == ram.size());
+        Preconditions.checkArgument(endAddress - startAddress <= ram.size());
         this.startAddress = Preconditions.checkBits16(startAddress);
         this.endAddress = Preconditions.checkBits16(endAddress);
         this.ram = ram;

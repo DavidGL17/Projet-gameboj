@@ -18,8 +18,9 @@ public class GameBoy {
     private RamController echoRam;
     
     public GameBoy(Object cartridge) {
-        workRam = new RamController(new Ram(AddressMap.WORK_RAM_SIZE), AddressMap.WORK_RAM_START);
-        echoRam = new RamController(new Ram(AddressMap.ECHO_RAM_SIZE), AddressMap.ECHO_RAM_START);
+        Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
+        workRam = new RamController(ram, AddressMap.WORK_RAM_START);
+        echoRam = new RamController(ram, AddressMap.ECHO_RAM_START, AddressMap.ECHO_RAM_END);
         workRam.attachTo(bus);
         echoRam.attachTo(bus);
     }
