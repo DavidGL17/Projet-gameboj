@@ -143,7 +143,7 @@ public class Cpu implements Component, Clocked {
         }
     }
     
-<<<<<<< HEAD
+
     
     private int read8(int adress) {
     		Preconditions.checkBits16(adress);
@@ -185,7 +185,6 @@ public class Cpu implements Component, Clocked {
     }
     
     
-=======
     private int reg16(Reg16 r) {
         Preconditions.checkArgument(r!=null);
         switch (r) {
@@ -231,5 +230,5 @@ public class Cpu implements Component, Clocked {
             setReg16(r, newV);
         }
     }
->>>>>>> c78d377161f7261a87dfe0002b31078d9654dbab
+
 }
