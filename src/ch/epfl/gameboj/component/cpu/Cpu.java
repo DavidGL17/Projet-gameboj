@@ -143,6 +143,10 @@ public class Cpu implements Component, Clocked {
         }
     }
     
+<<<<<<< HEAD
+=======
+
+>>>>>>> 81ddab644ac8edc907892650fb21211876b5fb57
     
     private int read8(int adress) {
     		Preconditions.checkBits16(adress);
@@ -229,6 +233,7 @@ public class Cpu implements Component, Clocked {
             setReg16(r, newV);
         }
     }
+<<<<<<< HEAD
     
     private int getRegValue(int opcodeValue, int startBit, int length) {
         int value = 0;
@@ -274,4 +279,7 @@ public class Cpu implements Component, Clocked {
             return null;
         }
     }
+=======
+
+>>>>>>> 81ddab644ac8edc907892650fb21211876b5fb57
 }
