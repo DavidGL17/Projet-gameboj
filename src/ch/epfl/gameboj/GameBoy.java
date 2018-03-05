@@ -13,14 +13,13 @@ import ch.epfl.gameboj.component.memory.RamController;
  * 
  */
 public class GameBoy {
-    private Bus bus;
+    private Bus bus = new Bus();
     private RamController workRam;
     private RamController echoRam;
     
     public GameBoy(Object cartridge) {
-        Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
-        workRam = new RamController(ram, AddressMap.WORK_RAM_START, AddressMap.WORK_RAM_END);
-        echoRam = new RamController(ram, AddressMap.ECHO_RAM_START, AddressMap.ECHO_RAM_END);
+        workRam = new RamController(new Ram(AddressMap.WORK_RAM_SIZE), AddressMap.WORK_RAM_START);
+        echoRam = new RamController(new Ram(AddressMap.ECHO_RAM_SIZE), AddressMap.ECHO_RAM_START);
         workRam.attachTo(bus);
         echoRam.attachTo(bus);
     }
