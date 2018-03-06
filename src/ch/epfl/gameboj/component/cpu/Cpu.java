@@ -29,18 +29,16 @@ public class Cpu implements Component, Clocked {
     private long nextNonIdleCycle;
     private Bus bus;
     private RegisterFile<Reg> Regs = new RegisterFile<>(Reg.values());
-    private int PC;
+    private int registerPC;
     private int SP;
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.DIRECT);
     
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[256];
-        int i = 0;
+        Opcode[] table = new Opcode[0XFF];
         for (Opcode o : Opcode.values()) {
             if (o.kind == Kind.DIRECT) {
-                table[i] = o;
-                ++i;
+                table[o.encoding] = o;
             }
         }
         return table;
@@ -78,28 +76,45 @@ public class Cpu implements Component, Clocked {
     @Override
     public void cycle(long cycle) {
         if(cycle >=nextNonIdleCycle) {
-            dispatch(getOpcode(bus.read(PC)));
+            dispatch(DIRECT_OPCODE_TABLE[bus.read(registerPC)]);
         }
-    }
-    
-    private Opcode getOpcode (int value) {
-        for (int i = 0;i<DIRECT_OPCODE_TABLE.length;++i) {
-            if (value==DIRECT_OPCODE_TABLE[i].encoding) {
-                return DIRECT_OPCODE_TABLE[i];
-            }
-        }
-        return null;
     }
     
     private void dispatch(Opcode opcode) {
         switch(opcode) {
         case NOP: {
         } break;
-        case LD_R8_HLR: {
+        case LD_A_HLR: {
+            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
         } break;
-        case LD_A_HLRU: {
+        case LD_B_HLR: {
+            Regs.set(Reg.B, bus.read(reg16(Reg16.HL)));
+        } break;
+        case LD_C_HLR: {
+            Regs.set(Reg.C, bus.read(reg16(Reg16.HL)));
+        } break;
+        case LD_D_HLR: {
+            Regs.set(Reg.D, bus.read(reg16(Reg16.HL)));
+        } break;
+        case LD_E_HLR: {
+            Regs.set(Reg.E, bus.read(reg16(Reg16.HL)));
+        } break;
+        case LD_H_HLR: {
+            Regs.set(Reg.H, bus.read(reg16(Reg16.HL)));
+        } break;
+        case LD_L_HLR: {
+            Regs.set(Reg.L, bus.read(reg16(Reg16.HL)));
+        } break;
+        case LD_A_HLRI: {
+            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
+            setReg16(Reg16.HL, reg16(Reg16.HL)+1);
+        } break;
+        case LD_A_HLRD: {
+            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
+            setReg16(Reg16.HL, reg16(Reg16.HL)-1);
         } break;
         case LD_A_N8R: {
+            Regs.set(Reg.A, bus.read(0xFF00+));
         } break;
         case LD_A_CR: {
         } break;
@@ -154,7 +169,7 @@ public class Cpu implements Component, Clocked {
     }
     
     private int read8AfterOpcode() {
-    		return read8(PC+1);
+    		return read8(registerPC+1);
     }
     
     private int read16(int adress) {
@@ -162,7 +177,7 @@ public class Cpu implements Component, Clocked {
     }
     
     private int read16AfterOpcode() {
-    		return read16(PC+1);
+    		return read16(registerPC+1);
     }
     
     private void write8(int adress, int v) {
