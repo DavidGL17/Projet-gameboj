@@ -81,40 +81,14 @@ public class Cpu implements Component, Clocked {
     }
     
     private void dispatch(Opcode opcode) {
-        switch(opcode) {
+        switch(opcode.family) {
         case NOP: {
         } break;
-        case LD_A_HLR: {
-            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
+        case LD_R8_HLR: {
         } break;
-        case LD_B_HLR: {
-            Regs.set(Reg.B, bus.read(reg16(Reg16.HL)));
-        } break;
-        case LD_C_HLR: {
-            Regs.set(Reg.C, bus.read(reg16(Reg16.HL)));
-        } break;
-        case LD_D_HLR: {
-            Regs.set(Reg.D, bus.read(reg16(Reg16.HL)));
-        } break;
-        case LD_E_HLR: {
-            Regs.set(Reg.E, bus.read(reg16(Reg16.HL)));
-        } break;
-        case LD_H_HLR: {
-            Regs.set(Reg.H, bus.read(reg16(Reg16.HL)));
-        } break;
-        case LD_L_HLR: {
-            Regs.set(Reg.L, bus.read(reg16(Reg16.HL)));
-        } break;
-        case LD_A_HLRI: {
-            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
-            setReg16(Reg16.HL, reg16(Reg16.HL)+1);
-        } break;
-        case LD_A_HLRD: {
-            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
-            setReg16(Reg16.HL, reg16(Reg16.HL)-1);
+        case LD_A_HLRU: {
         } break;
         case LD_A_N8R: {
-            Regs.set(Reg.A, bus.read(0xFF00+));
         } break;
         case LD_A_CR: {
         } break;
@@ -132,7 +106,6 @@ public class Cpu implements Component, Clocked {
         } break;
         case LD_HLR_R8: {
         } break;
-        
         case LD_HLRU_A: {
         } break;
         case LD_N8R_A: {
@@ -154,8 +127,8 @@ public class Cpu implements Component, Clocked {
         case LD_SP_HL: {
         } break;
         case PUSH_R16: {
-        	
         } break;
+        
         }
     }
     
