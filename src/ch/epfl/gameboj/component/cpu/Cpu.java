@@ -143,11 +143,7 @@ public class Cpu implements Component, Clocked {
         }
     }
     
-<<<<<<< HEAD
-=======
-
->>>>>>> 81ddab644ac8edc907892650fb21211876b5fb57
-    
+     
     private int read8(int adress) {
     		Preconditions.checkBits16(adress);
     		return bus.read(adress);
@@ -233,13 +229,12 @@ public class Cpu implements Component, Clocked {
             setReg16(r, newV);
         }
     }
-<<<<<<< HEAD
     
     private int getRegValue(int opcodeValue, int startBit, int length) {
         int value = 0;
         for (int i = 0;i<length;++i) {
             if(Bits.test(opcodeValue, i+startBit)) {
-                value += Bits.mask(length-1-i);
+                value += Bits.mask(i);
             }
         }
         return value;
@@ -279,7 +274,7 @@ public class Cpu implements Component, Clocked {
             return null;
         }
     }
-=======
-
->>>>>>> 81ddab644ac8edc907892650fb21211876b5fb57
+    private int extractHlIncrement(Opcode opcode) {
+        return (Bits.test(opcode.encoding, 4)?-1:+1);
+    }
 }
