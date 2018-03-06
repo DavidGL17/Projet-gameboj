@@ -154,6 +154,7 @@ public class Cpu implements Component, Clocked {
         case LD_SP_HL: {
         } break;
         case PUSH_R16: {
+        	
         } break;
         }
     }
@@ -165,7 +166,7 @@ public class Cpu implements Component, Clocked {
     }
     
     private int read8AtHl() {
-    		return read8(Reg16(Reg16.HL));
+    		return read8(reg16(Reg16.HL));
     }
     
     private int read8AfterOpcode() {
@@ -173,7 +174,8 @@ public class Cpu implements Component, Clocked {
     }
     
     private int read16(int adress) {
-    		return Bits.make16(read8(adress),read8(adress));
+		Preconditions.checkBits16(adress);
+    		return Bits.make16(read8(adress+1),read8(adress));
     }
     
     private int read16AfterOpcode() {
@@ -181,21 +183,32 @@ public class Cpu implements Component, Clocked {
     }
     
     private void write8(int adress, int v) {
+		Preconditions.checkBits16(adress);
+		Preconditions.checkBits8(v);
     		bus.write(adress,v);
     }
     
     private void write16(int adress, int v) {
-    		write8(adress, Bits.clip(8,v));
-    		write8(adress + 1, Bits.extract(8,8,v));
+		Preconditions.checkBits16(adress);
+		Preconditions.checkBits8(v);
+    		write8(adress + 1, Bits.clip(8,v));
+    		write8(adress, Bits.extract(8,8,v));
     }
     
     private void write8AtHl(int v) {
-    		write8(Reg16(Reg16.HL) , v);
+		Preconditions.checkBits8(v);
+    		write8(reg16(Reg16.HL) , v);
     		
     }
     private void push16(int v) {
+		Preconditions.checkBits8(v);
     		SP=SP-2;
-    		
+    		write16(SP,v);
+    }
+    
+    private int pop16() {
+    		SP = SP + 2;
+    		return read16(SP-2);
     }
     
     
