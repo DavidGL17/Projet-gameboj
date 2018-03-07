@@ -80,7 +80,6 @@ public class Cpu implements Component, Clocked {
         }
     }
     
-<<<<<<< HEAD
     private void setNextNonIdleCycle(long cycle, int cycles) {
         setNextNonIdleCycle(cycle, cycles, 0);
     }
@@ -89,81 +88,57 @@ public class Cpu implements Component, Clocked {
     }
     
     private void dispatch(Opcode opcode, long cycle) {
-        switch(opcode) {
-        case NOP: {
-        } break;
-        case LD_A_HLR: {
-            Regs.set(Reg.A, read8AtHl());
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_B_HLR: {
-            Regs.set(Reg.B, read8AtHl());
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_C_HLR: {
-            Regs.set(Reg.C, read8AtHl());
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_D_HLR: {
-            Regs.set(Reg.D, read8AtHl());
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_E_HLR: {
-            Regs.set(Reg.E, read8AtHl());
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_H_HLR: {
-            Regs.set(Reg.H, read8AtHl());
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_L_HLR: {
-            Regs.set(Reg.L,read8AtHl());
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_A_HLRI: {
-            Regs.set(Reg.A, read8AtHl());
-            setReg16(Reg16.HL, reg16(Reg16.HL)+1);
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_A_HLRD: {
-            Regs.set(Reg.A, read8AtHl());
-            setReg16(Reg16.HL, reg16(Reg16.HL)-1);
-            setNextNonIdleCycle(cycle, opcode.cycles);
-        } break;
-        case LD_A_N8R: {
-            Regs.set(Reg.A, read8(0xFF00+read8AfterOpcode()));
-            setNextNonIdleCycle(cycle, opcode.cycles);
-=======
-    private void dispatch(Opcode opcode) {
+        
         switch(opcode.family) {
         case NOP: {
         } break;
         case LD_R8_HLR: {
+            Regs.set(extractReg(opcode, 3), read8AtHl());
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_HLRU: {
+          Regs.set(Reg.A, read8AtHl());
+          setReg16(Reg16.HL, reg16(Reg16.HL)+extractHlIncrement(opcode));
+          setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_N8R: {
->>>>>>> 786175004697769b5914759c4b3189a03801f47e
+            Regs.set(Reg.A, read8(0xFF00+read8AfterOpcode()));
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_CR: {
             Regs.set(Reg.A, read8(0xFF00+Regs.get(Reg.C)));
-            setNextNonIdleCycle(cycle, opcode.cycles);
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_N16R: {
             Regs.set(Reg.A, read16AfterOpcode());
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_BCR: {
+            Regs.set(Reg.A, read8(reg16(Reg16.BC)));
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_DER: {
+            Regs.set(Reg.A, read8(reg16(Reg16.DE)));
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_R8_N8: {
+            Regs.set(extractReg(opcode, 3), read8AfterOpcode());
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_R16SP_N16: {
+            setReg16(extractReg16(opcode), read16AfterOpcode());
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case POP_R16: {
+            setReg16(extractReg16(opcode), pop16());
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_HLR_R8: {
+            write8AtHl(Regs.get(extractReg(opcode, 0)));
+            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
+        
+        
         case LD_HLRU_A: {
         } break;
         case LD_N8R_A: {
@@ -311,6 +286,13 @@ public class Cpu implements Component, Clocked {
     }
     
     
+    /**
+     * Returns the value contained in the given register
+     * 
+     * @param r, the 16 bit register
+     * @return the value contained in the 16 bit register
+     * @throws IllegalArgumentException if the register is null
+     */
     private int reg16(Reg16 r) {
         Preconditions.checkArgument(r!=null);
         switch (r) {
@@ -326,6 +308,15 @@ public class Cpu implements Component, Clocked {
             return 0;
         }
     }
+    
+    
+    /**
+     * Sets the value of the given 16 bit register to the given value
+     * 
+     * @param r, the 16 bit register
+     * @param newV, the new value
+     * @throws IllegalArgumentException, if the value is not a 16 bit number or if the register is null
+     */
     private void setReg16(Reg16 r, int newV) {
         Preconditions.checkArgument(r!=null);
         Preconditions.checkBits16(newV);
@@ -348,15 +339,31 @@ public class Cpu implements Component, Clocked {
             break;
         }
     }
+    /**
+     * Sets the value of the given 16 bit register to the given value. if the given register is AF, sets the value of SP instead
+     * 
+     * @param r, the 16 bit register
+     * @param newV, the new value
+     * @throws IllegalArgumentException, if the value is not a 16 bit number or if the register is null
+     */
     private void setReg16SP(Reg16 r, int newV) {
         switch (r) {
         case AF :
             SP = Preconditions.checkBits16(newV);
+            break;
         default :
             setReg16(r, newV);
         }
     }
     
+    /**
+     * Returns the length bit bits that identifies a register in the opcode value
+     * 
+     * @param opcodeValue, the value of the opcode
+     * @param startBit, the bite where we start looking for the bits
+     * @param length, the number of bits that identifies the register
+     * @return The bits identifying the register
+     */
     private int getRegValue(int opcodeValue, int startBit, int length) {
         int value = 0;
         for (int i = 0;i<length;++i) {
@@ -367,6 +374,13 @@ public class Cpu implements Component, Clocked {
         return value;
     }
     
+    /**
+     * Extracts and returns the identitie of an 8 bit register in the encodig of the given opcode at the given starting bit
+     * 
+     * @param opcode, the opocode's enconding we have to extract the value of
+     * @param startBit, the bit we have to start extracting the value
+     * @return the register that was encoded in the opcode's encoding
+     */
     private Reg extractReg(Opcode opcode, int startBit) {
         switch(getRegValue(opcode.encoding, startBit, 3)) {
         case 0b000 :
@@ -387,6 +401,12 @@ public class Cpu implements Component, Clocked {
             return null;
         }
     }
+    /**
+     * Extracts and returns the identitie of an 16 bit register in the encoding of the given opcode at the fourth bit
+     * 
+     * @param opcode, the opocode's enconding we have to extract the value of
+     * @return the register that was encoded in the opcode's encoding
+     */
     private Reg16 extractReg16(Opcode opcode) {
         switch (getRegValue(opcode.encoding, 4, 2)) {
         case 0b00:
@@ -401,6 +421,12 @@ public class Cpu implements Component, Clocked {
             return null;
         }
     }
+    /**
+     * Returns +1 or -1 depending on the fourth bit of the given opcode's encoding
+     * 
+     * @param opcode, the opcode we have to analyse
+     * @return +1 if the fourth bit is 0, -1 if the fourth bit is 1
+     */
     private int extractHlIncrement(Opcode opcode) {
         return (Bits.test(opcode.encoding, 4)?-1:+1);
     }
