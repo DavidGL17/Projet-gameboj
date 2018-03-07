@@ -95,56 +95,53 @@ public class Cpu implements Component, Clocked {
         } break;
         case LD_R8_HLR: {
             Regs.set(extractReg(opcode, 3), read8AtHl());
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_HLRU: {
           Regs.set(Reg.A, read8AtHl());
           setReg16(Reg16.HL, Bits.clip(16, reg16(Reg16.HL)+extractHlIncrement(opcode)));
-          setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_N8R: {
             Regs.set(Reg.A, read8(AddressMap.REGS_START+read8AfterOpcode()));
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_CR: {
             Regs.set(Reg.A, read8(AddressMap.REGS_START+Regs.get(Reg.C)));
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_N16R: {
             Regs.set(Reg.A, read16AfterOpcode());
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_BCR: {
             Regs.set(Reg.A, read8(reg16(Reg16.BC)));
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_DER: {
             Regs.set(Reg.A, read8(reg16(Reg16.DE)));
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_R8_N8: {
             Regs.set(extractReg(opcode, 3), read8AfterOpcode());
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_R16SP_N16: {
             setReg16SP(extractReg16(opcode), read16AfterOpcode());
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case POP_R16: {
             setReg16(extractReg16(opcode), pop16());
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_HLR_R8: {
             write8AtHl(Regs.get(extractReg(opcode, 0)));
-            setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
-        
-        
         case LD_HLRU_A: {
+        		int value = Regs.get(Reg.A);
+        		write8AtHl(value);
+        		setReg16(Reg16.HL, (reg16(Reg16.HL)+extractHlIncrement(opcode)) );
+        		
         } break;
         case LD_N8R_A: {
+        		int destination = 0xFF + read8AfterOpcode();
+        		int value = Regs.get(Reg.A);
+        		write8(destination,value);
         } break;
         case LD_CR_A: {
+        		int destination = 0xFF00 + Regs.get(Reg.C);
+        		int value = Regs.get(Reg.A);
+        		write8(destination,value);
         } break;
         case LD_N16R_A: {
         		int destination = read16AfterOpcode();
@@ -187,7 +184,9 @@ public class Cpu implements Component, Clocked {
         	System.out.println("Not yet treated");
         	throw new IllegalArgumentException();
         }
+        
         }
+        setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
     }
     
     /**
