@@ -80,6 +80,7 @@ public class Cpu implements Component, Clocked {
         }
     }
     
+<<<<<<< HEAD
     private void setNextNonIdleCycle(long cycle, int cycles) {
         setNextNonIdleCycle(cycle, cycles, 0);
     }
@@ -132,6 +133,17 @@ public class Cpu implements Component, Clocked {
         case LD_A_N8R: {
             Regs.set(Reg.A, read8(0xFF00+read8AfterOpcode()));
             setNextNonIdleCycle(cycle, opcode.cycles);
+=======
+    private void dispatch(Opcode opcode) {
+        switch(opcode.family) {
+        case NOP: {
+        } break;
+        case LD_R8_HLR: {
+        } break;
+        case LD_A_HLRU: {
+        } break;
+        case LD_A_N8R: {
+>>>>>>> 786175004697769b5914759c4b3189a03801f47e
         } break;
         case LD_A_CR: {
             Regs.set(Reg.A, read8(0xFF00+Regs.get(Reg.C)));
@@ -152,7 +164,6 @@ public class Cpu implements Component, Clocked {
         } break;
         case LD_HLR_R8: {
         } break;
-        
         case LD_HLRU_A: {
         } break;
         case LD_N8R_A: {
@@ -160,62 +171,143 @@ public class Cpu implements Component, Clocked {
         case LD_CR_A: {
         } break;
         case LD_N16R_A: {
+        		int destination = read16AfterOpcode();
+        		int value = Regs.get(Reg.A);
+        		write8(destination,value);
         } break;
         case LD_BCR_A: {
+        		int destination = reg16(Reg16.BC);
+        		int value = Regs.get(Reg.A);
+        		write8(destination,value);
         } break;
         case LD_DER_A: {
+        		int destination = reg16(Reg16.DE);
+        		int value = Regs.get(Reg.A);
+        		write8(destination,value);
         } break;
         case LD_HLR_N8: {
+        		int destination = reg16(Reg16.HL);
+        		int value = read8AfterOpcode();
+        		write8(destination,value);
         } break;
         case LD_N16R_SP: {
+        		int argument = read16AfterOpcode();
+        		write16(argument,SP);
         } break;
         case LD_R8_R8: {
+        		Reg destination = extractReg(opcode,2);
+        		Reg store = extractReg(opcode,5);
+        		int value=Regs.get(store);
+        		Regs.set(destination,value);
         } break;
         case LD_SP_HL: {
+        		SP=reg16(Reg16.HL);
         } break;
         case PUSH_R16: {
+        		Reg16 reg = extractReg16(opcode);
+        		push16(reg16(reg));
         } break;
+        default : {
+        	System.out.println("Not yet treated");
+        	throw new IllegalArgumentException();
+        }
         }
     }
     
-     
+    /**
+     * Reads the byte at the given adress on the bus
+     * @param adress a 16 bits integer
+     * @return the stored 8-bits value
+     */
     private int read8(int adress) {
     		Preconditions.checkBits16(adress);
     		return bus.read(adress);
     }
     
+    /**
+     * Reads the byte at the adress stored in HL on the bus
+     * @return the stored 8-bits value
+     */
     private int read8AtHl() {
-    		return read8(Reg16(Reg16.HL));
+    		return read8(reg16(Reg16.HL));
     }
     
+    /**
+     * Reads the byte following the Opcode
+     * @return the store 8-bits value
+     */
     private int read8AfterOpcode() {
     		return read8(registerPC+1);
     }
     
+    /**
+     * Reads the 16 bits value stored at an adress
+     * @param adress a 16-bits integer
+     * @return the 16-bits value represented
+     */
     private int read16(int adress) {
-    		return Bits.make16(read8(adress),read8(adress));
+		Preconditions.checkBits16(adress);
+    		return Bits.make16(read8(adress+1),read8(adress));
     }
     
+    /**
+     * Reads the 16 bits-value stored after the Opcode
+     * @return the 16-bits value represented
+     */
     private int read16AfterOpcode() {
     		return read16(registerPC+1);
     }
     
+    /**
+     * Writes a 8-bit value at the desired adress
+     * @param adress a 16-bits value
+     * @param v the 8-bits value to represent
+     */
     private void write8(int adress, int v) {
+		Preconditions.checkBits16(adress);
+		Preconditions.checkBits8(v);
     		bus.write(adress,v);
     }
     
+    /**
+     * Writes a 16-bits value at the desired adress
+     * @param adress a 16-bits value
+     * @param v the 16-bits value to represent
+     */
     private void write16(int adress, int v) {
-    		write8(adress, Bits.clip(8,v));
-    		write8(adress + 1, Bits.extract(8,8,v));
+		Preconditions.checkBits16(adress);
+		Preconditions.checkBits16(v);
+    		write8(adress + 1, Bits.clip(8,v));
+    		write8(adress, Bits.extract(8,8,v));
     }
     
+    /**
+     * Writes a 8-bits value at the adress stored in HL
+     * @param v the 8-bits value to represent 
+     */
     private void write8AtHl(int v) {
-    		write8(Reg16(Reg16.HL) , v);
+		Preconditions.checkBits8(v);
+    		write8(reg16(Reg16.HL),v);
     		
     }
+    
+    /**
+     * Decreases SP by 2 and writes v at the adress SP
+     * @param v the 16-bits value to represent
+     */
     private void push16(int v) {
+		Preconditions.checkBits16(v);
     		SP=SP-2;
-    		
+    		write16(SP,v);
+    }
+    
+    /**
+     * Reads what's stored at the adress SP and increases SP by 2
+     * @return the 16-bits value represented
+     */
+    private int pop16() {
+    		SP = SP + 2;
+    		return read16(SP-2);
     }
     
     
