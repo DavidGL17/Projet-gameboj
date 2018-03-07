@@ -5,6 +5,7 @@ package ch.epfl.gameboj.component.cpu;
 
 import java.util.Objects;
 
+import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
@@ -98,15 +99,15 @@ public class Cpu implements Component, Clocked {
         } break;
         case LD_A_HLRU: {
           Regs.set(Reg.A, read8AtHl());
-          setReg16(Reg16.HL, reg16(Reg16.HL)+extractHlIncrement(opcode));
+          setReg16(Reg16.HL, Bits.clip(16, reg16(Reg16.HL)+extractHlIncrement(opcode)));
           setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_N8R: {
-            Regs.set(Reg.A, read8(0xFF00+read8AfterOpcode()));
+            Regs.set(Reg.A, read8(AddressMap.REGS_START+read8AfterOpcode()));
             setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_CR: {
-            Regs.set(Reg.A, read8(0xFF00+Regs.get(Reg.C)));
+            Regs.set(Reg.A, read8(AddressMap.REGS_START+Regs.get(Reg.C)));
             setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_A_N16R: {
@@ -126,7 +127,7 @@ public class Cpu implements Component, Clocked {
             setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case LD_R16SP_N16: {
-            setReg16(extractReg16(opcode), read16AfterOpcode());
+            setReg16SP(extractReg16(opcode), read16AfterOpcode());
             setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         } break;
         case POP_R16: {
@@ -347,6 +348,8 @@ public class Cpu implements Component, Clocked {
      * @throws IllegalArgumentException, if the value is not a 16 bit number or if the register is null
      */
     private void setReg16SP(Reg16 r, int newV) {
+        Preconditions.checkArgument(r!=null);
+        Preconditions.checkBits16(newV);
         switch (r) {
         case AF :
             SP = Preconditions.checkBits16(newV);
@@ -365,6 +368,7 @@ public class Cpu implements Component, Clocked {
      * @return The bits identifying the register
      */
     private int getRegValue(int opcodeValue, int startBit, int length) {
+        Preconditions.checkBits8(opcodeValue);
         int value = 0;
         for (int i = 0;i<length;++i) {
             if(Bits.test(opcodeValue, i+startBit)) {
@@ -382,6 +386,7 @@ public class Cpu implements Component, Clocked {
      * @return the register that was encoded in the opcode's encoding
      */
     private Reg extractReg(Opcode opcode, int startBit) {
+        Preconditions.checkArgument(opcode!=null);
         switch(getRegValue(opcode.encoding, startBit, 3)) {
         case 0b000 :
             return Reg.B;
@@ -408,6 +413,7 @@ public class Cpu implements Component, Clocked {
      * @return the register that was encoded in the opcode's encoding
      */
     private Reg16 extractReg16(Opcode opcode) {
+        Preconditions.checkArgument(opcode!=null);;
         switch (getRegValue(opcode.encoding, 4, 2)) {
         case 0b00:
             return Reg16.BC;
@@ -428,6 +434,7 @@ public class Cpu implements Component, Clocked {
      * @return +1 if the fourth bit is 0, -1 if the fourth bit is 1
      */
     private int extractHlIncrement(Opcode opcode) {
+        Preconditions.checkArgument(opcode!=null);
         return (Bits.test(opcode.encoding, 4)?-1:+1);
     }
 }
