@@ -76,49 +76,69 @@ public class Cpu implements Component, Clocked {
     @Override
     public void cycle(long cycle) {
         if(cycle >=nextNonIdleCycle) {
-            dispatch(DIRECT_OPCODE_TABLE[bus.read(registerPC)]);
+            dispatch(DIRECT_OPCODE_TABLE[bus.read(registerPC)],cycle);
         }
     }
     
-    private void dispatch(Opcode opcode) {
+    private void setNextNonIdleCycle(long cycle, int cycles) {
+        setNextNonIdleCycle(cycle, cycles, 0);
+    }
+    private void setNextNonIdleCycle(long cycle, int cycles, int additionalCycles) {
+        nextNonIdleCycle = cycle+cycles+additionalCycles-1;
+    }
+    
+    private void dispatch(Opcode opcode, long cycle) {
         switch(opcode) {
         case NOP: {
         } break;
         case LD_A_HLR: {
-            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.A, read8AtHl());
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_B_HLR: {
-            Regs.set(Reg.B, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.B, read8AtHl());
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_C_HLR: {
-            Regs.set(Reg.C, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.C, read8AtHl());
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_D_HLR: {
-            Regs.set(Reg.D, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.D, read8AtHl());
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_E_HLR: {
-            Regs.set(Reg.E, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.E, read8AtHl());
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_H_HLR: {
-            Regs.set(Reg.H, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.H, read8AtHl());
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_L_HLR: {
-            Regs.set(Reg.L, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.L,read8AtHl());
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_A_HLRI: {
-            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.A, read8AtHl());
             setReg16(Reg16.HL, reg16(Reg16.HL)+1);
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_A_HLRD: {
-            Regs.set(Reg.A, bus.read(reg16(Reg16.HL)));
+            Regs.set(Reg.A, read8AtHl());
             setReg16(Reg16.HL, reg16(Reg16.HL)-1);
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_A_N8R: {
-            Regs.set(Reg.A, bus.read(0xFF00+));
+            Regs.set(Reg.A, read8(0xFF00+read8AfterOpcode()));
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_A_CR: {
+            Regs.set(Reg.A, read8(0xFF00+Regs.get(Reg.C)));
+            setNextNonIdleCycle(cycle, opcode.cycles);
         } break;
         case LD_A_N16R: {
+            Regs.set(Reg.A, read16AfterOpcode());
         } break;
         case LD_A_BCR: {
         } break;
