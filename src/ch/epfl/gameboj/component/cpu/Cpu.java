@@ -128,20 +128,14 @@ public class Cpu implements Component, Clocked {
             write8AtHl(Regs.get(extractReg(opcode, 0)));
         } break;
         case LD_HLRU_A: {
-        		int value = Regs.get(Reg.A);
-        		write8AtHl(value);
-        		setReg16(Reg16.HL, (reg16(Reg16.HL)+extractHlIncrement(opcode)) );
-        		
+            write8AtHl(Regs.get(Reg.A));
+            setReg16(Reg16.HL, (reg16(Reg16.HL) + extractHlIncrement(opcode)));
         } break;
         case LD_N8R_A: {
-        		int destination = 0xFF + read8AfterOpcode();
-        		int value = Regs.get(Reg.A);
-        		write8(destination,value);
+        	write8(0xFF00 + read8AfterOpcode(),Regs.get(Reg.A));
         } break;
         case LD_CR_A: {
-        		int destination = 0xFF00 + Regs.get(Reg.C);
-        		int value = Regs.get(Reg.A);
-        		write8(destination,value);
+        	write8(0xFF00 + Regs.get(Reg.C),Regs.get(Reg.A));
         } break;
         case LD_N16R_A: {
         		int destination = read16AfterOpcode();
@@ -195,8 +189,7 @@ public class Cpu implements Component, Clocked {
      * @return the stored 8-bits value
      */
     private int read8(int adress) {
-    		Preconditions.checkBits16(adress);
-    		return bus.read(adress);
+    		return bus.read(Preconditions.checkBits16(adress));
     }
     
     /**
@@ -221,8 +214,7 @@ public class Cpu implements Component, Clocked {
      * @return the 16-bits value represented
      */
     private int read16(int adress) {
-		Preconditions.checkBits16(adress);
-    		return Bits.make16(read8(adress+1),read8(adress));
+    	return Bits.make16(read8(Preconditions.checkBits16(adress)+1),read8(adress));
     }
     
     /**
@@ -239,9 +231,7 @@ public class Cpu implements Component, Clocked {
      * @param v the 8-bits value to represent
      */
     private void write8(int adress, int v) {
-		Preconditions.checkBits16(adress);
-		Preconditions.checkBits8(v);
-    		bus.write(adress,v);
+    	bus.write(Preconditions.checkBits16(adress),Preconditions.checkBits8(v));
     }
     
     /**
@@ -250,10 +240,8 @@ public class Cpu implements Component, Clocked {
      * @param v the 16-bits value to represent
      */
     private void write16(int adress, int v) {
-		Preconditions.checkBits16(adress);
-		Preconditions.checkBits16(v);
-    		write8(adress + 1, Bits.clip(8,v));
-    		write8(adress, Bits.extract(8,8,v));
+    	write8(Preconditions.checkBits16(adress) + 1, Bits.clip(8,Preconditions.checkBits16(v)));
+    	write8(adress, Bits.extract(8,8,v));
     }
     
     /**
@@ -261,9 +249,7 @@ public class Cpu implements Component, Clocked {
      * @param v the 8-bits value to represent 
      */
     private void write8AtHl(int v) {
-		Preconditions.checkBits8(v);
-    		write8(reg16(Reg16.HL),v);
-    		
+        write8(reg16(Reg16.HL),Preconditions.checkBits8(v));	
     }
     
     /**
@@ -271,9 +257,8 @@ public class Cpu implements Component, Clocked {
      * @param v the 16-bits value to represent
      */
     private void push16(int v) {
-		Preconditions.checkBits16(v);
-    		SP=SP-2;
-    		write16(SP,v);
+    	SP=SP-2;
+    	write16(SP,Preconditions.checkBits16(v));
     }
     
     /**
@@ -281,8 +266,8 @@ public class Cpu implements Component, Clocked {
      * @return the 16-bits value represented
      */
     private int pop16() {
-    		SP = SP + 2;
-    		return read16(SP-2);
+    	SP = SP + 2;
+    	return read16(SP-2);
     }
     
     
@@ -348,7 +333,6 @@ public class Cpu implements Component, Clocked {
      */
     private void setReg16SP(Reg16 r, int newV) {
         Preconditions.checkArgument(r!=null);
-        Preconditions.checkBits16(newV);
         switch (r) {
         case AF :
             SP = Preconditions.checkBits16(newV);
