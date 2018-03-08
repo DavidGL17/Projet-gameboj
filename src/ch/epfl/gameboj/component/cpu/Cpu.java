@@ -240,6 +240,7 @@ public class Cpu implements Component, Clocked {
      * @param v the 16-bits value to represent
      */
     private void write16(int adress, int v) {
+        Preconditions.checkArgument(adress<=0xFFFE);
     	write8(Preconditions.checkBits16(adress) + 1, Bits.clip(8,Preconditions.checkBits16(v)));
     	write8(adress, Bits.extract(8,8,v));
     }
