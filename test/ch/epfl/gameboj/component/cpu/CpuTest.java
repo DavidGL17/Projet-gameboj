@@ -27,7 +27,6 @@ public class CpuTest {
 
     private void cycleCpu(Cpu cpu, long cycles) {
         for (int c = 0; c < cycles; ++c) {
-            System.out.println("cycle : "+c);
             cpu.cycle(c);
         }
     }
