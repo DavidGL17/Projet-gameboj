@@ -79,8 +79,8 @@ public class Cpu implements Component, Clocked {
         }
     }
     
-    private void setNextNonIdleCycle(long cycle, int cycles, int additionalCycles) {
-        nextNonIdleCycle = cycle+cycles+additionalCycles;
+    private void setNextNonIdleCycle(long cycle, int cycles, int additionalCycles) { // Doesn't use additional cycle
+        nextNonIdleCycle = cycle+cycles;
     }
     
     private void dispatch(Opcode opcode, long cycle) {
