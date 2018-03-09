@@ -30,13 +30,13 @@ public class Cpu implements Component, Clocked {
     private long nextNonIdleCycle;
     private Bus bus;
     private RegisterFile<Reg> Regs = new RegisterFile<>(Reg.values());
-    private int registerPC;
-    private int SP;
+    private int registerPC = 0;
+    private int registerSP = 0;
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.DIRECT);
     
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[0XFF];
+        Opcode[] table = new Opcode[0XFFFF];
         for (Opcode o : Opcode.values()) {
             if (o.kind == Kind.DIRECT) {
                 table[o.encoding] = o;
@@ -68,7 +68,7 @@ public class Cpu implements Component, Clocked {
     }
     
     public int[] _testGetPcSpAFBCDEHL() {
-        return null;    
+        return new int[] {registerPC,registerSP, Regs.get(Reg.A), Regs.get(Reg.F), Regs.get(Reg.B), Regs.get(Reg.C), Regs.get(Reg.D), Regs.get(Reg.E), Regs.get(Reg.H), Regs.get(Reg.L)};    
     }
 
     /* (non-Javadoc)
@@ -159,7 +159,7 @@ public class Cpu implements Component, Clocked {
         } break;
         case LD_N16R_SP: {
         		int argument = read16AfterOpcode();
-        		write16(argument,SP);
+        		write16(argument,registerSP);
         } break;
         case LD_R8_R8: {
         		Reg destination = extractReg(opcode,2);
@@ -168,7 +168,7 @@ public class Cpu implements Component, Clocked {
         		Regs.set(destination,value);
         } break;
         case LD_SP_HL: {
-        		SP=reg16(Reg16.HL);
+        		registerSP=reg16(Reg16.HL);
         } break;
         case PUSH_R16: {
         		Reg16 reg = extractReg16(opcode);
@@ -181,6 +181,7 @@ public class Cpu implements Component, Clocked {
         
         }
         setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
+        registerPC += opcode.totalBytes;
     }
     
     /**
@@ -258,8 +259,8 @@ public class Cpu implements Component, Clocked {
      * @param v the 16-bits value to represent
      */
     private void push16(int v) {
-    	SP=SP-2;
-    	write16(SP,Preconditions.checkBits16(v));
+    	registerSP=registerSP-2;
+    	write16(registerSP,Preconditions.checkBits16(v));
     }
     
     /**
@@ -267,8 +268,8 @@ public class Cpu implements Component, Clocked {
      * @return the 16-bits value represented
      */
     private int pop16() {
-    	SP = SP + 2;
-    	return read16(SP-2);
+    	registerSP = registerSP + 2;
+    	return read16(registerSP-2);
     }
     
     
@@ -308,19 +309,19 @@ public class Cpu implements Component, Clocked {
         Preconditions.checkBits16(newV);
         switch (r) {
         case AF :
-            Regs.set(Reg.A, newV>>>8);
-            Regs.set(Reg.C, Bits.clip(8, newV)&0xF0);
+            Regs.set(Reg.A, (newV&0xF0)>>>8);
+            Regs.set(Reg.F, Bits.clip(8, newV)&0b11110000);
             break;
         case BC :
-            Regs.set(Reg.B, newV>>>8);
+            Regs.set(Reg.B, (newV&0xF0)>>>8);
             Regs.set(Reg.C, Bits.clip(8, newV));
             break;
         case DE :
-            Regs.set(Reg.D, newV>>>8);
+            Regs.set(Reg.D, (newV&0xF0)>>>8);
             Regs.set(Reg.E, Bits.clip(8, newV));
             break;
         case HL :
-            Regs.set(Reg.H, newV>>>8);
+            Regs.set(Reg.H, (newV&0xF0)>>>8);
             Regs.set(Reg.L, Bits.clip(8, newV));
             break;
         }
@@ -336,7 +337,7 @@ public class Cpu implements Component, Clocked {
         Preconditions.checkArgument(r!=null);
         switch (r) {
         case AF :
-            SP = Preconditions.checkBits16(newV);
+            registerSP = Preconditions.checkBits16(newV);
             break;
         default :
             setReg16(r, newV);

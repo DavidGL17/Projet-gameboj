@@ -13,10 +13,11 @@ import ch.epfl.gameboj.bits.Bits;
  *
  */
 public final class RegisterFile<E extends Register> {
-    private ArrayList<E> allRegs;
+    private ArrayList<E> allRegs = new ArrayList<>();
     private int[] registers;
     
     public RegisterFile(E[] allRegs) {
+        Preconditions.checkArgument(allRegs.length>0);
         for(int i = 0; i<allRegs.length;++i) {
             this.allRegs.add(allRegs[i]);
         }
