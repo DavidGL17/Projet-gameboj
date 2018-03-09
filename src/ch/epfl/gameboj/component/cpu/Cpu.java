@@ -42,8 +42,11 @@ public class Cpu implements Component, Clocked {
         }
         return table;
     }
-    /* (non-Javadoc)
-     * @see ch.epfl.gameboj.component.Component#attachTo(ch.epfl.gameboj.Bus)
+    /**
+     * Attaches the cpu to the given bus
+     * 
+     * @param bus
+     *            the bus we want to attach our component to
      */
     @Override
     public void attachTo(Bus bus) {

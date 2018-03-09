@@ -38,15 +38,33 @@ public final class RegisterFile<E extends Register> {
         }
         throw new IllegalArgumentException();
     }
+    /**
+     * @param reg
+     * @return
+     */
     public int get(E reg) {
         return registers[getIndex(reg)];
     }
+    /**
+     * @param reg
+     * @param newValue
+     */
     public void set(E reg, int newValue) {
         registers[getIndex(reg)] = Preconditions.checkBits8(newValue);
     }
+    /**
+     * @param reg
+     * @param b
+     * @return
+     */
     public boolean testBit(E reg, Bit b) {
         return Bits.test(registers[getIndex(reg)], b);
     }
+    /**
+     * @param reg
+     * @param bit
+     * @param newValue
+     */
     public void setBit(E reg, Bit bit, boolean newValue) {
         registers[getIndex(reg)] = Bits.set(registers[getIndex(reg)], bit.index(), newValue);
     }
