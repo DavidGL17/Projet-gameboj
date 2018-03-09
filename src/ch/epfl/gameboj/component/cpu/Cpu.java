@@ -388,13 +388,13 @@ public class Cpu implements Component, Clocked {
         Preconditions.checkArgument(r!=null);
         switch (r) {
         case AF :
-            return (Regs.get(Reg.A)<<8)+(Regs.get(Reg.F));
+            return Preconditions.checkBits16(Regs.get(Reg.A)<<8)+(Regs.get(Reg.F));
         case BC :
-            return (Regs.get(Reg.B)<<8)+(Regs.get(Reg.C));
+            return Preconditions.checkBits16(Regs.get(Reg.B)<<8)+(Regs.get(Reg.C));
         case DE :
-            return (Regs.get(Reg.D)<<8)+(Regs.get(Reg.E));
+            return Preconditions.checkBits16(Regs.get(Reg.D)<<8)+(Regs.get(Reg.E));
         case HL :
-            return (Regs.get(Reg.H)<<8)+(Regs.get(Reg.L));
+            return Preconditions.checkBits16(Regs.get(Reg.H)<<8)+(Regs.get(Reg.L));
         default :
             return 0;
         }
