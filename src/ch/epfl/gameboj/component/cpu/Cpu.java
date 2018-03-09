@@ -307,7 +307,7 @@ public class Cpu implements Component, Clocked {
      * @return the store 8-bits value
      */
     private int read8AfterOpcode() {
-    		return read8(registerPC+1);
+    		return read8(Bits.clip(16,Preconditions.checkBits16(registerPC+1)));
     }
     
     /**
@@ -316,7 +316,7 @@ public class Cpu implements Component, Clocked {
      * @return the 16-bits value represented
      */
     private int read16(int adress) {
-    	return Bits.make16(read8(Preconditions.checkBits16(adress)+1),read8(adress));
+    	return Bits.make16(read8(Preconditions.checkBits16(adress+1)),read8(adress));
     }
     
     /**
@@ -342,9 +342,10 @@ public class Cpu implements Component, Clocked {
      * @param v the 16-bits value to represent
      */
     private void write16(int adress, int v) {
-        Preconditions.checkArgument(adress<=0xFFFE);
-    	write8(Preconditions.checkBits16(adress) + 1, Bits.clip(8,Preconditions.checkBits16(v)));
-    	write8(adress, Bits.extract(8,8,v));
+    
+    	write8(Preconditions.checkBits16(adress+1), Bits.extract(8,8,Preconditions.checkBits16(v)));
+    	write8(adress, Bits.clip(8,v));
+    
     }
     
     /**
@@ -360,7 +361,7 @@ public class Cpu implements Component, Clocked {
      * @param v the 16-bits value to represent
      */
     private void push16(int v) {
-    	registerSP=registerSP-2;
+    	registerSP=Bits.clip(16,registerSP-2);
     	write16(registerSP,Preconditions.checkBits16(v));
     }
     
@@ -369,8 +370,9 @@ public class Cpu implements Component, Clocked {
      * @return the 16-bits value represented
      */
     private int pop16() {
-    	registerSP = registerSP + 2;
-    	return read16(registerSP-2);
+    	int sP = registerSP;
+    	registerSP = Bits.clip(16, registerSP + 2);
+    	return read16(sP);
     }
     
     
