@@ -79,7 +79,12 @@ public class Cpu implements Component, Clocked {
     @Override
     public void cycle(long cycle) {
         if(cycle >=nextNonIdleCycle) {
-            dispatch(DIRECT_OPCODE_TABLE[bus.read(registerPC)],cycle);
+            if (bus.read(registerPC)==0xCB) {
+                dispatch(PREFIXED_OPCODE_TABLE[bus.read(registerPC+1)],cycle);
+
+            } else {
+                dispatch(DIRECT_OPCODE_TABLE[bus.read(registerPC)],cycle);
+            }
         }
     }
     
@@ -224,6 +229,8 @@ public class Cpu implements Component, Clocked {
         } break;
         case OR_A_HLR: {
         } break;
+        
+        
         case XOR_A_R8: {
         } break;
         case XOR_A_N8: {
@@ -285,7 +292,7 @@ public class Cpu implements Component, Clocked {
         
         }
         setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
-        registerPC += opcode.totalBytes;
+        registerPC += Bits.clip(16,opcode.totalBytes);
     }
     
     /**
