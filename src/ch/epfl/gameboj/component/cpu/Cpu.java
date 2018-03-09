@@ -14,6 +14,7 @@ import ch.epfl.gameboj.component.Component;
 
 /**
  * @author David Gonzalez leon (270845)
+ * @author Melvin Malonga-Matouba (288405)
  *
  */
 public class Cpu implements Component, Clocked {
