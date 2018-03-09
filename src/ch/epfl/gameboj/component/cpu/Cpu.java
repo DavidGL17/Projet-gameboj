@@ -528,4 +528,19 @@ public class Cpu implements Component, Clocked {
         Preconditions.checkArgument(opcode!=null);
         return (Bits.test(opcode.encoding, 4)?-1:+1);
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /// Gestion des Fanions
+    
+    
+    void setRegFromAlu() {
+    	
+    }
 }
