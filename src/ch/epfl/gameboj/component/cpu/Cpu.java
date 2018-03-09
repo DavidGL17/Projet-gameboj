@@ -11,6 +11,7 @@ import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
+import ch.epfl.gameboj.component.cpu.Alu;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -546,8 +547,89 @@ public class Cpu implements Component, Clocked {
     
     /// Gestion des Fanions
     
-    
-    void setRegFromAlu() {
-    	
+    /**
+     * Loads in the register r the value from packed vf
+     * 
+     * @param r - the destination Register
+     * @param vf - the packed value/flags
+     */
+    private void setRegFromAlu(Reg r, int vf) {
+    		Preconditions.checkArgument(r!=null);
+    		Regs.set(r,Alu.unpackValue(vf));
     }
+    
+    /**
+     * Sets F according to a given value/flags
+     * 
+     * @param valueFlags
+     */
+    private void setFlags(int valueFlags) {
+    		Regs.set(Reg.F,Alu.unpackFlags(valueFlags));
+    }
+    
+    /**
+     * Loads in the register r the value and in F the flags from vf a value/flags
+     * 
+     * @param r - the destination Register
+     * @param vf - the packed value/flags
+     */
+    private void setRegFlags(Reg r, int vf) {
+    		setRegFromAlu(r,vf);
+    		setFlags(vf);
+    }
+    
+    /**
+     * Load in F the flags and writes at [HL] the value from vf 
+     * 
+     * @param vf - the packed value/flags
+     */
+    private void write8AtHlAndSetFlags(int vf) {
+    		write8(reg16(Reg16.HL) , Alu.unpackValue(vf));
+    		setFlags(vf);
+    }
+    
+    private enum FlagSrc {V0, V1, ALU, CPU };
+    
+    /**
+     * Loads in F the flags according to the vf value, state of F, and FlagSrcs
+     * 
+     * @param vf - the packed value/flags
+     * @param z - how z activation is determined
+     * @param n - how n activation is determined
+     * @param h - how h activation is determined
+     * @param c - how c activation is determined
+     */
+    private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c ) {
+    		FlagSrc [] FlagSources = { z,n,h,c };
+    		for (FlagSrc i : FlagSources) {
+    			Preconditions.checkArgument(i!=null);
+    		}
+    		boolean [] currentState = { Bits.test(Regs.get(Reg.F),Alu.Flag.Z), Bits.test(Regs.get(Reg.F),Alu.Flag.N), Bits.test(Regs.get(Reg.F),Alu.Flag.H), Bits.test(Regs.get(Reg.F),Alu.Flag.C)};
+    		boolean [] activationInVf = { Bits.test(vf,Alu.Flag.Z), Bits.test(vf,Alu.Flag.N), Bits.test(vf,Alu.Flag.H), Bits.test(vf,Alu.Flag.C)};
+    		boolean [] FlagActivation = new boolean [4];
+  
+    		for (int i=0 ; i<FlagSources.length ; i++) {
+    			switch (FlagSources[i]) {
+    			case V0:{
+    				FlagActivation[i]=false;
+    			} break;
+    			case V1:{
+    				FlagActivation[i]=true;
+    			} break;
+    			case ALU:{
+    				FlagActivation[i]=activationInVf[i];
+    			} break;
+    			case CPU:{
+    				FlagActivation[i]=currentState[i];
+    			} break ;
+    			}
+    		}
+    		
+    		setFlags(Alu.maskZNHC(FlagActivation[0], FlagActivation[1], FlagActivation[2], FlagActivation[3]) );
+    		
+    		
+    }
+    
+    
+    
 }
