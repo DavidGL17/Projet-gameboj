@@ -39,31 +39,40 @@ public final class RegisterFile<E extends Register> {
         throw new IllegalArgumentException();
     }
     /**
-     * @param reg
-     * @return
+     * Returns the 8 bit value contained in thee given register
+     * 
+     * @param reg, the given register
+     * @return value, the value stored in the given register
      */
     public int get(E reg) {
         return registers[getIndex(reg)];
     }
     /**
-     * @param reg
-     * @param newValue
+     * Sets the value of the given register to the new value
+     * 
+     * @param reg, the given register
+     * @param newValue, the new value
+     * @throws IllegalArgumentException if the new value is not an 8 bit value
      */
     public void set(E reg, int newValue) {
         registers[getIndex(reg)] = Preconditions.checkBits8(newValue);
     }
     /**
-     * @param reg
-     * @param b
-     * @return
+     * Returns true if the bit of the given register is 1
+     * 
+     * @param reg, the given register
+     * @param b, the numbre of the bit we want to test
+     * @return 1 if the bit waas 1, false otherwise
      */
     public boolean testBit(E reg, Bit b) {
         return Bits.test(registers[getIndex(reg)], b);
     }
     /**
-     * @param reg
-     * @param bit
-     * @param newValue
+     * Set the bit of the given register to the given new value
+     * 
+     * @param reg, the given register
+     * @param bit, the given bit
+     * @param newValue, the new value
      */
     public void setBit(E reg, Bit bit, boolean newValue) {
         registers[getIndex(reg)] = Bits.set(registers[getIndex(reg)], bit.index(), newValue);
