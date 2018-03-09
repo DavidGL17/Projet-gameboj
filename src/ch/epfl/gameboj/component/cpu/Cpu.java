@@ -33,12 +33,13 @@ public class Cpu implements Component, Clocked {
     private int registerPC = 0;
     private int registerSP = 0;
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.DIRECT);
+    private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.PREFIXED);
     
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
         Opcode[] table = new Opcode[0XFFFF];
         for (Opcode o : Opcode.values()) {
-            if (o.kind == Kind.DIRECT) {
+            if (o.kind == kind) {
                 table[o.encoding] = o;
             }
         }
