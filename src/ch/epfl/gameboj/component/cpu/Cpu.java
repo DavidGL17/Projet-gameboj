@@ -182,7 +182,6 @@ public class Cpu implements Component, Clocked {
         }
         setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         registerPC += opcode.totalBytes;
-        System.out.println("Register PC : "+registerPC);
     }
     
     /**
@@ -311,7 +310,7 @@ public class Cpu implements Component, Clocked {
         switch (r) {
         case AF :
             Regs.set(Reg.A, (newV&0xFF00)>>>8);
-            Regs.set(Reg.F, Bits.clip(8, newV)&0b11110000);
+            Regs.set(Reg.F, Bits.clip(8, newV)&0xF0);
             break;
         case BC :
             Regs.set(Reg.B, (newV&0xFF00)>>>8);
