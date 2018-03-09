@@ -27,7 +27,7 @@ public class Cpu implements Component, Clocked {
         AF,BC,DE,HL
     }
     
-    private long nextNonIdleCycle;
+    private long nextNonIdleCycle = 0;
     private Bus bus;
     private RegisterFile<Reg> Regs = new RegisterFile<>(Reg.values());
     private int registerPC = 0;
@@ -85,7 +85,7 @@ public class Cpu implements Component, Clocked {
         setNextNonIdleCycle(cycle, cycles, 0);
     }
     private void setNextNonIdleCycle(long cycle, int cycles, int additionalCycles) {
-        nextNonIdleCycle = cycle+cycles+additionalCycles-1;
+        nextNonIdleCycle = cycle+cycles+additionalCycles;
     }
     
     private void dispatch(Opcode opcode, long cycle) {
@@ -182,6 +182,7 @@ public class Cpu implements Component, Clocked {
         }
         setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         registerPC += opcode.totalBytes;
+        System.out.println("Register PC : "+registerPC);
     }
     
     /**
@@ -309,19 +310,19 @@ public class Cpu implements Component, Clocked {
         Preconditions.checkBits16(newV);
         switch (r) {
         case AF :
-            Regs.set(Reg.A, (newV&0xF0)>>>8);
+            Regs.set(Reg.A, (newV&0xFF00)>>>8);
             Regs.set(Reg.F, Bits.clip(8, newV)&0b11110000);
             break;
         case BC :
-            Regs.set(Reg.B, (newV&0xF0)>>>8);
+            Regs.set(Reg.B, (newV&0xFF00)>>>8);
             Regs.set(Reg.C, Bits.clip(8, newV));
             break;
         case DE :
-            Regs.set(Reg.D, (newV&0xF0)>>>8);
+            Regs.set(Reg.D, (newV&0xFF00)>>>8);
             Regs.set(Reg.E, Bits.clip(8, newV));
             break;
         case HL :
-            Regs.set(Reg.H, (newV&0xF0)>>>8);
+            Regs.set(Reg.H, (newV&0xFF00)>>>8);
             Regs.set(Reg.L, Bits.clip(8, newV));
             break;
         }

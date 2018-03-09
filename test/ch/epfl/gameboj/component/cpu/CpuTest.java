@@ -26,9 +26,9 @@ public class CpuTest {
     }
 
     private void cycleCpu(Cpu cpu, long cycles) {
-        for (long c = 0; c < cycles; ++c) {
+        for (int c = 0; c < cycles; ++c) {
+            System.out.println("cycle : "+c);
             cpu.cycle(c);
-            System.out.println(c);
         }
     }
 
@@ -50,8 +50,8 @@ public class CpuTest {
         b.write(0, Opcode.LD_HL_N16.encoding);
         b.write(2, 0xFF);
         b.write(0xFF00, 20);
-        b.write(3, Opcode.LD_A_HLR.encoding);
+        b.write(4, Opcode.LD_A_HLR.encoding);
         cycleCpu(c, Opcode.LD_HL_N16.cycles+Opcode.LD_A_HLR.cycles);
-        assertArrayEquals(new int[] {4,0,20,0,0,0,0,0,0,10}, c._testGetPcSpAFBCDEHL());
+        assertArrayEquals(new int[] {5,0,20,0,0,0,0,0,0xFF,0}, c._testGetPcSpAFBCDEHL());
     }
 }
