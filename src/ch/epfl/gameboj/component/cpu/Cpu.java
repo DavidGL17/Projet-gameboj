@@ -181,14 +181,27 @@ public class Cpu implements Component, Clocked {
         } break;
         // Add
         case ADD_A_R8: {
+            boolean c = extractCarry(opcode, Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)));
+            combineAluFlags(Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),c), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),c)));
         } break;
         case ADD_A_N8: {
+            boolean c = extractCarry(opcode, Regs.get(Reg.A), read8AfterOpcode());
+            combineAluFlags(Alu.add(Regs.get(Reg.A), read8AfterOpcode(),c), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.add(Regs.get(Reg.A), read8AfterOpcode(),c)));
         } break;
         case ADD_A_HLR: {
+            boolean c = extractCarry(opcode, Regs.get(Reg.A), read8AtHl());
+            combineAluFlags(Alu.add(Regs.get(Reg.A), read8AtHl(),c), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.add(Regs.get(Reg.A), read8AtHl(),c)));
         } break;
         case INC_R8: {
+            combineAluFlags(Alu.add(Regs.get(extractReg(opcode, 4)), 1), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
+            Regs.set(extractReg(opcode, 4), Alu.unpackValue(Alu.add(Regs.get(extractReg(opcode, 4)), 1)));
         } break;
         case INC_HLR: {
+            combineAluFlags(Alu.add(read8AtHl(), 1), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
+            write8AtHl(Alu.unpackValue(Alu.add(read8AtHl(), 1)));
         } break;
         case INC_R16SP: {
         } break;
@@ -296,6 +309,10 @@ public class Cpu implements Component, Clocked {
         registerPC += Bits.clip(16,opcode.totalBytes);
     }
     
+    
+    ///Accès au bus
+    
+    
     /**
      * Reads the byte at the given adress on the bus
      * @param adress a 16 bits integer
@@ -387,6 +404,9 @@ public class Cpu implements Component, Clocked {
     }
     
     
+    ///Gestion des paires de registres
+    
+    
     /**
      * Returns the value contained in the given register
      * 
@@ -457,6 +477,9 @@ public class Cpu implements Component, Clocked {
             setReg16(r, newV);
         }
     }
+    
+    
+    ///Extraction des reg
     
     /**
      * Returns the length bit bits that identifies a register in the opcode value
@@ -630,6 +653,14 @@ public class Cpu implements Component, Clocked {
     		
     }
     
+    
+    ///Extraction du carry
+    private boolean extractCarry(Opcode opcode, int l, int r) {
+        if (Bits.test(opcode.encoding, 3)) {
+            return (Bits.test(Alu.unpackFlags(Alu.add(l, r)), 4));
+        }
+        return false;
+    }
     
     
 }
