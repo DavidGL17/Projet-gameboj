@@ -167,8 +167,8 @@ public class Cpu implements Component, Clocked {
         		write16(argument,registerSP);
         } break;
         case LD_R8_R8: {
-        		Reg destination = extractReg(opcode,2);
-        		Reg store = extractReg(opcode,5);
+        		Reg destination = extractReg(opcode,0);
+        		Reg store = extractReg(opcode,3);
         		int value=Regs.get(store);
         		Regs.set(destination,value);
         } break;
@@ -245,7 +245,13 @@ public class Cpu implements Component, Clocked {
         } break;
         
         
+        // 
+        
         case XOR_A_R8: {
+        	Reg reg = extractReg(opcode,0);
+        	int vf = Alu.xor(Regs.get(Reg.A),Regs.get(reg));
+        	Regs.set(Reg.A,Alu.unpackValue(vf));
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
         } break;
         case XOR_A_N8: {
         } break;
