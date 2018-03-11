@@ -204,8 +204,26 @@ public class Cpu implements Component, Clocked {
             write8AtHl(Alu.unpackValue(Alu.add(read8AtHl(), 1)));
         } break;
         case INC_R16SP: {
+            int r16Value = 0;
+            switch(extractReg16(opcode)) {
+            case AF:
+                r16Value = registerSP;
+            default :
+                r16Value = reg16(extractReg16(opcode));
+            }
+            combineAluFlags(Alu.add16H(r16Value, 1), FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU);
+            setReg16SP(extractReg16(opcode), Alu.add16H(r16Value, 1));
         } break;
         case ADD_HL_R16SP: {
+            int r16Value = 0;
+            switch(extractReg16(opcode)) {
+            case AF:
+                r16Value = registerSP;
+            default :
+                r16Value = reg16(extractReg16(opcode));
+            }
+            combineAluFlags(Alu.add16H(reg16(Reg16.HL), r16Value), FlagSrc.CPU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+            setReg16(Reg16.HL, Alu.add16H(reg16(Reg16.HL), r16Value));
         } break;
         case LD_HLSP_S8: {
         } break;
