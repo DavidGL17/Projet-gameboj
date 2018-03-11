@@ -181,17 +181,17 @@ public class Cpu implements Component, Clocked {
         } break;
         // Add
         case ADD_A_R8: {
-            boolean c = extractCarry(opcode, Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)));
+            boolean c = extractCarry(opcode);
             combineAluFlags(Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),c), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
             Regs.set(Reg.A, Alu.unpackValue(Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),c)));
         } break;
         case ADD_A_N8: {
-            boolean c = extractCarry(opcode, Regs.get(Reg.A), read8AfterOpcode());
+            boolean c = extractCarry(opcode);
             combineAluFlags(Alu.add(Regs.get(Reg.A), read8AfterOpcode(),c), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
             Regs.set(Reg.A, Alu.unpackValue(Alu.add(Regs.get(Reg.A), read8AfterOpcode(),c)));
         } break;
         case ADD_A_HLR: {
-            boolean c = extractCarry(opcode, Regs.get(Reg.A), read8AtHl());
+            boolean c = extractCarry(opcode);
             combineAluFlags(Alu.add(Regs.get(Reg.A), read8AtHl(),c), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
             Regs.set(Reg.A, Alu.unpackValue(Alu.add(Regs.get(Reg.A), read8AtHl(),c)));
         } break;
@@ -226,14 +226,30 @@ public class Cpu implements Component, Clocked {
             setReg16(Reg16.HL, Alu.add16H(reg16(Reg16.HL), r16Value));
         } break;
         case LD_HLSP_S8: {
+            if (Bits.test(opcode.encoding, 4)) {
+                combineAluFlags(Alu.add16H(registerSP, read8AfterOpcode()), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+                setReg16(Reg16.HL, Alu.unpackValue(Alu.add16H(registerSP, read8AfterOpcode())));
+            } else {
+                combineAluFlags(Alu.add16H(registerSP, read8AfterOpcode()), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+                registerSP = Alu.unpackValue(Alu.add16H(registerSP, read8AfterOpcode()));
+            }
         } break;
 
         // Subtract
         case SUB_A_R8: {
+            boolean c = extractCarry(opcode);
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),c), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),c)));
         } break;
         case SUB_A_N8: {
+            boolean c = extractCarry(opcode);
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), read8AfterOpcode(),c), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.sub(Regs.get(Reg.A), read8AfterOpcode(),c)));
         } break;
         case SUB_A_HLR: {
+            boolean c = extractCarry(opcode);
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), read8AtHl(),c), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.sub(Regs.get(Reg.A), read8AtHl(),c)));
         } break;
         case DEC_R8: {
         } break;
@@ -679,11 +695,12 @@ public class Cpu implements Component, Clocked {
     
     
     ///Extraction du carry
-    private boolean extractCarry(Opcode opcode, int l, int r) {
+    private boolean extractCarry(Opcode opcode) {
         if (Bits.test(opcode.encoding, 3)) {
-            return (Bits.test(Alu.unpackFlags(Alu.add(l, r)), 4));
+            return (Bits.test(Regs.get(Reg.F), 4));
+        } else {
+            return false;
         }
-        return false;
     }
     
     
