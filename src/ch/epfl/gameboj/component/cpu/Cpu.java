@@ -134,6 +134,7 @@ public class Cpu implements Component, Clocked {
         case LD_HLR_R8: {
             write8AtHl(Regs.get(extractReg(opcode, 0)));
         } break;
+        
         case LD_HLRU_A: {
             write8AtHl(Regs.get(Reg.A));
             setReg16(Reg16.HL, (reg16(Reg16.HL) + extractHlIncrement(opcode)));
@@ -181,6 +182,8 @@ public class Cpu implements Component, Clocked {
         		Reg16 reg = extractReg16(opcode);
         		push16(reg16(reg));
         } break;
+        
+        
         // Add
         case ADD_A_R8: {
             boolean c = extractCarry(opcode);
@@ -214,7 +217,7 @@ public class Cpu implements Component, Clocked {
                 r16Value = reg16(extractReg16(opcode));
             }
             combineAluFlags(Alu.add16H(r16Value, 1), FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU);
-            setReg16SP(extractReg16(opcode), Alu.add16H(r16Value, 1));
+            setReg16SP(extractReg16(opcode), Alu.unpackValue(Alu.add16H(r16Value, 1)));
         } break;
         case ADD_HL_R16SP: {
             int r16Value = 0;
@@ -225,7 +228,7 @@ public class Cpu implements Component, Clocked {
                 r16Value = reg16(extractReg16(opcode));
             }
             combineAluFlags(Alu.add16H(reg16(Reg16.HL), r16Value), FlagSrc.CPU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
-            setReg16(Reg16.HL, Alu.add16H(reg16(Reg16.HL), r16Value));
+            setReg16(Reg16.HL, Alu.unpackValue(Alu.add16H(reg16(Reg16.HL), r16Value)));
         } break;
         case LD_HLSP_S8: {
             if (Bits.test(opcode.encoding, 4)) {
@@ -254,35 +257,60 @@ public class Cpu implements Component, Clocked {
             Regs.set(Reg.A, Alu.unpackValue(Alu.sub(Regs.get(Reg.A), read8AtHl(),c)));
         } break;
         case DEC_R8: {
+            combineAluFlags(Alu.sub(Regs.get(extractReg(opcode, 3)), 1), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.CPU);
+            Regs.set(extractReg(opcode, 3), Alu.unpackValue(Alu.sub(Regs.get(extractReg(opcode, 3)), 1)));
         } break;
         case DEC_HLR: {
+            combineAluFlags(Alu.sub(read8AtHl(), 1), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.CPU);
+            write8AtHl(Alu.unpackValue(Alu.sub(read8AtHl(), 1)));
         } break;
         case CP_A_R8: {
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),extractCarry(opcode)), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
         } break;
         case CP_A_N8: {
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),extractCarry(opcode)), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
         } break;
         case CP_A_HLR: {
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),extractCarry(opcode)), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
         } break;
         case DEC_R16SP: {
+            int r16Value = 0;
+            switch(extractReg16(opcode)) {
+            case AF:
+                r16Value = registerSP;
+            default :
+                r16Value = reg16(extractReg16(opcode));
+            }
+            setReg16SP(extractReg16(opcode), Bits.clip(16,r16Value-1));
         } break;
 
         // And, or, xor, complement
         case AND_A_N8: {
+            combineAluFlags(Alu.and(Regs.get(Reg.A), read8AfterOpcode()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V1, FlagSrc.V0);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.and(Regs.get(Reg.A), read8AfterOpcode())));
         } break;
         case AND_A_R8: {
+            combineAluFlags(Alu.and(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0))), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V1, FlagSrc.V0);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.and(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)))));
         } break;
         case AND_A_HLR: {
+            combineAluFlags(Alu.and(Regs.get(Reg.A), read8AtHl()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V1, FlagSrc.V0);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.and(Regs.get(Reg.A), read8AtHl())));
         } break;
         case OR_A_R8: {
+            combineAluFlags(Alu.or(Regs.get(Reg.A), read8AfterOpcode()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.or(Regs.get(Reg.A), read8AfterOpcode())));
         } break;
         case OR_A_N8: {
+            combineAluFlags(Alu.or(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0))), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.or(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)))));
         } break;
         case OR_A_HLR: {
+            combineAluFlags(Alu.or(Regs.get(Reg.A), read8AtHl()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
+            Regs.set(Reg.A, Alu.unpackValue(Alu.or(Regs.get(Reg.A), read8AtHl())));
         } break;
         
-        
-        // 
-        
+                
         case XOR_A_R8: {
         	int vf = Alu.xor(Regs.get(Reg.A),Regs.get(extractReg(opcode,0)));
         	Regs.set(Reg.A,Bits.clip(8,Alu.unpackValue(vf)));
@@ -707,38 +735,36 @@ public class Cpu implements Component, Clocked {
      * @param c - how c activation is determined
      */
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c ) {
-    		FlagSrc [] FlagSources = { z,n,h,c };
-    		for (FlagSrc i : FlagSources) {
-    			Preconditions.checkArgument(i!=null);
-    		}
-    		boolean [] currentState = { Bits.test(Regs.get(Reg.F),Alu.Flag.Z), Bits.test(Regs.get(Reg.F),Alu.Flag.N), Bits.test(Regs.get(Reg.F),Alu.Flag.H), Bits.test(Regs.get(Reg.F),Alu.Flag.C)};
-    		boolean [] activationInVf = { Bits.test(vf,Alu.Flag.Z), Bits.test(vf,Alu.Flag.N), Bits.test(vf,Alu.Flag.H), Bits.test(vf,Alu.Flag.C)};
-    		boolean [] FlagActivation = new boolean [4];
-  
-    		for (int i=0 ; i<FlagSources.length ; i++) {
-    			switch (FlagSources[i]) {
-    			case V0:{
-    				FlagActivation[i]=false;
-    			} break;
-    			case V1:{
-    				FlagActivation[i]=true;
-    			} break;
-    			case ALU:{
-    				FlagActivation[i]=activationInVf[i];
-    			} break;
-    			case CPU:{
-    				FlagActivation[i]=currentState[i];
-    			} break ;
-    			}
-    		}
-    		
-    		setFlags(Alu.maskZNHC(FlagActivation[0], FlagActivation[1], FlagActivation[2], FlagActivation[3]) );
-    		
-    		
+        FlagSrc[] FlagSources = { z, n, h, c };
+        for (FlagSrc i : FlagSources) {
+            Preconditions.checkArgument(i != null);
+        }
+        boolean[] currentState = { Bits.test(Regs.get(Reg.F), Alu.Flag.Z), Bits.test(Regs.get(Reg.F), Alu.Flag.N), Bits.test(Regs.get(Reg.F), Alu.Flag.H), Bits.test(Regs.get(Reg.F), Alu.Flag.C) };
+        boolean[] activationInVf = { Bits.test(vf, Alu.Flag.Z), Bits.test(vf, Alu.Flag.N), Bits.test(vf, Alu.Flag.H), Bits.test(vf, Alu.Flag.C) };
+        boolean[] FlagActivation = new boolean[4];
+
+        for (int i = 0; i < FlagSources.length; i++) {
+            switch (FlagSources[i]) {
+            case V0:
+                FlagActivation[i] = false;
+                break;
+            case V1:
+                FlagActivation[i] = true;
+                break;
+            case ALU: 
+                FlagActivation[i] = activationInVf[i];
+                break;
+            case CPU:
+                FlagActivation[i] = currentState[i];
+                break;
+            }
+        }
+        setFlags(Alu.maskZNHC(FlagActivation[0], FlagActivation[1], FlagActivation[2], FlagActivation[3]));
     }
     
     
     ///Extraction du carry
+    
     private boolean extractCarry(Opcode opcode) {
         if (Bits.test(opcode.encoding, 3)) {
             return (Bits.test(Regs.get(Reg.F), 4));
