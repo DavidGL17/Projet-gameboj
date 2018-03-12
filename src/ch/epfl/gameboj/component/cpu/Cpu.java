@@ -114,7 +114,7 @@ public class Cpu implements Component, Clocked {
             Regs.set(Reg.A, read8(AddressMap.REGS_START+Regs.get(Reg.C)));
         } break;
         case LD_A_N16R: {
-            Regs.set(Reg.A, read16AfterOpcode());
+            Regs.set(Reg.A, read8(read16AfterOpcode()));
         } break;
         case LD_A_BCR: {
             Regs.set(Reg.A, read8(reg16(Reg16.BC)));
