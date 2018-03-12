@@ -169,8 +169,8 @@ public class Cpu implements Component, Clocked {
         		write16(argument,registerSP);
         } break;
         case LD_R8_R8: {
-        		Reg destination = extractReg(opcode,0);
-        		Reg store = extractReg(opcode,3);
+        		Reg store = extractReg(opcode,0);
+        		Reg destination = extractReg(opcode,3);
         		int value=Regs.get(store);
         		Regs.set(destination,value);
         } break;
