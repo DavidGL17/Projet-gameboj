@@ -315,20 +315,24 @@ public class Cpu implements Component, Clocked {
         	int vf = Alu.xor(Regs.get(Reg.A),Regs.get(extractReg(opcode,0)));
         	Regs.set(Reg.A,Bits.clip(8,Alu.unpackValue(vf)));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
+        	//setRegFlags(Reg.A,vf);
         } break;
         case XOR_A_N8: {
         	int vf = Alu.xor(Regs.get(Reg.A),read8AfterOpcode());
         	Regs.set(Reg.A,Bits.clip(8,Alu.unpackValue(vf)));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
+        	//setRegFlags(Reg.A,vf);
         } break;
         case XOR_A_HLR: {
         	int vf = Alu.xor(Regs.get(Reg.A),read8AtHl());
         	Regs.set(Reg.A,Bits.clip(8,Alu.unpackValue(vf)));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
+        //setRegFlags(Reg.A,vf);
         } break;
         case CPL: {
         	Regs.set(Reg.A,Bits.clip(8,Bits.clip(8,~Regs.get(Reg.A))));
         	combineAluFlags(0,FlagSrc.CPU,FlagSrc.V1,FlagSrc.V1,FlagSrc.CPU);
+        	
         } break;
 
         // Rotate, shift
@@ -472,7 +476,7 @@ public class Cpu implements Component, Clocked {
      */
     private void write16(int adress, int v) {
     
-    	write8(Preconditions.checkBits16(adress+1), Bits.extract(8,8,Preconditions.checkBits16(v)));
+    	write8(Preconditions.checkBits16(adress+1), Bits.extract(Preconditions.checkBits16(v),8,8));
     	write8(adress, Bits.clip(8,v));
     
     }
@@ -762,6 +766,12 @@ public class Cpu implements Component, Clocked {
         }
     }
     
+    /**
+     * AUXILIARY 
+     * 
+     * @param opcode
+     * @return
+     */
     private RotDir extractRotDir(Opcode opcode) {
     		if (Bits.test(3,opcode.encoding)){
     			return RotDir.RIGHT;
