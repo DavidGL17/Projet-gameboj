@@ -12,6 +12,8 @@ import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Alu;
+import ch.epfl.gameboj.component.cpu.Alu.Flag;
+import ch.epfl.gameboj.component.cpu.Alu.RotDir;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -283,36 +285,62 @@ public class Cpu implements Component, Clocked {
         
         case XOR_A_R8: {
         	int vf = Alu.xor(Regs.get(Reg.A),Regs.get(extractReg(opcode,0)));
-        	Regs.set(Reg.A,Alu.unpackValue(vf));
+        	Regs.set(Reg.A,Bits.clip(8,Alu.unpackValue(vf)));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
         } break;
         case XOR_A_N8: {
         	int vf = Alu.xor(Regs.get(Reg.A),read8AfterOpcode());
-        	Regs.set(Reg.A,Alu.unpackValue(vf));
+        	Regs.set(Reg.A,Bits.clip(8,Alu.unpackValue(vf)));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
         } break;
         case XOR_A_HLR: {
         	int vf = Alu.xor(Regs.get(Reg.A),read8AtHl());
-        	Regs.set(Reg.A,Alu.unpackValue(vf));
+        	Regs.set(Reg.A,Bits.clip(8,Alu.unpackValue(vf)));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
         } break;
         case CPL: {
+        	Regs.set(Reg.A,Bits.clip(8,Bits.clip(8,~Regs.get(Reg.A))));
+        	combineAluFlags(0,FlagSrc.CPU,FlagSrc.V1,FlagSrc.V1,FlagSrc.CPU);
         } break;
 
         // Rotate, shift
         case ROTCA: {
+        	int vf = Alu.rotate(extractRotDir(opcode),Regs.get(Reg.A));
+        	setRegFromAlu(Reg.A,vf);
+        	combineAluFlags(vf,FlagSrc.V0,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
         } break;
         case ROTA: {
+        	int vf = Alu.rotate(extractRotDir(opcode), Regs.get(Reg.A), Bits.test(Regs.get(Reg.F),Flag.C));
+        	setRegFromAlu(Reg.A,vf);
+        	combineAluFlags(vf,FlagSrc.V0,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
         } break;
         case ROTC_R8: {
+        	Reg reg = extractReg(opcode,0);
+        	int vf = Alu.rotate(extractRotDir(opcode),Regs.get(reg));
+        	setRegFromAlu(reg,vf);
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
         } break;
         case ROT_R8: {
+        	Reg reg = extractReg(opcode,0);
+        	int vf = Alu.rotate(extractRotDir(opcode),Regs.get(reg),Bits.test(Regs.get(Reg.F),Flag.C));
+        	setRegFromAlu(reg,vf);
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
         } break;
         case ROTC_HLR: {
+        	int vf = Alu.rotate(extractRotDir(opcode), read8AtHl());
+        	write8AtHl(Bits.clip(8,Alu.unpackValue(vf)));
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
         } break;
         case ROT_HLR: {
+        	int vf = Alu.rotate(extractRotDir(opcode), read8AtHl(), Bits.test(Regs.get(Reg.F),Flag.C));
+        	write8AtHl(Bits.clip(8,Alu.unpackValue(vf)));
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
         } break;
         case SWAP_R8: {
+        	Reg reg = extractReg(opcode,0);
+        	int vf = Alu.swap(Regs.get(reg));
+        	setRegFromAlu(reg,vf);
+        	setFlags(vf);
         } break;
         case SWAP_HLR: {
         } break;
@@ -706,6 +734,14 @@ public class Cpu implements Component, Clocked {
         } else {
             return false;
         }
+    }
+    
+    private RotDir extractRotDir(Opcode opcode) {
+    		if (Bits.test(3,opcode.encoding)){
+    			return RotDir.RIGHT;
+    		} else {
+    			return RotDir.LEFT;
+    		}
     }
     
     
