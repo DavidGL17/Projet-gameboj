@@ -266,14 +266,19 @@ public class Cpu implements Component, Clocked {
         // 
         
         case XOR_A_R8: {
-        	Reg reg = extractReg(opcode,0);
-        	int vf = Alu.xor(Regs.get(Reg.A),Regs.get(reg));
+        	int vf = Alu.xor(Regs.get(Reg.A),Regs.get(extractReg(opcode,0)));
         	Regs.set(Reg.A,Alu.unpackValue(vf));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
         } break;
         case XOR_A_N8: {
+        	int vf = Alu.xor(Regs.get(Reg.A),read8AfterOpcode());
+        	Regs.set(Reg.A,Alu.unpackValue(vf));
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
         } break;
         case XOR_A_HLR: {
+        	int vf = Alu.xor(Regs.get(Reg.A),read8AtHl());
+        	Regs.set(Reg.A,Alu.unpackValue(vf));
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.V0);
         } break;
         case CPL: {
         } break;
