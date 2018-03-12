@@ -20,7 +20,7 @@ import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
 
-class CpuTest {
+class CpuTestProf {
     private static final int CPU_STATE_SIZE = 10;
 
     @Test
