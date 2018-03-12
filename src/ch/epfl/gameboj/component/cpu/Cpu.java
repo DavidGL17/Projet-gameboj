@@ -383,33 +383,83 @@ public class Cpu implements Component, Clocked {
         	setFlags(vf);
         } break;
         case SLA_R8: {
-        	
+        	Reg reg =extractReg(opcode,0);
+        int vf =	Alu.shiftLeft(Regs.get(reg));
+        setRegFlags(reg,vf);
         } break;
         case SRA_R8: {
+        	Reg reg = extractReg(opcode,0);
+        	int vf = Alu.shiftRightA(Regs.get(reg));
+        	setRegFlags(reg,vf);
         } break;
         case SRL_R8: {
+        Reg reg = extractReg(opcode,0);
+        	int vf = Alu.shiftRightL(Regs.get(reg));
+        	setRegFlags(reg,vf);
         } break;
         case SLA_HLR: {
+        	int value = read8AtHl();
+        	int vf = Alu.shiftLeft(value);
+        	write8AtHl(Alu.unpackValue(value));
+        	setFlags(vf);
         } break;
         case SRA_HLR: {
+        	int value = read8AtHl();
+        	int vf = Alu.shiftRightA(value);
+        	write8AtHl(Bits.clip(8,Alu.unpackValue(value)));
+        	setFlags(vf); 	
         } break;
         case SRL_HLR: {
+        	int value = read8AtHl();
+        	int vf = Alu.shiftRightL(value);
+        	write8AtHl(Bits.clip(8,Alu.unpackValue(value)));
+        	setFlags(vf); 
         } break;
 
         // Bit test and set
         case BIT_U3_R8: {
+        	int value = Bits.extract(opcode.encoding, 3,3);
+        	Reg reg = extractReg(opcode,0);
+        	boolean z=false;
+        	if (!(Bits.test(Regs.get(reg),value))) {
+        		z=true;
+        	} else {
+        		z=false;
+        	}
+        	combineAluFlags(Alu.maskZNHC(z,false,false,false),FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.CPU);
+        		
         } break;
         case BIT_U3_HLR: {
+        	int value = Bits.extract(opcode.encoding, 3, 3);
+        	boolean z=false;
+        	if (!(Bits.test(read8AtHl(),value))) {
+        		z=true;
+        	} else {
+        		z=false;
+        	}
+        	combineAluFlags(Alu.maskZNHC(z,false,false,false),FlagSrc.ALU,FlagSrc.V0,FlagSrc.V1,FlagSrc.CPU);
         } break;
         case CHG_U3_R8: {
+        	int value = Bits.extract(opcode.encoding, 3, 3);
+        	Reg reg=extractReg(opcode,0);
+        	Regs.set(reg,Bits.set(Regs.get(reg),value,extractSet(opcode)));
         } break;
         case CHG_U3_HLR: {
+        	int value = Bits.extract(opcode.encoding, 3, 3);
+        	write8AtHl(Bits.set(read8AtHl(),value,extractSet(opcode)));
         } break;
 
         // Misc. ALU
         case DAA: {
+        	int vf = Alu.bcdAdjust(Regs.get(Reg.A),Bits.test(Regs.get(Reg.F),Flag.N),Bits.test(Regs.get(Reg.F),Flag.H),Bits.test(Regs.get(Reg.F),Flag.C));
+        	Regs.set(Reg.A,Alu.unpackValue(vf));
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.CPU,FlagSrc.V0,FlagSrc.ALU);
         } break;
         case SCCF: {
+        	int res = Flag.C.getMask();
+        	res += (Bits.test(Regs.get(Reg.F),Flag.Z)) ? Flag.Z.getMask() : 0;
+        	
+        	setFlags(res);
         } break;
         default : {
         	System.out.println("Not yet treated");
@@ -690,7 +740,7 @@ public class Cpu implements Component, Clocked {
      */
     private void setRegFromAlu(Reg r, int vf) {
     		Preconditions.checkArgument(r!=null);
-    		Regs.set(r,Alu.unpackValue(vf));
+    		Regs.set(r,Bits.clip(8,Alu.unpackValue(vf)));
     }
     
     /**
@@ -785,6 +835,15 @@ public class Cpu implements Component, Clocked {
     		} else {
     			return RotDir.LEFT;
     		}
+    }
+    
+    private boolean extractSet(Opcode opcode) {
+    		if (Bits.test(6,opcode.encoding)){
+    			return false;
+    		} else {
+    			return true;
+    		}
+    		
     }
     
     

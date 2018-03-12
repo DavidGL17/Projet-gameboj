@@ -514,8 +514,8 @@ public final class Alu {
 
         Preconditions.checkBits8(v);
 
-        final boolean n = false;
-        final boolean h = false;
+        final boolean N = false;
+        final boolean H = false;
         boolean c = false;
 
         if (Bits.test(v, 0))
@@ -525,7 +525,7 @@ public final class Alu {
 
         result = Bits.clip(8, result);
 
-        return packValueFlags(result, (result == 0), n, h, c);
+        return packValueFlags(result, (result == 0), N, H, c);
     }
 
     /**
