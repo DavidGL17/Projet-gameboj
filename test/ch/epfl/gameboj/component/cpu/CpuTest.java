@@ -57,10 +57,70 @@ class CpuTest {
     
     ///Partie 4
     
+    
     @Test
     void ADDWork() {
+        Cpu c = new Cpu();
+        Ram r = new Ram(30);
+        Bus b = connect(c, r);
+        Opcode a = Opcode.ADD_A_N8;
+        b.write(0, a.encoding);
+        b.write(1, 10);
+        cycleCpu(c,getTotalCycles(new Opcode[] {a}));
+        assertArrayEquals(new int[] {getTotalBits(new Opcode[] {a}),0,10,0,0,0,0,0,0,0}, c._testGetPcSpAFBCDEHL());
         Opcode[] os = new Opcode[] {
-                ADD_
-        };
+                Opcode.ADD_A_A,
+                Opcode.ADD_A_B,
+                Opcode.ADD_A_C,
+                Opcode.ADD_A_D,
+                Opcode.ADD_A_E,
+                Opcode.ADD_A_H,
+                Opcode.ADD_A_L,
+                };
+        for (int i = 0;i<os.length;++i) {
+            b.write(i, os[i].encoding);
+        }
+        cycleCpu(c, getTotalCycles(os));
+        assertArrayEquals(new int[] {getTotalBits(os),0,10,0,0,0,0,0,0,0}, c._testGetPcSpAFBCDEHL());
+    }
+    @Test
+    void ADCWork() {
+        Cpu c = new Cpu();
+        Ram r = new Ram(30);
+        Bus b = connect(c, r);
+        Opcode a = Opcode.ADD_A_N8;
+        b.write(0, a.encoding);
+        b.write(1, 10);
+        cycleCpu(c,getTotalCycles(new Opcode[] {a}));
+        assertArrayEquals(new int[] {getTotalBits(new Opcode[] {a}),0,10,0,0,0,0,0,0,0}, c._testGetPcSpAFBCDEHL());
+        Opcode[] os = new Opcode[] {
+                Opcode.ADC_A_A,
+                Opcode.ADC_A_B,
+                Opcode.ADC_A_C,
+                Opcode.ADC_A_D,
+                Opcode.ADC_A_E,
+                Opcode.ADC_A_H,
+                Opcode.ADC_A_L,
+                };
+        for (int i = 0;i<os.length;++i) {
+            b.write(i, os[i].encoding);
+        }
+        cycleCpu(c, getTotalCycles(os));
+        assertArrayEquals(new int[] {getTotalBits(os),0,17,0,0,0,0,0,0,0}, c._testGetPcSpAFBCDEHL());
+    }
+    
+    private int getTotalCycles(Opcode[] os) {
+        int cycles = 0;
+        for (int i = 0;i<os.length;++i) {
+            cycles += os[i].cycles;
+        }
+        return cycles;
+    }
+    private int getTotalBits(Opcode[] os) {
+        int bits = 0;
+        for (int i = 0;i<os.length;++i) {
+            bits += os[i].totalBytes;
+        }
+        return bits;
     }
 }

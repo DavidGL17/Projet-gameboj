@@ -11,7 +11,6 @@ import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
-import ch.epfl.gameboj.component.cpu.Alu;
 import ch.epfl.gameboj.component.cpu.Alu.Flag;
 import ch.epfl.gameboj.component.cpu.Alu.RotDir;
 
@@ -82,11 +81,10 @@ public class Cpu implements Component, Clocked {
     @Override
     public void cycle(long cycle) {
         if(cycle >=nextNonIdleCycle) {
-            if (bus.read(registerPC)==0xCB) {
-                dispatch(PREFIXED_OPCODE_TABLE[bus.read(registerPC+1)],cycle);
-
+            if (read8(registerPC)==0xCB) {
+                dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()],cycle);
             } else {
-                dispatch(DIRECT_OPCODE_TABLE[bus.read(registerPC)],cycle);
+                dispatch(DIRECT_OPCODE_TABLE[read8(registerPC)],cycle);
             }
         }
     }
