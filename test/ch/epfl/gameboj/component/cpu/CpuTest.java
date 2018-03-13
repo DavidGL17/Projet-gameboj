@@ -15,7 +15,7 @@ import ch.epfl.gameboj.component.memory.RamController;
  * @author David Gonzalez leon (270845)
  *
  */
-public class CpuTest {
+class CpuTest {
 
     private Bus connect(Cpu cpu, Ram ram) {
         RamController rc = new RamController(ram, 0);
@@ -52,5 +52,15 @@ public class CpuTest {
         b.write(4, Opcode.LD_A_HLR.encoding);
         cycleCpu(c, Opcode.LD_HL_N16.cycles+Opcode.LD_A_HLR.cycles);
         assertArrayEquals(new int[] {5,0,20,0,0,0,0,0,0xFF,0}, c._testGetPcSpAFBCDEHL());
+    }
+    
+    
+    ///Partie 4
+    
+    @Test
+    void ADDWork() {
+        Opcode[] os = new Opcode[] {
+                ADD_
+        };
     }
 }

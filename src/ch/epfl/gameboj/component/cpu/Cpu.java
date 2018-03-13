@@ -575,6 +575,7 @@ public class Cpu implements Component, Clocked {
             break;
         default :
             setReg16(r, newV);
+            break;
         }
     }
     
