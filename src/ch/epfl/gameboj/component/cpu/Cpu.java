@@ -82,7 +82,7 @@ public class Cpu implements Component, Clocked {
     public void cycle(long cycle) {
         if(cycle >=nextNonIdleCycle) {
             if (read8(registerPC)==0xCB) {
-                dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()],cycle);
+                dispatch(PREFIXED_OPCODE_TABLE[registerPC +1],cycle);
             } else {
                 dispatch(DIRECT_OPCODE_TABLE[read8(registerPC)],cycle);
             }
@@ -199,12 +199,12 @@ public class Cpu implements Component, Clocked {
             Regs.set(Reg.A, Regs.get(Reg.A) + read8AtHl()+ (c?1:0));
         } break;
         case INC_R8: {
-            combineAluFlags(Alu.add(Regs.get(extractReg(opcode, 4)), 1), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
-            Regs.set(extractReg(opcode, 4), Regs.get(extractReg(opcode, 4))+ 1);
+            combineAluFlags(Alu.add(Regs.get(extractReg(opcode, 3)), 1), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
+            Regs.set(extractReg(opcode, 3), Regs.get(extractReg(opcode, 3))+ 1);
         } break;
         case INC_HLR: {
             combineAluFlags(Alu.add(read8AtHl(), 1), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
-            write8AtHl(read8AtHl()+ 1);
+            write8AtHl(read8AtHl() + 1);
         } break;
         case INC_R16SP: {
             combineAluFlags(Alu.add16H(reg16SP(extractReg16(opcode)), 1), FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU);
