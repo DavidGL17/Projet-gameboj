@@ -802,6 +802,11 @@ public class Cpu implements Component, Clocked {
     
     ///Extraction du carry
     
+    /**
+     * Auxiliary method for ADD/ADC opcodes
+     * @param opcode, the opcode 
+     * @return true if the opcode is an ADC_A_... and the fanion C in register F is activated, returns false otherwise
+     */
     private boolean extractCarry(Opcode opcode) {
         if (Bits.test(opcode.encoding, 3)) {
             return (Bits.test(Regs.get(Reg.F), 4));
