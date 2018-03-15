@@ -156,6 +156,33 @@ class CpuTest {
         assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16,Opcode.INC_HLR}),0,21,0,0,0,0,0,0xFF,0}, c._testGetPcSpAFBCDEHL());
     }
     
+    @Test
+    void ANDWorks() {
+        Cpu c = new Cpu();
+        Ram r = new Ram(0xFFFF);
+        Bus b = connect(c, r);
+        b.write(0, Opcode.LD_HL_N16.encoding);
+        b.write(2, 0xFF);
+        b.write(0xFF00, 0x0B);
+        b.write(3, Opcode.ADD_A_HLR.encoding);
+        Opcode[] os = new Opcode[] {
+                Opcode.INC_B,
+                Opcode.INC_C,
+                Opcode.INC_D,
+                Opcode.INC_E,
+                };
+        for (int i = 0;i<os.length;++i) {
+            b.write(i+4, os[i].encoding);
+        }
+        Opcode[] os2 = new Opcode[] {
+                Opcode.AND_A_B
+        };
+        b.write(8, os[0].encoding);
+        cycleCpu(c, Opcode.LD_HL_N16.cycles+Opcode.ADD_A_HLR.cycles+getTotalCycles(os)+getTotalCycles(os2));
+        assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16})+getTotalBits(os2)+getTotalBits(os),0,0x01,0x02,1,1,1,1,0xFF,0}, c._testGetPcSpAFBCDEHL());
+    }
+    
+    
     private int getTotalCycles(Opcode[] os) {
         int cycles = 0;
         for (int i = 0;i<os.length;++i) {
