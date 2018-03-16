@@ -163,6 +163,21 @@ class CpuTest {
     }
     
     @Test
+    void CPSetsFlagsCorrectly() {
+        Cpu c = new Cpu();
+        Ram r = new Ram(0xFFFF);
+        Bus b = connect(c, r);
+        b.write(0, Opcode.LD_HL_N16.encoding);
+        b.write(2, 0xFF);
+        b.write(0xFF00, 0x0B);
+        b.write(3, Opcode.ADD_A_HLR.encoding);
+        b.write(4,Opcode.CP_A_N8.encoding);
+        b.write(5, 0x0B);
+        cycleCpu(c, Opcode.LD_HL_N16.cycles+Opcode.ADD_A_HLR.cycles+Opcode.CP_A_N8.cycles);
+        assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16,Opcode.CP_A_N8}),0,0x0B,0xC0,0,0,0,0,0xFF,0}, c._testGetPcSpAFBCDEHL());
+    }
+    
+    @Test
     void ANDWorks() {
         Cpu c = new Cpu();
         Ram r = new Ram(0xFFFF);
