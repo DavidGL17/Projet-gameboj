@@ -783,33 +783,54 @@ public class Cpu implements Component, Clocked {
      * @param c - how c activation is determined
      */
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c ) {
-        FlagSrc[] FlagSources = { z, n, h, c };
-        for (FlagSrc i : FlagSources) {
-            Preconditions.checkArgument(i != null);
-        }
-        boolean[] currentState = { Bits.test(Regs.get(Reg.F), Alu.Flag.Z), Bits.test(Regs.get(Reg.F), Alu.Flag.N), Bits.test(Regs.get(Reg.F), Alu.Flag.H), Bits.test(Regs.get(Reg.F), Alu.Flag.C) };
-        boolean[] activationInVf = { Bits.test(vf, Alu.Flag.Z), Bits.test(vf, Alu.Flag.N), Bits.test(vf, Alu.Flag.H), Bits.test(vf, Alu.Flag.C) };
-        boolean[] FlagActivation = new boolean[4];
+    		int toEnable=0,toDisable = 0,toKeep=0,toTake = 0;
+    		if (z==FlagSrc.V0) {
+    			toDisable+=Alu.Flag.Z.getMask();
+    		} else if (z==FlagSrc.V1) {
+    			toEnable+=Alu.Flag.Z.getMask();
+    		} else if (z==FlagSrc.CPU) {
+    			toKeep+=Alu.Flag.Z.getMask();
+    		} else if (z==FlagSrc.ALU) {
+    			toTake+=Alu.Flag.Z.getMask();
+    		}
+    		if (n==FlagSrc.V0) {
+    			toDisable+=Alu.Flag.N.getMask();
+    		} else if (n==FlagSrc.V1) {
+    			toEnable+=Alu.Flag.N.getMask();
+    		} else if (n==FlagSrc.CPU) {
+    			toKeep+=Alu.Flag.N.getMask();
+    		} else if (n==FlagSrc.ALU) {
+    			toTake+=Alu.Flag.N.getMask();
+    		}
+    		if (h==FlagSrc.V0) {
+    			toDisable+=Alu.Flag.H.getMask();
+    		} else if (h==FlagSrc.V1) {
+    			toEnable+=Alu.Flag.H.getMask();
+    		} else if (h==FlagSrc.CPU) {
+    			toKeep+=Alu.Flag.H.getMask();
+    		} else if (h==FlagSrc.ALU) {
+    			toTake+=Alu.Flag.H.getMask();
+    		}
+    		if (c==FlagSrc.V0) {
+    			toDisable+=Alu.Flag.C.getMask();
+    		} else if (c==FlagSrc.V1) {
+    			toEnable+=Alu.Flag.C.getMask();
+    		} else if (c==FlagSrc.CPU) {
+    			toKeep+=Alu.Flag.C.getMask();
+    		} else if (c==FlagSrc.ALU) {
+    			toTake+=Alu.Flag.C.getMask();
+    		}
+    		
+    		int res = vf & toTake;
+    		res= res | (Regs.get(Reg.F) & toKeep);
+    		res = res | toEnable;
+    		res = res & Bits.complement8(toDisable);
+    		
+    		setFlags(res);
 
-        for (int i = 0; i < FlagSources.length; i++) {
-            switch (FlagSources[i]) {
-            case V0:
-                FlagActivation[i] = false;
-                break;
-            case V1:
-                FlagActivation[i] = true;
-                break;
-            case ALU: 
-                FlagActivation[i] = activationInVf[i];
-                break;
-            case CPU:
-                FlagActivation[i] = currentState[i];
-                break;
-            }
-        }
-        setFlags(Alu.maskZNHC(FlagActivation[0], FlagActivation[1], FlagActivation[2], FlagActivation[3]));
+
+        
     }
-    
     
     ///Extraction du carry
     
