@@ -166,7 +166,6 @@ class CpuTest {
         b.write(0xFF00, 0x0B);
         b.write(3, Opcode.ADD_A_HLR.encoding);
         Opcode[] os = new Opcode[] {
-                Opcode.INC_B,
                 Opcode.INC_C,
                 Opcode.INC_D,
                 Opcode.INC_E,
@@ -175,11 +174,11 @@ class CpuTest {
             b.write(i+4, os[i].encoding);
         }
         Opcode[] os2 = new Opcode[] {
-                Opcode.AND_A_B
+                Opcode.AND_A_C
         };
-        b.write(8, os[0].encoding);
+        b.write(8, os2[0].encoding);
         cycleCpu(c, Opcode.LD_HL_N16.cycles+Opcode.ADD_A_HLR.cycles+getTotalCycles(os)+getTotalCycles(os2));
-        assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16})+getTotalBits(os2)+getTotalBits(os),0,0x01,0x02,1,1,1,1,0xFF,0}, c._testGetPcSpAFBCDEHL());
+        assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16})+getTotalBits(os2)+getTotalBits(os),0,0x0B,0x20,0,1,1,1,0xFF,0}, c._testGetPcSpAFBCDEHL());
     }
     
     

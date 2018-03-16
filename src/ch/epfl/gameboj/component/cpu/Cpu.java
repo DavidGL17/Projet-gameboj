@@ -267,7 +267,7 @@ public class Cpu implements Component, Clocked {
         } break;
         case AND_A_R8: {
             combineAluFlags(Alu.and(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0))), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V1, FlagSrc.V0);
-            Regs.set(Reg.A, Regs.get(Reg.A)&Regs.get(extractReg(opcode, 0)));
+            Regs.set(Reg.A, Regs.get(Reg.A) & Regs.get(extractReg(opcode, 0)));
         } break;
         case AND_A_HLR: {
             combineAluFlags(Alu.and(Regs.get(Reg.A), read8AtHl()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V1, FlagSrc.V0);
