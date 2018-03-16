@@ -313,39 +313,33 @@ public class Cpu implements Component, Clocked {
         	int vf = Alu.rotate(extractRotDir(opcode),Regs.get(Reg.A));
         	setRegFromAlu(Reg.A,vf);
         	combineAluFlags(vf,FlagSrc.V0,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
-        //setRegFlags(Reg.A,vf);
         } break;
         case ROTA: {
         	int vf = Alu.rotate(extractRotDir(opcode), Regs.get(Reg.A), Bits.test(Regs.get(Reg.F),Flag.C));
         	setRegFromAlu(Reg.A,vf);
         	combineAluFlags(vf,FlagSrc.V0,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
-        	//setRegFlags(Reg.A,vf);
         } break;
         case ROTC_R8: {
         	Reg reg = extractReg(opcode,0);
         	int vf = Alu.rotate(extractRotDir(opcode),Regs.get(reg));
         	setRegFromAlu(reg,vf);
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
-         //setRegFlags(Reg.A,vf);
         } break;
         case ROT_R8: {
         	Reg reg = extractReg(opcode,0);
         	int vf = Alu.rotate(extractRotDir(opcode),Regs.get(reg),Bits.test(Regs.get(Reg.F),Flag.C));
         	setRegFromAlu(reg,vf);
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
-         //setRegFlags(Reg.A,vf);
         } break;
         case ROTC_HLR: {
         	int vf = Alu.rotate(extractRotDir(opcode), read8AtHl());
         	write8AtHl(Bits.clip(8,Alu.unpackValue(vf)));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
-         //setRegFlags(Reg.A,vf);
         } break;
         case ROT_HLR: {
         	int vf = Alu.rotate(extractRotDir(opcode), read8AtHl(), Bits.test(Regs.get(Reg.F),Flag.C));
         	write8AtHl(Bits.clip(8,Alu.unpackValue(vf)));
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.ALU);
-         //setRegFlags(Reg.A,vf);
         } break;
         case SWAP_R8: {
         	Reg reg = extractReg(opcode,0);
@@ -772,7 +766,6 @@ public class Cpu implements Component, Clocked {
      * @param h - how h activation is determined
      * @param c - how c activation is determined
      */
-<<<<<<< HEAD
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c ) {
     		int toEnable=0,toDisable = 0,toKeep=0,toTake = 0;
     		if (z==FlagSrc.V0) {
@@ -818,56 +811,7 @@ public class Cpu implements Component, Clocked {
     		res = res & Bits.complement8(toDisable);
     		
     		Regs.set(Reg.F,res);
-=======
-    private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h,
-            FlagSrc c) {
-        int toEnable = 0, toDisable = 0, toKeep = 0, toTake = 0;
-        if (z == FlagSrc.V0) {
-            toDisable += Alu.Flag.Z.getMask();
-        } else if (z == FlagSrc.V1) {
-            toEnable += Alu.Flag.Z.getMask();
-        } else if (z == FlagSrc.CPU) {
-            toKeep += Alu.Flag.Z.getMask();
-        } else if (z == FlagSrc.ALU) {
-            toTake += Alu.Flag.Z.getMask();
-        }
-        if (n == FlagSrc.V0) {
-            toDisable += Alu.Flag.N.getMask();
-        } else if (n == FlagSrc.V1) {
-            toEnable += Alu.Flag.N.getMask();
-        } else if (n == FlagSrc.CPU) {
-            toKeep += Alu.Flag.N.getMask();
-        } else if (n == FlagSrc.ALU) {
-            toTake += Alu.Flag.N.getMask();
-        }
-        if (h == FlagSrc.V0) {
-            toDisable += Alu.Flag.H.getMask();
-        } else if (h == FlagSrc.V1) {
-            toEnable += Alu.Flag.H.getMask();
-        } else if (h == FlagSrc.CPU) {
-            toKeep += Alu.Flag.H.getMask();
-        } else if (h == FlagSrc.ALU) {
-            toTake += Alu.Flag.H.getMask();
-        }
-        if (c == FlagSrc.V0) {
-            toDisable += Alu.Flag.C.getMask();
-        } else if (c == FlagSrc.V1) {
-            toEnable += Alu.Flag.C.getMask();
-        } else if (c == FlagSrc.CPU) {
-            toKeep += Alu.Flag.C.getMask();
-        } else if (c == FlagSrc.ALU) {
-            toTake += Alu.Flag.C.getMask();
-        }
->>>>>>> 2923efb26f1da6d2f35bec0a45c4f2a0261780b3
-
-        int res = vf & toTake;
-        res = res | (Regs.get(Reg.F) & toKeep);
-        res = res | toEnable;
-        res = res & Bits.complement8(toDisable);
-
-        setFlags(res);
     }
-
     ///Extraction du carry
     
     /**
