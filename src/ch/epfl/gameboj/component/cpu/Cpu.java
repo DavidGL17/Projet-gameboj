@@ -248,13 +248,13 @@ public class Cpu implements Component, Clocked {
             write8AtHl(Bits.clip(8,read8AtHl() -1));
         } break;
         case CP_A_R8: {
-            combineAluFlags(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),extractCarry(opcode)), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0))), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
         } break;
         case CP_A_N8: {
-            combineAluFlags(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),extractCarry(opcode)), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), read8AfterOpcode()), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
         } break;
         case CP_A_HLR: {
-            combineAluFlags(Alu.sub(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),extractCarry(opcode)), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+            combineAluFlags(Alu.sub(Regs.get(Reg.A), read8AtHl()), FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
         } break;
         case DEC_R16SP: {
             setReg16SP(extractReg16(opcode), Bits.clip(16,reg16SP(extractReg16(opcode))-1));
@@ -787,8 +787,9 @@ public class Cpu implements Component, Clocked {
         for (FlagSrc i : FlagSources) {
             Preconditions.checkArgument(i != null);
         }
+        int flags = Alu.unpackFlags(vf);
         boolean[] currentState = { Bits.test(Regs.get(Reg.F), Alu.Flag.Z), Bits.test(Regs.get(Reg.F), Alu.Flag.N), Bits.test(Regs.get(Reg.F), Alu.Flag.H), Bits.test(Regs.get(Reg.F), Alu.Flag.C) };
-        boolean[] activationInVf = { Bits.test(vf, Alu.Flag.Z), Bits.test(vf, Alu.Flag.N), Bits.test(vf, Alu.Flag.H), Bits.test(vf, Alu.Flag.C) };
+        boolean[] activationInVf = { Bits.test(flags, Alu.Flag.Z), Bits.test(flags, Alu.Flag.N), Bits.test(flags, Alu.Flag.H), Bits.test(flags, Alu.Flag.C) };
         boolean[] FlagActivation = new boolean[4];
 
         for (int i = 0; i < FlagSources.length; i++) {
