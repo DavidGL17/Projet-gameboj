@@ -300,10 +300,10 @@ public class Cpu implements Component, Clocked {
         case XOR_A_HLR: {
         	int vf = Alu.xor(Regs.get(Reg.A),read8AtHl());
         	Regs.set(Reg.A,Bits.clip(8,Alu.unpackValue(vf)));
-        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.V0);
+        	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.V0,FlagSrc.V0,FlagSrc.V0); /// Sometimes sets N and H !!!!!
         } break;
         case CPL: {
-        	Regs.set(Reg.A,Bits.clip(8,Bits.clip(8,~Regs.get(Reg.A))));
+        	Regs.set(Reg.A,Bits.complement8(Regs.get(Reg.A)));
         	combineAluFlags(0,FlagSrc.CPU,FlagSrc.V1,FlagSrc.V1,FlagSrc.CPU);
         	
         } break;
@@ -432,10 +432,15 @@ public class Cpu implements Component, Clocked {
         	combineAluFlags(vf,FlagSrc.ALU,FlagSrc.CPU,FlagSrc.V0,FlagSrc.ALU);
         } break;
         case SCCF: {
-        	int res = Flag.C.getMask();
-        	res += (Bits.test(Regs.get(Reg.F),Flag.Z)) ? Flag.Z.getMask() : 0;
-        	
-        	setFlags(res);
+        	int res=0;
+        	if (Bits.test(opcode.encoding,3)){
+        		res += (Bits.test(Regs.get(Reg.F),Flag.C)) ? 0 : Flag.C.getMask();
+        	} else {
+	        	res += Flag.C.getMask();
+	        	
+        	}
+	        	res += (Bits.test(Regs.get(Reg.F),Flag.Z)) ? Flag.Z.getMask() : 0;	
+	        	setFlags(res);
         } break;
         default : {
         	System.out.println("Not yet treated");
