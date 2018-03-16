@@ -202,7 +202,7 @@ class CpuTest {
         assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16})+getTotalBits(os2)+getTotalBits(os),0,0x01,0x20,0,1,1,1,0xFF,0}, c._testGetPcSpAFBCDEHL());
     }
     
-<<<<<<< HEAD
+
     @Test
     void XORWorks() {
     		//XOR_A_HLR
@@ -254,8 +254,10 @@ class CpuTest {
             
             
         }
+        
+    }
     	
-=======
+
     
 //    @Test
 ////    void XORSetsCorrectFlags() {
@@ -368,7 +370,7 @@ class CpuTest {
         b.write(1, Opcode.CCF.encoding);
         cycleCpu(c, 1);
         assertEquals(0x10, getF(c));
->>>>>>> 2923efb26f1da6d2f35bec0a45c4f2a0261780b3
+
     }
     
     
