@@ -354,8 +354,8 @@ public class Cpu implements Component, Clocked {
         } break;
         case SWAP_HLR: {
         	int adress = read16AfterOpcode();
-        	int vf = Alu.swap(read16(adress));
-        	write16(adress,Alu.unpackValue(vf));
+        	int vf = Alu.swap(read8(adress));
+        	write8(adress,Alu.unpackValue(vf));
         	setFlags(vf);
         } break;
         case SLA_R8: {
