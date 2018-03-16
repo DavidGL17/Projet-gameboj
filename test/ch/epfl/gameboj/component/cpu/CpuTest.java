@@ -202,6 +202,10 @@ class CpuTest {
         assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16})+getTotalBits(os2)+getTotalBits(os),0,0x01,0x20,0,1,1,1,0xFF,0}, c._testGetPcSpAFBCDEHL());
     }
     
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7b5a813e759436a1ad652ceba8a8762728016075
     @Test
     void XORWorks() {
     		//XOR_A_HLR
@@ -251,7 +255,92 @@ class CpuTest {
             assertArrayEquals( new int [] {5,0,outputs[i][0],outputs[i][1],0,0,0,0,0,0},c._testGetPcSpAFBCDEHL());
         }            
         }
+        
+    }
     	
+<<<<<<< HEAD
+=======
+
+    
+//    @Test
+////    void XORSetsCorrectFlags() {
+//    		final int ITERATIONS=100;
+//        final Opcode N8 = Opcode.XOR_A_N8;
+//        final Opcode RB = Opcode.XOR_A_B;
+//        final Opcode RC = Opcode.XOR_A_C;
+//        final Opcode RD = Opcode.XOR_A_D;
+//        final Opcode RE = Opcode.XOR_A_E;
+//        final Opcode RH = Opcode.XOR_A_H;
+//        final Opcode RL = Opcode.XOR_A_L;
+//        final Opcode HLR = Opcode.XOR_A_HLR;
+//        final Opcode[] R8 = {	
+//        		RB,RC,RD,RE,RH,RL
+//        };
+//        Random randomGenerator =new Random();
+//       
+//        
+//        //XOR_A_N8
+//        {
+//	        Cpu c = new Cpu();
+//	        Ram r = new Ram(0xFFFF);
+//	        Bus b = connect(c, r);
+//	        int adress = 0;
+//	        for (int i=0;i<ITERATIONS; i++) {
+//	        		b.write(adress,N8.encoding);
+//	        		adress++;
+//	        		int input = Bits.clip(8,randomGenerator.nextInt());
+//	        		int current = getA(c);
+//	        		b.write(adress,input);
+//	        		adress++;
+//	        		cycleCpu(c,N8.cycles);
+//	        		int expected = (current==input) ? 1<<7 : 0;
+//	        		System.out.println(current + " " + input);
+//	        		assertEquals(expected ,getF(c));
+//	        }
+//        }
+//        //XOR_A_R8
+//        {
+//        		Cpu c = new Cpu();
+//	        Ram r = new Ram(0xFFFF);
+//	        Bus b = connect(c, r);
+//	        int adress = 0;
+//	        for (int i=0 ; i<R8.length ; i++) {
+//		        	for (int j=0;j<ITERATIONS; j++) {
+//		        		b.write(adress,R8[i].encoding);
+//		        		adress++;
+//		        		int input = c._testGetPcSpAFBCDEHL()[i+4];
+//		        		int current = getA(c);
+//		        		
+//		        		adress++;
+//		        		cycleCpu(c,R8[i].cycles);
+//		        		int expected = (current==input) ? 1<<7 : 0;
+//		        		System.out.println(current + " " + input);
+//		        		assertEquals(expected ,getF(c));
+//		        }
+//	        }
+//        }
+//        //XOR_A_HLR
+//        {
+//        	Cpu c = new Cpu();
+//	        Ram r = new Ram(0xFFFF);
+//	        Bus b = connect(c, r);
+//	        int adress = 0;
+//	        for (int i=0;i<ITERATIONS; i++) {
+//	        		b.write(adress,HLR.encoding);
+//	        		adress++;
+//	        		int input = Bits.clip(8,randomGenerator.nextInt());
+//	        		int current = getA(c);
+//	        		b.write(getHL(c),input);
+//	        		adress++;
+//	        		cycleCpu(c,HLR.cycles);
+//	        		int expected = (current==input) ? 1<<7 : 0;
+//	        		System.out.println(current + " " + input);
+//	        		assertEquals(expected ,getF(c));
+//        	
+//	        }
+//        }        
+//    }
+>>>>>>> 7b5a813e759436a1ad652ceba8a8762728016075
     
     
     @Test
@@ -283,6 +372,10 @@ class CpuTest {
         b.write(1, Opcode.CCF.encoding);
         cycleCpu(c, 1);
         assertEquals(0x10, getF(c));
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7b5a813e759436a1ad652ceba8a8762728016075
     }
     
     
