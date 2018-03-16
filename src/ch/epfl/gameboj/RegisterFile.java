@@ -39,7 +39,7 @@ public final class RegisterFile<E extends Register> {
         throw new IllegalArgumentException();
     }
     /**
-     * Returns the 8 bit value contained in thee given register
+     * Returns the 8 bit value contained in the given register
      * 
      * @param reg, the given register
      * @return value, the value stored in the given register
