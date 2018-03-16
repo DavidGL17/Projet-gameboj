@@ -4,15 +4,21 @@
 package ch.epfl.gameboj.component.cpu;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.Bus;
+import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
+import ch.epfl.gameboj.component.cpu.Alu;
 
 /**
  * @author David Gonzalez leon (270845)
+ * @author Melvin Malonga-Matouba (288405)
  *
  */
 class CpuTest {
@@ -182,6 +188,87 @@ class CpuTest {
     }
     
     
+    @Test
+    void XORSetsCorrectFlags() {
+    		final int ITERATIONS=100;
+        final Opcode N8 = Opcode.XOR_A_N8;
+        final Opcode RB = Opcode.XOR_A_B;
+        final Opcode RC = Opcode.XOR_A_C;
+        final Opcode RD = Opcode.XOR_A_D;
+        final Opcode RE = Opcode.XOR_A_E;
+        final Opcode RH = Opcode.XOR_A_H;
+        final Opcode RL = Opcode.XOR_A_L;
+        final Opcode HLR = Opcode.XOR_A_HLR;
+        final Opcode[] R8 = {	
+        		RB,RC,RD,RE,RH,RL
+        };
+        Random randomGenerator =new Random();
+       
+        
+        //XOR_A_N8
+        {
+	        Cpu c = new Cpu();
+	        Ram r = new Ram(0xFFFF);
+	        Bus b = connect(c, r);
+	        int adress = 0;
+	        for (int i=0;i<ITERATIONS; i++) {
+	        		b.write(adress,N8.encoding);
+	        		adress++;
+	        		int input = Bits.clip(8,randomGenerator.nextInt());
+	        		int current = getA(c);
+	        		b.write(adress,input);
+	        		adress++;
+	        		cycleCpu(c,N8.cycles);
+	        		int expected = (current==input) ? 1<<7 : 0;
+	        		System.out.println(current + " " + input);
+	        		assertEquals(expected ,getF(c));
+	        }
+        }
+        //XOR_A_R8
+        {
+        		Cpu c = new Cpu();
+	        Ram r = new Ram(0xFFFF);
+	        Bus b = connect(c, r);
+	        int adress = 0;
+	        for (int i=0 ; i<R8.length ; i++) {
+		        	for (int j=0;j<ITERATIONS; j++) {
+		        		b.write(adress,R8[i].encoding);
+		        		adress++;
+		        		int input = c._testGetPcSpAFBCDEHL()[i+4];
+		        		int current = getA(c);
+		        		
+		        		adress++;
+		        		cycleCpu(c,R8[i].cycles);
+		        		int expected = (current==input) ? 1<<7 : 0;
+		        		System.out.println(current + " " + input);
+		        		assertEquals(expected ,getF(c));
+		        }
+	        }
+        }
+        //XOR_A_HLR
+        {
+        	Cpu c = new Cpu();
+	        Ram r = new Ram(0xFFFF);
+	        Bus b = connect(c, r);
+	        int adress = 0;
+	        for (int i=0;i<ITERATIONS; i++) {
+	        		b.write(adress,HLR.encoding);
+	        		adress++;
+	        		int input = Bits.clip(8,randomGenerator.nextInt());
+	        		int current = getA(c);
+	        		b.write(getHL(c),input);
+	        		adress++;
+	        		cycleCpu(c,HLR.cycles);
+	        		int expected = (current==input) ? 1<<7 : 0;
+	        		System.out.println(current + " " + input);
+	        		assertEquals(expected ,getF(c));
+        	
+	        }
+        }
+        
+    }
+    
+    
     private int getTotalCycles(Opcode[] os) {
         int cycles = 0;
         for (int i = 0;i<os.length;++i) {
@@ -196,4 +283,33 @@ class CpuTest {
         }
         return bits;
     }
+    
+    private int getA(Cpu c) {
+    		return c._testGetPcSpAFBCDEHL()[2];	
+    }
+    private int getB(Cpu c) {
+		return c._testGetPcSpAFBCDEHL()[4];	
+}
+    private int getF(Cpu c) {
+		return c._testGetPcSpAFBCDEHL()[3];	
+}
+    private int getC(Cpu c) {
+		return c._testGetPcSpAFBCDEHL()[5];	
+}
+    private int getD(Cpu c) {
+		return c._testGetPcSpAFBCDEHL()[6];	
+}
+    private int getE(Cpu c) {
+		return c._testGetPcSpAFBCDEHL()[7];	
+}
+    private int getH(Cpu c) {
+		return c._testGetPcSpAFBCDEHL()[8];	
+}
+    private int getL(Cpu c) {
+		return c._testGetPcSpAFBCDEHL()[9];	
+}
+    private int getHL(Cpu c) {
+    		return Bits.make16(getH(c),getL(c));
+    }
+    
 }

@@ -435,13 +435,13 @@ public final class Alu {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
 
-        final boolean n = false;
-        final boolean h = false;
-        final boolean c = false;
+        final boolean N = false;
+        final boolean H = false;
+        final boolean C = false;
 
         int result = l ^ r;
 
-        return packValueFlags(result, (result == 0), n, h, c);
+        return packValueFlags(result, (result == 0), N, H, C);
     }
 
     /**
