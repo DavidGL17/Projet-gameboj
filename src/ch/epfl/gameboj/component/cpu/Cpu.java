@@ -439,8 +439,8 @@ public class Cpu implements Component, Clocked {
 	        	res += Flag.C.getMask();
 	        	
         	}
-	        	res += (Bits.test(Regs.get(Reg.F),Flag.Z)) ? Flag.Z.getMask() : 0;	
-	        	setFlags(res);
+        	res += (Bits.test(Regs.get(Reg.F),Flag.Z)) ? Flag.Z.getMask() : 0;	
+        	setFlags(res);
         } break;
         default : {
         	System.out.println("Not yet treated");
@@ -787,9 +787,8 @@ public class Cpu implements Component, Clocked {
         for (FlagSrc i : FlagSources) {
             Preconditions.checkArgument(i != null);
         }
-        int flags = Alu.unpackFlags(vf);
         boolean[] currentState = { Bits.test(Regs.get(Reg.F), Alu.Flag.Z), Bits.test(Regs.get(Reg.F), Alu.Flag.N), Bits.test(Regs.get(Reg.F), Alu.Flag.H), Bits.test(Regs.get(Reg.F), Alu.Flag.C) };
-        boolean[] activationInVf = { Bits.test(flags, Alu.Flag.Z), Bits.test(flags, Alu.Flag.N), Bits.test(flags, Alu.Flag.H), Bits.test(flags, Alu.Flag.C) };
+        boolean[] activationInVf = { Bits.test(vf, Alu.Flag.Z), Bits.test(vf, Alu.Flag.N), Bits.test(vf, Alu.Flag.H), Bits.test(vf, Alu.Flag.C) };
         boolean[] FlagActivation = new boolean[4];
 
         for (int i = 0; i < FlagSources.length; i++) {
