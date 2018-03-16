@@ -202,10 +202,7 @@ class CpuTest {
         assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16})+getTotalBits(os2)+getTotalBits(os),0,0x01,0x20,0,1,1,1,0xFF,0}, c._testGetPcSpAFBCDEHL());
     }
     
-<<<<<<< HEAD
-=======
 
->>>>>>> 7b5a813e759436a1ad652ceba8a8762728016075
     @Test
     void XORWorks() {
     		//XOR_A_HLR
@@ -254,12 +251,11 @@ class CpuTest {
             c.cycle(5+2);
             assertArrayEquals( new int [] {5,0,outputs[i][0],outputs[i][1],0,0,0,0,0,0},c._testGetPcSpAFBCDEHL());
         }            
-        }
-        
     }
+        
+    
     	
-<<<<<<< HEAD
-=======
+
 
     
 //    @Test
@@ -340,7 +336,7 @@ class CpuTest {
 //	        }
 //        }        
 //    }
->>>>>>> 7b5a813e759436a1ad652ceba8a8762728016075
+
     
     
     @Test
@@ -372,10 +368,7 @@ class CpuTest {
         b.write(1, Opcode.CCF.encoding);
         cycleCpu(c, 1);
         assertEquals(0x10, getF(c));
-<<<<<<< HEAD
-=======
 
->>>>>>> 7b5a813e759436a1ad652ceba8a8762728016075
     }
     
     
