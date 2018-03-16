@@ -826,7 +826,7 @@ public class Cpu implements Component, Clocked {
     		res = res | toEnable;
     		res = res & Bits.complement8(toDisable);
     		
-    		setFlags(res);
+    		Regs.set(Reg.F,res);
 
 
         

@@ -202,87 +202,66 @@ class CpuTest {
         assertArrayEquals(new int[] {getTotalBits(new Opcode[] {Opcode.ADD_A_HLR,Opcode.LD_HL_N16})+getTotalBits(os2)+getTotalBits(os),0,0x01,0x20,0,1,1,1,0xFF,0}, c._testGetPcSpAFBCDEHL());
     }
     
-    
     @Test
-    void XORSetsCorrectFlags() {
-    		final int ITERATIONS=100;
-        final Opcode N8 = Opcode.XOR_A_N8;
-        final Opcode RB = Opcode.XOR_A_B;
-        final Opcode RC = Opcode.XOR_A_C;
-        final Opcode RD = Opcode.XOR_A_D;
-        final Opcode RE = Opcode.XOR_A_E;
-        final Opcode RH = Opcode.XOR_A_H;
-        final Opcode RL = Opcode.XOR_A_L;
-        final Opcode HLR = Opcode.XOR_A_HLR;
-        final Opcode[] R8 = {	
-        		RB,RC,RD,RE,RH,RL
+    void XORWorks() {
+    		//XOR_A_HLR
+    	/*
+    		Cpu c = new Cpu();
+        Ram r = new Ram(0xFFFF);
+        Bus b = connect(c, r);
+        int initialHL = 0xFF;
+        int valueA=0x08;
+        b.write(0, Opcode.LD_HL_N16.encoding);
+        b.write(2, initialHL);
+        b.write(initialHL, valueA);
+        b.write(3, Opcode.ADD_A_HLR.encoding);
+        */
+        // HL is loaded with initialHL; A is loaded with valueA
+        int [][] inputs = { //initialHL, intialA, ValueAtHL
+        		{0xFF,0x54,0x25},
+        		{0x52,0x45,0x37},
+        		{0x72,0xAC,0x47},
+        		{0x73,0xB3,0x24},
+        		{0x15,0x15,0x15}
         };
-        Random randomGenerator =new Random();
-       
-        
-        //XOR_A_N8
-        {
-	        Cpu c = new Cpu();
-	        Ram r = new Ram(0xFFFF);
-	        Bus b = connect(c, r);
-	        int adress = 0;
-	        for (int i=0;i<ITERATIONS; i++) {
-	        		b.write(adress,N8.encoding);
-	        		adress++;
-	        		int input = Bits.clip(8,randomGenerator.nextInt());
-	        		int current = getA(c);
-	        		b.write(adress,input);
-	        		adress++;
-	        		cycleCpu(c,N8.cycles);
-	        		int expected = (current==input) ? 1<<7 : 0;
-	        		System.out.println(current + " " + input);
-	        		assertEquals(expected ,getF(c));
-	        }
-        }
-        //XOR_A_R8
-        {
+        int [][] outputs = {
+        		{0b0111_0001,0},
+        		{0b0111_0010,0},
+        		{0b1110_1011,0},
+        		{0b1001_0111,0},
+        		{0,1<<7}
+        		
+        };
+        for (int i=0 ;i<inputs.length ; i++) {
         		Cpu c = new Cpu();
-	        Ram r = new Ram(0xFFFF);
-	        Bus b = connect(c, r);
-	        int adress = 0;
-	        for (int i=0 ; i<R8.length ; i++) {
-		        	for (int j=0;j<ITERATIONS; j++) {
-		        		b.write(adress,R8[i].encoding);
-		        		adress++;
-		        		int input = c._testGetPcSpAFBCDEHL()[i+4];
-		        		int current = getA(c);
-		        		
-		        		adress++;
-		        		cycleCpu(c,R8[i].cycles);
-		        		int expected = (current==input) ? 1<<7 : 0;
-		        		System.out.println(current + " " + input);
-		        		assertEquals(expected ,getF(c));
-		        }
-	        }
+            Ram r = new Ram(0xFFFF);
+            Bus b = connect(c, r);
+            int initialHL = inputs[i][0];
+            int initialA=inputs[i][1];
+            int valueAtHL=inputs[i][2];
+            b.write(0, Opcode.LD_HL_N16.encoding);
+            b.write(2, initialHL);
+            b.write(initialHL, initialA);
+            b.write(3, Opcode.ADD_A_HLR.encoding);
+            cycleCpu(c,Opcode.LD_HL_N16.cycles+Opcode.ADD_A_HLR.cycles);
+            b.write(initialHL,valueAtHL);
+            b.write(4, Opcode.XOR_A_HLR.encoding);
+            c.cycle(5+1);
+            c.cycle(5+2);
+            assertArrayEquals( new int [] {5,0,outputs[i][0],outputs[i][1],0,0,0,0,0,0},c._testGetPcSpAFBCDEHL());
+            
+            
+            
         }
-        //XOR_A_HLR
-        {
-        	Cpu c = new Cpu();
-	        Ram r = new Ram(0xFFFF);
-	        Bus b = connect(c, r);
-	        int adress = 0;
-	        for (int i=0;i<ITERATIONS; i++) {
-	        		b.write(adress,HLR.encoding);
-	        		adress++;
-	        		int input = Bits.clip(8,randomGenerator.nextInt());
-	        		int current = getA(c);
-	        		b.write(getHL(c),input);
-	        		adress++;
-	        		cycleCpu(c,HLR.cycles);
-	        		int expected = (current==input) ? 1<<7 : 0;
-	        		System.out.println(current + " " + input);
-	        		assertEquals(expected ,getF(c));
-        	
-	        }
-        }
-        
+    	
     }
     
+    
+    
+    
+    
+    
+   
     
     private int getTotalCycles(Opcode[] os) {
         int cycles = 0;
