@@ -426,6 +426,44 @@ public class Cpu implements Component, Clocked {
         	res += (Bits.test(Regs.get(Reg.F),Flag.Z)) ? Flag.Z.getMask() : 0;	
         	setFlags(res);
         } break;
+        
+     // Jumps
+        case JP_HL: {
+        } break;
+        case JP_N16: {
+        } break;
+        case JP_CC_N16: {
+        } break;
+        case JR_E8: {
+        } break;
+        case JR_CC_E8: {
+        } break;
+
+        // Calls and returns
+        case CALL_N16: {
+        } break;
+        case CALL_CC_N16: {
+        } break;
+        
+        case RST_U3: {
+        } break;
+        case RET: {
+        } break;
+        case RET_CC: {
+        } break;
+
+        // Interrupts
+        case EDI: {
+        } break;
+        case RETI: {
+        } break;
+
+        // Misc control
+        case HALT: {
+        } break;
+        case STOP:
+          throw new Error("STOP is not implemented");
+          
         default : {
         	System.out.println("Not yet treated");
         	throw new IllegalArgumentException();

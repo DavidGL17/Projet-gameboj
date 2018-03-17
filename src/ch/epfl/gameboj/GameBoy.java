@@ -3,6 +3,7 @@
  */
 package ch.epfl.gameboj;
 
+import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
 
@@ -16,6 +17,9 @@ public class GameBoy {
     private Bus bus = new Bus();
     private RamController workRam;
     private RamController echoRam;
+    private Cpu cpu;
+    
+    private long currentCycle = 0;
     
     public GameBoy(Object cartridge) {
         Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
@@ -23,6 +27,8 @@ public class GameBoy {
         echoRam = new RamController(ram, AddressMap.ECHO_RAM_START, AddressMap.ECHO_RAM_END);
         workRam.attachTo(bus);
         echoRam.attachTo(bus);
+        cpu = new Cpu();
+        cpu.attachTo(bus);
     }
 
     /**
@@ -32,5 +38,20 @@ public class GameBoy {
      */
     public Bus bus() {
         return bus;
+    }
+    
+    public Cpu cpu() {
+        return cpu;
+    }
+    
+    public void runUntil(long cycle) {
+        Preconditions.checkArgument(cycle>=currentCycle);
+        for (int i = 0;i<cycle;++i) {
+            cpu.cycle(currentCycle+i);
+        }
+        currentCycle += cycle;
+    }
+    public long cycles() {
+        return currentCycle;
     }
 }
