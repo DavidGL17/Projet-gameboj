@@ -4,6 +4,8 @@ package ch.epfl.gameboj.component.cpu;
 
 import java.util.Arrays;
 
+
+// Repressents the state of a Cpu
 public final class CpuState {
     private final int pc, sp;
     private final int a, f, b, c, d, e, h, l;

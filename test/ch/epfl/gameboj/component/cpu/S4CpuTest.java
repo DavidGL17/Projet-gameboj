@@ -1880,7 +1880,14 @@ public class S4CpuTest {
         Assertions.assertEquals(expected, actual,
                 () -> String.format("Expected state: [%s], actual: [%s]", expected, actual));
     }
-
+    
+    /**
+     * (Non-official java-doc) Creates a Cpu that will run the asm instructions with 
+     * the components components attached to its bus
+     * @param asm
+     * @param components
+     * @return the state of the Cpu after executions(s)
+     */
     private CpuState stateAfter(Assembler asm, Component... components) {
         Program prog = asm.program();
         Component rom = prog.rom();
