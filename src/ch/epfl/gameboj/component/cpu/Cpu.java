@@ -278,8 +278,8 @@ public class Cpu implements Component, Clocked {
             Regs.set(Reg.A, Bits.clip(8,Regs.get(Reg.A)|read8AfterOpcode()));
         } break;
         case OR_A_N8: {
-            combineAluFlags(Alu.or(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0))), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
-            Regs.set(Reg.A, Bits.clip(8,Regs.get(Reg.A)|Regs.get(extractReg(opcode, 0))));
+            combineAluFlags(Alu.or(Regs.get(Reg.A), read8AfterOpcode()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
+            Regs.set(Reg.A, Bits.clip(8,Regs.get(Reg.A)|read8AfterOpcode()));
         } break;
         case OR_A_HLR: {
             combineAluFlags(Alu.or(Regs.get(Reg.A), read8AtHl()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
