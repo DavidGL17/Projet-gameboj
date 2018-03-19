@@ -186,7 +186,7 @@ public class Cpu implements Component, Clocked {
         case ADD_A_R8: {
             boolean c = extractCarry(opcode);
             combineAluFlags(Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),c), FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
-            Regs.set(Reg.A, Regs.get(Reg.A)+Regs.get(extractReg(opcode, 0))+ (c?1:0));
+            Regs.set(Reg.A, Bits.clip(8,Regs.get(Reg.A)+Regs.get(extractReg(opcode, 0))+ (c?1:0)));
         } break;
         case ADD_A_N8: {
             boolean c = extractCarry(opcode);
