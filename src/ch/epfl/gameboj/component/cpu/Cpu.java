@@ -214,12 +214,30 @@ public class Cpu implements Component, Clocked {
             setReg16(Reg16.HL, Bits.clip(16,reg16(Reg16.HL)+ reg16SP(extractReg16(opcode))));
         } break;
         case LD_HLSP_S8: {
+            int s8 = read8AfterOpcode();
+            boolean negativeNumber = false;
+            if (Bits.test(s8, 7)) {
+                negativeNumber = true;
+                s8 -=1;
+                s8 = Bits.complement8(s8);
+            }
             if (Bits.test(opcode.encoding, 4)) {
-                combineAluFlags(Alu.add16L(registerSP, read8AfterOpcode()), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
-                setReg16(Reg16.HL, Bits.clip(16,registerSP+read8AfterOpcode()));
+                if (negativeNumber) {
+                    combineAluFlags(Alu.add16L(registerSP, Bits.clip(8, -s8)), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+                    setReg16(Reg16.HL, Bits.clip(16,registerSP-s8));
+                } else {
+                    combineAluFlags(Alu.add16L(registerSP, s8), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+                    setReg16(Reg16.HL, Bits.clip(16,registerSP+s8));
+                }
             } else {
-                combineAluFlags(Alu.add16L(registerSP, read8AfterOpcode()), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
-                registerSP = Bits.clip(16,registerSP+read8AfterOpcode());
+                if (negativeNumber) {
+                    combineAluFlags(Alu.add16L(registerSP, Bits.clip(8, -s8)), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+                    registerSP = Bits.clip(16,registerSP-s8);
+                } else {
+                    combineAluFlags(Alu.add16L(registerSP, s8), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+                    registerSP = Bits.clip(16,registerSP+s8);
+                    
+                }
             }
         } break;
 
