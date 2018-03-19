@@ -34,16 +34,27 @@ public class GameBoy {
     /**
      * Returns the gameBoy's Bus
      * 
-     * @return bus The gameBoys bus
+     * @return bus the gameBoys bus
      */
     public Bus bus() {
         return bus;
     }
     
+    /**
+     * Returns the gameBoy's Cpu
+     * 
+     * @return bus the gameBoys Cpu
+     */
     public Cpu cpu() {
         return cpu;
     }
     
+    /**
+     * Runs all the gameboy's elements implementing the interface clocked cycle-1 times
+     * 
+     * @param cycle, the number of cycles + 1 the components will run
+     * @throws IllegalArgumentException if the param cycle si strictly inferior than the number of cycles already simulated
+     */
     public void runUntil(long cycle) {
         Preconditions.checkArgument(cycle>=currentCycle);
         for (int i = 0;i<cycle;++i) {
@@ -51,6 +62,12 @@ public class GameBoy {
         }
         currentCycle += cycle;
     }
+    
+    /**
+     * Returns the number of cycles the gameboy has already simulated
+     * 
+     * @return currentCycle, the number of cycles already simulated
+     */
     public long cycles() {
         return currentCycle;
     }

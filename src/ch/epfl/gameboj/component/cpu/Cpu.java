@@ -13,6 +13,7 @@ import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Alu.Flag;
 import ch.epfl.gameboj.component.cpu.Alu.RotDir;
+import ch.epfl.gameboj.component.memory.Ram;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -34,6 +35,7 @@ public class Cpu implements Component, Clocked {
     private int registerSP = 0;
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.DIRECT);
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.PREFIXED);
+    private Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
     
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
@@ -61,6 +63,9 @@ public class Cpu implements Component, Clocked {
      */
     @Override
     public int read(int address) {
+        if (Preconditions.checkBits16(address)>=AddressMap.HIGH_RAM_START && address<AddressMap.HIGH_RAM_END) {
+            return highRam.read(address-AddressMap.HIGH_RAM_START);
+        }
         return NO_DATA;
     }
     
@@ -69,6 +74,9 @@ public class Cpu implements Component, Clocked {
      */
     @Override
     public void write(int address, int data) {
+        if (Preconditions.checkBits16(address)>=AddressMap.HIGH_RAM_START && address<AddressMap.HIGH_RAM_END) {
+            highRam.write(address-AddressMap.HIGH_RAM_START, Preconditions.checkBits8(data));
+        }
     }
     
     public int[] _testGetPcSpAFBCDEHL() {
