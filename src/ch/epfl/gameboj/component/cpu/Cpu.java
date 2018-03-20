@@ -300,8 +300,8 @@ public class Cpu implements Component, Clocked {
             Regs.set(Reg.A, Regs.get(Reg.A)& read8AtHl());
         } break;
         case OR_A_R8: {
-            combineAluFlags(Alu.or(Regs.get(Reg.A), read8AfterOpcode()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
-            Regs.set(Reg.A, Bits.clip(8,Regs.get(Reg.A)|read8AfterOpcode()));
+            combineAluFlags(Alu.or(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0))), FlagSrc.ALU,FlagSrc.ALU, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Bits.clip(8,Regs.get(Reg.A)|Regs.get(extractReg(opcode, 0))));
         } break;
         case OR_A_N8: {
             combineAluFlags(Alu.or(Regs.get(Reg.A), read8AfterOpcode()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
@@ -489,12 +489,6 @@ public class Cpu implements Component, Clocked {
         } break;
         case STOP:
           throw new Error("STOP is not implemented");
-          
-        default : {
-        	System.out.println("Not yet treated");
-        	throw new IllegalArgumentException();
-        }
-        
         }
         setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         registerPC += Bits.clip(16,opcode.totalBytes);
