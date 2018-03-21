@@ -511,25 +511,14 @@ public class Cpu implements Component, Clocked {
 
         // Calls and returns
         case CALL_N16: {
-<<<<<<< HEAD
             push16(Bits.clip(16, registerPC +2));
             registerPC = read16AfterOpcode();
-        } break;
-        case CALL_CC_N16: {
-            if (conditionalInstruction(opcode)) {
-                push16(Bits.clip(16, registerPC +2));
-                registerPC = read16AfterOpcode();
-            }
-=======
-        		push16(registerPC+3); // PC' = PC+3 ? (opcode + 16 d'argument)
-        		registerPC=read16AfterOpcode();
         } break;
         case CALL_CC_N16: {
         		if (conditionalInstruction(opcode)) {
         			push16(registerPC+3);
         			registerPC=read16AfterOpcode();
         		}
->>>>>>> 9f9e38c642346d6617961406949ec912c5806ddc
         } break;
         
         case RST_U3: {
