@@ -226,8 +226,7 @@ public class Cpu implements Component, Clocked {
             boolean negativeNumber = false;
             if (Bits.test(s8, 7)) {
                 negativeNumber = true;
-                s8 -=1;
-                s8 = Bits.complement8(s8);
+                s8 = Bits.complement8(s8 - 1);
             }
             if (Bits.test(opcode.encoding, 4)) {
                 if (negativeNumber) {
@@ -454,14 +453,14 @@ public class Cpu implements Component, Clocked {
         
      // Jumps
         case JP_HL: {
-            registerPC = reg16(Reg16.HL);
+            registerPC = reg16(Reg16.HL)-opcode.totalBytes;
         } break;
         case JP_N16: {
-            registerPC = read16AfterOpcode();
+            registerPC = read16AfterOpcode()-opcode.totalBytes;
         } break;
         case JP_CC_N16: {
             if (conditionalInstruction(opcode)) {
-                registerPC = read16AfterOpcode();
+                registerPC = read16AfterOpcode()-opcode.totalBytes;
             }
         } break;
         case JR_E8: {
@@ -469,14 +468,12 @@ public class Cpu implements Component, Clocked {
             boolean negativeNumber = false;
             if (Bits.test(s8, 7)) {
                 negativeNumber = true;
-                s8 -=1;
-                s8 = Bits.complement8(s8);
+                s8 = Bits.complement8(s8 - 1);
             }
             if (negativeNumber) {
-                registerPC = Bits.clip(16,registerPC + opcode.totalBytes-s8);
+                registerPC = Bits.clip(16,registerPC -s8);
             } else {
-                registerPC = Bits.clip(16,registerPC + opcode.totalBytes+s8);
-                
+                registerPC = Bits.clip(16,registerPC +s8);
             }
         } break;
         case JR_CC_E8: {
@@ -485,22 +482,26 @@ public class Cpu implements Component, Clocked {
                 boolean negativeNumber = false;
                 if (Bits.test(s8, 7)) {
                     negativeNumber = true;
-                    s8 -=1;
-                    s8 = Bits.complement8(s8);
+                    s8 = Bits.complement8(s8 - 1);
                 }
                 if (negativeNumber) {
                     registerPC = Bits.clip(16,registerPC + opcode.totalBytes-s8);
                 } else {
                     registerPC = Bits.clip(16,registerPC + opcode.totalBytes+s8);
-                    
                 }
             }
         } break;
 
         // Calls and returns
         case CALL_N16: {
+            push16(Bits.clip(16, registerPC +2));
+            registerPC = read16AfterOpcode();
         } break;
         case CALL_CC_N16: {
+            if (conditionalInstruction(opcode)) {
+                push16(Bits.clip(16, registerPC +2));
+                registerPC = read16AfterOpcode();
+            }
         } break;
         
         case RST_U3: {
