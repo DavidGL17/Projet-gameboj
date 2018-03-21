@@ -3,11 +3,14 @@
  */
 package ch.epfl.gameboj.component.cpu;
 
+import java.util.Arrays;
+
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
+import ch.epfl.gameboj.bits.Bit;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
@@ -36,7 +39,8 @@ public class Cpu implements Component, Clocked {
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.DIRECT);
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.PREFIXED);
     private Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
-    
+    private boolean IME = false; //Mise en oeuvre de IME ??????????
+    // COmment le contenu de IE peut-ilêtre modifié ??
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
         Opcode[] table = new Opcode[0XFFFF];
@@ -88,20 +92,33 @@ public class Cpu implements Component, Clocked {
      */
     @Override
     public void cycle(long cycle) {
-        if(cycle >=nextNonIdleCycle) {
-            if (read8(registerPC)==0xCB) {
-                dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()],cycle);
-            } else {
-                dispatch(DIRECT_OPCODE_TABLE[read8(registerPC)],cycle);
-            }
-        }
+    		if (nextNonIdleCycle==Long.MAX_VALUE) {
+    			nextNonIdleCycle=cycle;
+    			IME=true; /// Not said in Project but necessary !?
+    		}
+    			//of not HALT
+	        if(cycle >=nextNonIdleCycle) {
+	            reallyCycle(cycle);
+	        }
     }
     
-    private void setNextNonIdleCycle(long cycle, int cycles, int additionalCycles) { // Doesn't use additional cycle
-        nextNonIdleCycle = cycle+cycles;
+    private void setNextNonIdleCycle(long cycle, Opcode opcode) { // Doesn't use additional cycle
+    		int additional=0;
+    		Opcode.Family[] conditionals = {
+    				Opcode.Family.JP_CC_N16,
+    				Opcode.Family.JR_CC_E8,
+    				Opcode.Family.CALL_CC_N16,
+    				Opcode.Family.RET_CC
+    		};
+    		if (Arrays.asList(conditionals).contains(opcode.family)) {
+    			additional = (conditionalInstruction(opcode)) ? opcode.additionalCycles : 0;
+    		}
+        nextNonIdleCycle = cycle+opcode.cycles + additional;
     }
     
     private void dispatch(Opcode opcode, long cycle) {
+    	
+    		setNextNonIdleCycle(cycle, opcode);
         
         switch(opcode.family) {
         case NOP: {
@@ -372,9 +389,9 @@ public class Cpu implements Component, Clocked {
         	setRegFlags(reg,vf);
         } break;
         case SWAP_HLR: {
-        	int adress = read16AfterOpcode();
-        	int vf = Alu.swap(read8(adress));
-        	write8(adress,Alu.unpackValue(vf));
+        	int value = read8AtHl();
+        	int vf = Alu.swap(value);
+        	write8AtHl(Alu.unpackValue(vf));
         	setFlags(vf);
         } break;
         case SLA_R8: {
@@ -395,19 +412,19 @@ public class Cpu implements Component, Clocked {
         case SLA_HLR: {
         	int value = read8AtHl();
         	int vf = Alu.shiftLeft(value);
-        	write8AtHl(Alu.unpackValue(value));
+        	write8AtHl(Alu.unpackValue(vf));
         	setFlags(vf);
         } break;
         case SRA_HLR: {
         	int value = read8AtHl();
         	int vf = Alu.shiftRightA(value);
-        	write8AtHl(Bits.clip(8,Alu.unpackValue(value)));
+        	write8AtHl(Bits.clip(8,Alu.unpackValue(vf)));
         	setFlags(vf); 	
         } break;
         case SRL_HLR: {
         	int value = read8AtHl();
         	int vf = Alu.shiftRightL(value);
-        	write8AtHl(Bits.clip(8,Alu.unpackValue(value)));
+        	write8AtHl(Bits.clip(8,Alu.unpackValue(vf)));
         	setFlags(vf); 
         } break;
 
@@ -420,7 +437,7 @@ public class Cpu implements Component, Clocked {
         } break;
         case BIT_U3_HLR: {
         	int value = Bits.extract(opcode.encoding, 3, 3);
-            combineAluFlags(Alu.testBit(read8AfterOpcode(), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
+            combineAluFlags(Alu.testBit(read8AtHl(), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
         } break;
         case CHG_U3_R8: {
         	int value = Bits.extract(opcode.encoding, 3, 3);
@@ -499,30 +516,45 @@ public class Cpu implements Component, Clocked {
 
         // Calls and returns
         case CALL_N16: {
+        		push16(registerPC+3); // PC' = PC+3 ? (opcode + 16 d'argument)
+        		registerPC=read16AfterOpcode();
         } break;
         case CALL_CC_N16: {
+        		if (conditionalInstruction(opcode)) {
+        			push16(registerPC+3);
+        			registerPC=read16AfterOpcode();
+        		}
         } break;
         
         case RST_U3: {
+        		push16(registerPC+1); //PC' = PC+1 ? (opcode)
+        		registerPC=(Bits.extract(opcode.encoding, 3, 3)*8);
         } break;
         case RET: {
+        		registerPC=pop16();
         } break;
         case RET_CC: {
+        		if (conditionalInstruction(opcode)) {
+        			registerPC=pop16();
+        		}
         } break;
 
         // Interrupts
         case EDI: {
+        		IME= Bits.test(opcode.encoding,3); // IME
         } break;
         case RETI: {
+        		IME=true;
+        		registerPC=pop16();
         } break;
 
         // Misc control
         case HALT: {
+        		nextNonIdleCycle=Long.MAX_VALUE;
         } break;
         case STOP:
           throw new Error("STOP is not implemented");
         }
-        setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         registerPC += Bits.clip(16,opcode.totalBytes);
     }
     
@@ -956,4 +988,31 @@ public class Cpu implements Component, Clocked {
             throw new IllegalArgumentException();
         }
     }
+    
+    
+    public enum Interrupt implements Bit{
+    		VBLANK, LCD_STAT, TIMER, SERIAL, JOYPAD
+    };
+    
+    public void requestInterrupt(Interrupt i) {
+    		highRam.write(AddressMap.REG_IF,i.mask());
+    }
+    
+    private void reallyCycle(long cycle) {
+    		if (IME) {
+    			int RaisedAndActive = highRam.read(AddressMap.REG_IE) & highRam.read(AddressMap.REG_IF);
+    			int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));
+    			if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
+    				registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?	
+    				return;
+    			}
+    		}
+    	//if no exception
+	    	if (read8(registerPC)==0xCB) {
+	            dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()],cycle);
+	        } else {
+	            dispatch(DIRECT_OPCODE_TABLE[read8(registerPC)],cycle);
+	        }
+    }
+    
 }
