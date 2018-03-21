@@ -244,7 +244,6 @@ public class Cpu implements Component, Clocked {
                 } else {
                     combineAluFlags(Alu.add16L(registerSP, s8), FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
                     registerSP = Bits.clip(16,registerSP+s8);
-                    
                 }
             }
         } break;
@@ -300,8 +299,8 @@ public class Cpu implements Component, Clocked {
             Regs.set(Reg.A, Regs.get(Reg.A)& read8AtHl());
         } break;
         case OR_A_R8: {
-            combineAluFlags(Alu.or(Regs.get(Reg.A), read8AfterOpcode()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
-            Regs.set(Reg.A, Bits.clip(8,Regs.get(Reg.A)|read8AfterOpcode()));
+            combineAluFlags(Alu.or(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0))), FlagSrc.ALU,FlagSrc.ALU, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Bits.clip(8,Regs.get(Reg.A)|Regs.get(extractReg(opcode, 0))));
         } break;
         case OR_A_N8: {
             combineAluFlags(Alu.or(Regs.get(Reg.A), read8AfterOpcode()), FlagSrc.ALU,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
@@ -455,14 +454,47 @@ public class Cpu implements Component, Clocked {
         
      // Jumps
         case JP_HL: {
+            registerPC = reg16(Reg16.HL);
         } break;
         case JP_N16: {
+            registerPC = read16AfterOpcode();
         } break;
         case JP_CC_N16: {
+            if (conditionalInstruction(opcode)) {
+                registerPC = read16AfterOpcode();
+            }
         } break;
         case JR_E8: {
+            int s8 = read8AfterOpcode();
+            boolean negativeNumber = false;
+            if (Bits.test(s8, 7)) {
+                negativeNumber = true;
+                s8 -=1;
+                s8 = Bits.complement8(s8);
+            }
+            if (negativeNumber) {
+                registerPC = Bits.clip(16,registerPC + opcode.totalBytes-s8);
+            } else {
+                registerPC = Bits.clip(16,registerPC + opcode.totalBytes+s8);
+                
+            }
         } break;
         case JR_CC_E8: {
+            if (conditionalInstruction(opcode)) {
+                int s8 = read8AfterOpcode();
+                boolean negativeNumber = false;
+                if (Bits.test(s8, 7)) {
+                    negativeNumber = true;
+                    s8 -=1;
+                    s8 = Bits.complement8(s8);
+                }
+                if (negativeNumber) {
+                    registerPC = Bits.clip(16,registerPC + opcode.totalBytes-s8);
+                } else {
+                    registerPC = Bits.clip(16,registerPC + opcode.totalBytes+s8);
+                    
+                }
+            }
         } break;
 
         // Calls and returns
@@ -489,12 +521,6 @@ public class Cpu implements Component, Clocked {
         } break;
         case STOP:
           throw new Error("STOP is not implemented");
-          
-        default : {
-        	System.out.println("Not yet treated");
-        	throw new IllegalArgumentException();
-        }
-        
         }
         setNextNonIdleCycle(cycle, opcode.cycles, opcode.additionalCycles);
         registerPC += Bits.clip(16,opcode.totalBytes);
@@ -915,5 +941,19 @@ public class Cpu implements Component, Clocked {
     		
     }
     
-    
+    ///Extraction de la condition
+    private boolean conditionalInstruction (Opcode opcode) {
+        switch(Bits.extract(opcode.encoding, 3,2)) {
+        case 0b00 :
+            return !Bits.test(Regs.get(Reg.F), 7);
+        case 0b01 :
+            return Bits.test(Regs.get(Reg.F), 7);
+        case 0b10 :
+            return !Bits.test(Regs.get(Reg.F), 4);
+        case 0b11 :
+            return Bits.test(Regs.get(Reg.F), 4);
+        default :
+            throw new IllegalArgumentException();
+        }
+    }
 }
