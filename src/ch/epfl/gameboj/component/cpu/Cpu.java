@@ -117,8 +117,8 @@ public class Cpu implements Component, Clocked {
     }
     
     private void dispatch(Opcode opcode, long cycle) {
-    	
-    		setNextNonIdleCycle(cycle, opcode);
+        int nextPC = registerPC + opcode.totalBytes;
+        setNextNonIdleCycle(cycle, opcode);
         
         switch(opcode.family) {
         case NOP: {
@@ -470,14 +470,14 @@ public class Cpu implements Component, Clocked {
         
      // Jumps
         case JP_HL: {
-            registerPC = reg16(Reg16.HL)-opcode.totalBytes;
+            nextPC = reg16(Reg16.HL);
         } break;
         case JP_N16: {
-            registerPC = read16AfterOpcode()-opcode.totalBytes;
+            nextPC = read16AfterOpcode();
         } break;
         case JP_CC_N16: {
             if (conditionalInstruction(opcode)) {
-                registerPC = read16AfterOpcode()-opcode.totalBytes;
+                nextPC = read16AfterOpcode();
             }
         } break;
         case JR_E8: {
@@ -488,9 +488,9 @@ public class Cpu implements Component, Clocked {
                 s8 = Bits.complement8(s8 - 1);
             }
             if (negativeNumber) {
-                registerPC = Bits.clip(16,registerPC -s8);
+                registerPC = Bits.clip(16,nextPC -s8);
             } else {
-                registerPC = Bits.clip(16,registerPC +s8);
+                registerPC = Bits.clip(16,nextPC +s8);
             }
         } break;
         case JR_CC_E8: {
@@ -502,35 +502,35 @@ public class Cpu implements Component, Clocked {
                     s8 = Bits.complement8(s8 - 1);
                 }
                 if (negativeNumber) {
-                    registerPC = Bits.clip(16,registerPC + opcode.totalBytes-s8);
+                    nextPC = Bits.clip(16,nextPC + opcode.totalBytes-s8);
                 } else {
-                    registerPC = Bits.clip(16,registerPC + opcode.totalBytes+s8);
+                    nextPC = Bits.clip(16,nextPC + opcode.totalBytes+s8);
                 }
             }
         } break;
 
         // Calls and returns
         case CALL_N16: {
-            push16(Bits.clip(16, registerPC +2));
-            registerPC = read16AfterOpcode();
+            push16(Bits.clip(16, nextPC));
+            nextPC = read16AfterOpcode();
         } break;
         case CALL_CC_N16: {
         		if (conditionalInstruction(opcode)) {
-        			push16(registerPC+3);
-        			registerPC=read16AfterOpcode();
+        			push16(nextPC);
+        			nextPC=read16AfterOpcode();
         		}
         } break;
         
         case RST_U3: {
         		push16(registerPC+1); //PC' = PC+1 ? (opcode)
-        		registerPC=(Bits.extract(opcode.encoding, 3, 3)*8);
+        		nextPC=(Bits.extract(opcode.encoding, 3, 3)*8);
         } break;
         case RET: {
-        		registerPC=pop16();
+            nextPC=pop16();
         } break;
         case RET_CC: {
         		if (conditionalInstruction(opcode)) {
-        			registerPC=pop16();
+        		    nextPC=pop16();
         		}
         } break;
 
@@ -540,7 +540,7 @@ public class Cpu implements Component, Clocked {
         } break;
         case RETI: {
         		IME=true;
-        		registerPC=pop16();
+        		nextPC=pop16();
         } break;
 
         // Misc control
@@ -550,7 +550,7 @@ public class Cpu implements Component, Clocked {
         case STOP:
           throw new Error("STOP is not implemented");
         }
-        registerPC += Bits.clip(16,opcode.totalBytes);
+        registerPC = nextPC;
     }
     
     
