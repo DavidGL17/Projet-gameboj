@@ -897,11 +897,12 @@ public class Cpu implements Component, Clocked {
      * @param opcode
      * @return
      */
-    private RotDir extractRotDir(Opcode opcode) {
-    		if (Bits.test(3,opcode.encoding)){
-    			return RotDir.RIGHT;
-    		} else {
+    private RotDir extractRotDir(Opcode opcode) { // /!\ Always returns Right ?
+    		assert (opcode.encoding<0x20);
+    		if (Bits.clip(4,opcode.encoding)<0x08){
     			return RotDir.LEFT;
+    		} else {
+    			return RotDir.RIGHT;
     		}
     }
     
