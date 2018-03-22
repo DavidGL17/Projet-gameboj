@@ -382,11 +382,34 @@ class CpuTest {
         b.write(AddressMap.HIGH_RAM_START, 42);
         assertEquals(42,b.read(AddressMap.HIGH_RAM_START));
         b.write(AddressMap.HIGH_RAM_END, 3);
-        assertEquals(Component.NO_DATA, b.read(AddressMap.HIGH_RAM_END));
+        assertEquals(0xff, b.read(AddressMap.HIGH_RAM_END));
     }
     
     
-    
+    @Test
+    void fibonacciTest() {
+        Cpu c = new Cpu();
+        Ram r = new Ram(0xFFFF);
+        Bus b = connect(c, r);
+        int[] bytes = new int[] {
+                0x31, 0xFF, 0xFF, 0x3E,
+                0x0B, 0xCD, 0x0A, 0x00,
+                0x76, 0x00, 0xFE, 0x02,
+                0xD8, 0xC5, 0x3D, 0x47,
+                0xCD, 0x0A, 0x00, 0x4F,
+                0x78, 0x3D, 0xCD, 0x0A,
+                0x00, 0x81, 0xC1, 0xC9,
+              };
+        for (int i = 0;i<bytes.length;++i) {
+            b.write(i, bytes[i]);
+        }
+        long i = 0;
+        while (getPC(c)!=8) {
+            c.cycle(i);
+            ++i;
+        }
+        assertEquals(89, getA(c));
+    }
     
    
     
@@ -405,6 +428,9 @@ class CpuTest {
         return bits;
     }
     
+    private int getPC(Cpu c) {
+        return c._testGetPcSpAFBCDEHL()[0]; 
+}
     private int getA(Cpu c) {
     		return c._testGetPcSpAFBCDEHL()[2];	
     }
