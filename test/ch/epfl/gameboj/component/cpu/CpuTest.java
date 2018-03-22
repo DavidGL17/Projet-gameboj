@@ -6,18 +6,15 @@ package ch.epfl.gameboj.component.cpu;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Random;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.bits.Bits;
+import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
-import ch.epfl.gameboj.component.Component;
-import ch.epfl.gameboj.component.cpu.Alu;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -385,6 +382,38 @@ class CpuTest {
         assertEquals(0xff, b.read(AddressMap.HIGH_RAM_END));
     }
     
+    @Test
+    void settingIMEWorks() {
+        Opcode[] EIDI = new Opcode[] {Opcode.EI, Opcode.DI};
+        Interrupt interruption = Interrupt.VBLANK;
+        for (Opcode o:EIDI) {
+            Cpu c = new Cpu();
+            Ram r = new Ram(0xFFFF);
+            Bus b = connect(c, r);
+            settingInterruptions(interruption, c);
+            b.write(0, o.encoding);
+            cycleCpu(c, o.cycles);
+            if (o ==Opcode.EI) {
+                assertEquals(AddressMap.INTERRUPTS[interruption.mask()], getPC(c));
+            } else {
+                assertEquals(o.totalBytes, getPC(c));
+            }
+        }
+    }
+    @Test
+    void allInterruptionsWork() {
+        Interrupt[] interrupts = new Interrupt[] {Interrupt.VBLANK, Interrupt.LCD_STAT, Interrupt.TIMER, Interrupt.SERIAL, Interrupt.JOYPAD};
+        Opcode imeActivator = Opcode.EI;
+        for (Interrupt i : interrupts) {
+            Cpu c = new Cpu();
+            Ram r = new Ram(0xFFFF);
+            Bus b = connect(c, r);
+            settingInterruptions(i, c);
+            b.write(0, imeActivator.encoding);
+            cycleCpu(c, imeActivator.cycles);
+            assertEquals(AddressMap.INTERRUPTS[i.mask()], getPC(c));
+        }
+    }
     
     @Test
     void fibonacciTest() {
@@ -426,6 +455,11 @@ class CpuTest {
             bits += os[i].totalBytes;
         }
         return bits;
+    }
+    
+    private void settingInterruptions(Interrupt i, Cpu c) {
+        c.requestInterrupt(i);
+        c.write(AddressMap.REG_IE, i.mask());
     }
     
     private int getPC(Cpu c) {
