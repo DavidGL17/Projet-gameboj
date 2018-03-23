@@ -6,10 +6,7 @@ package ch.epfl.gameboj.component.cpu;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,14 +15,11 @@ import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.GameBoy;
 import ch.epfl.gameboj.bits.Bits;
+import ch.epfl.gameboj.component.Component;
+import ch.epfl.gameboj.component.cpu.Assembler.Program;
 import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
-import ch.epfl.gameboj.component.Component;
-import ch.epfl.gameboj.component.cpu.Alu;
-import ch.epfl.gameboj.component.cpu.Assembler;
-import ch.epfl.gameboj.component.cpu.CpuState;
-import ch.epfl.gameboj.component.cpu.Assembler.Program;
 
 
 
@@ -392,7 +386,7 @@ class CpuTest {
         b.write(AddressMap.HIGH_RAM_START, 42);
         assertEquals(42,b.read(AddressMap.HIGH_RAM_START));
         b.write(AddressMap.HIGH_RAM_END, 3);
-        assertEquals(0xff, b.read(AddressMap.HIGH_RAM_END));
+        assertEquals(3, b.read(AddressMap.HIGH_RAM_END));
     }
     
     @Test
@@ -420,11 +414,11 @@ class CpuTest {
             Bus b = connect(c, r);
             settingInterruptions(interruption, c);
             b.write(0, o.encoding);
-            cycleCpu(c, o.cycles);
+            cycleCpu(c, o.cycles+1);
             if (o ==Opcode.EI) {
-                assertEquals(AddressMap.INTERRUPTS[interruption.mask()], getPC(c));
+                assertEquals(AddressMap.INTERRUPTS[interruption.mask()]+1, getPC(c));
             } else {
-                assertEquals(o.totalBytes, getPC(c));
+                assertEquals(o.totalBytes+1, getPC(c));
             }
         }
     }
@@ -452,8 +446,8 @@ class CpuTest {
             Bus b = connect(c, r);
             settingInterruptions(i, c);
             b.write(0, imeActivator.encoding);
-            cycleCpu(c, imeActivator.cycles);
-            assertEquals(AddressMap.INTERRUPTS[i.mask()], getPC(c));
+            cycleCpu(c, imeActivator.cycles+1);
+            assertEquals(AddressMap.INTERRUPTS[i.mask()]+1, getPC(c));
         }
     }
     
