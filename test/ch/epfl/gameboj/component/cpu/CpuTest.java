@@ -386,7 +386,7 @@ class CpuTest {
         b.write(AddressMap.HIGH_RAM_START, 42);
         assertEquals(42,b.read(AddressMap.HIGH_RAM_START));
         b.write(AddressMap.HIGH_RAM_END, 3);
-        assertEquals(0xff, b.read(AddressMap.HIGH_RAM_END));
+        assertEquals(3, b.read(AddressMap.HIGH_RAM_END));
     }
     
     @Test
@@ -414,11 +414,11 @@ class CpuTest {
             Bus b = connect(c, r);
             settingInterruptions(interruption, c);
             b.write(0, o.encoding);
-            cycleCpu(c, o.cycles);
+            cycleCpu(c, o.cycles+1);
             if (o ==Opcode.EI) {
-                assertEquals(AddressMap.INTERRUPTS[interruption.mask()], getPC(c));
+                assertEquals(AddressMap.INTERRUPTS[interruption.mask()]+1, getPC(c));
             } else {
-                assertEquals(o.totalBytes, getPC(c));
+                assertEquals(o.totalBytes+1, getPC(c));
             }
         }
     }
@@ -446,7 +446,7 @@ class CpuTest {
             Bus b = connect(c, r);
             settingInterruptions(i, c);
             b.write(0, imeActivator.encoding);
-            cycleCpu(c, imeActivator.cycles);
+            cycleCpu(c, imeActivator.cycles+1);
             assertEquals(AddressMap.INTERRUPTS[i.mask()], getPC(c));
         }
     }
