@@ -4,9 +4,11 @@
 package ch.epfl.gameboj;
 
 import ch.epfl.gameboj.component.Timer;
+import ch.epfl.gameboj.component.cartridge.Cartridge;
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
+import jdk.internal.joptsimple.internal.Objects;
 
 /**
  * 
@@ -23,7 +25,8 @@ public class GameBoy {
     
     private long currentCycle = 0;
     
-    public GameBoy(Object cartridge) {
+    public GameBoy(Cartridge cartridge) {
+        Objects.ensureNotNull(cartridge);
         Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
         workRam = new RamController(ram, AddressMap.WORK_RAM_START);
         echoRam = new RamController(ram, AddressMap.ECHO_RAM_START, AddressMap.ECHO_RAM_END);
@@ -53,6 +56,10 @@ public class GameBoy {
         return cpu;
     }
     
+    public Timer timer() {
+        return timer;
+    }
+    
     /**
      * Runs all the gameboy's elements implementing the interface clocked cycle-1 times
      * 
@@ -62,6 +69,7 @@ public class GameBoy {
     public void runUntil(long cycle) {
         Preconditions.checkArgument(cycle>=currentCycle);
         for (int i = 0;i<cycle;++i) {
+            timer.cycle(currentCycle+i);
             cpu.cycle(currentCycle+i);
         }
         currentCycle += cycle;
