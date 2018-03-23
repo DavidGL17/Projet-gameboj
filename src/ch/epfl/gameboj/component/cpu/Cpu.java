@@ -40,7 +40,6 @@ public class Cpu implements Component, Clocked {
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.PREFIXED);
     private Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
     private boolean IME = false; //Mise en oeuvre de IME ??????????
-    // COmment le contenu de IE peut-ilêtre modifié ??
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
         Opcode[] table = new Opcode[0XFFFF];
@@ -92,17 +91,37 @@ public class Cpu implements Component, Clocked {
      */
     @Override
     public void cycle(long cycle) {
-    		if (nextNonIdleCycle==Long.MAX_VALUE) {
-    			nextNonIdleCycle=cycle;
-    			IME=true; /// Not said in Project but necessary !?
+    	
+    		if (nextNonIdleCycle==Long.MAX_VALUE) { //Halt
+    			int RaisedAndActive = highRam.read(AddressMap.REG_IE) & highRam.read(AddressMap.REG_IF);
+				int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));
+				if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
+					registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?
+				}
+				nextNonIdleCycle=cycle;
+				reallyCycle(cycle);
     		}
-    			//of not HALT
-	        if(cycle >=nextNonIdleCycle) {
-	            reallyCycle(cycle);
+    		if(cycle >=nextNonIdleCycle) {
+    			reallyCycle(cycle);
 	        }
     }
     
-    private void setNextNonIdleCycle(long cycle, Opcode opcode) { // Doesn't use additional cycle
+    private void reallyCycle(long cycle) {
+    		if (IME) {
+			int RaisedAndActive = highRam.read(AddressMap.REG_IE) & highRam.read(AddressMap.REG_IF);
+			int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));				if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
+				registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?	
+			}
+		}
+		
+    		if (read8(registerPC)==0xCB) {
+    			dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()],cycle);
+    		} else {
+	    		dispatch(DIRECT_OPCODE_TABLE[read8(registerPC)],cycle);
+	    		}
+	}
+    
+	private void setNextNonIdleCycle(long cycle, Opcode opcode) { // Doesn't use additional cycle
     		int additional=0;
     		Opcode.Family[] conditionals = {
     				Opcode.Family.JP_CC_N16,
@@ -991,23 +1010,6 @@ public class Cpu implements Component, Clocked {
     
     public void requestInterrupt(Interrupt i) {
     		highRam.write(AddressMap.REG_IF,i.mask());
-    }
-    
-    private void reallyCycle(long cycle) {
-    		if (IME) {
-    			int RaisedAndActive = highRam.read(AddressMap.REG_IE) & highRam.read(AddressMap.REG_IF);
-    			int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));
-    			if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
-    				registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?	
-    				return;
-    			}
-    		}
-    	//if no exception
-	    	if (read8(registerPC)==0xCB) {
-	            dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()],cycle);
-	        } else {
-	            dispatch(DIRECT_OPCODE_TABLE[read8(registerPC)],cycle);
-	        }
     }
     
 }
