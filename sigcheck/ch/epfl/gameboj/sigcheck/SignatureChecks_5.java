@@ -17,8 +17,7 @@ public final class SignatureChecks_5 {
     }
     
     void checkGameBoy() {
-        Object o = null;
-        GameBoy g = new GameBoy(o);
+        GameBoy g = new GameBoy(null);
         long c = 0;
         g.runUntil(c);
         Cpu cpu = g.cpu();
