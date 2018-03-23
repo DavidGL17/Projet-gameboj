@@ -1019,7 +1019,7 @@ public class Cpu implements Component, Clocked {
     };
     
     public void requestInterrupt(Interrupt i) {
-    		highRam.write(AddressMap.REG_IF,i.mask());
+    		registerIF=registerIF | i.mask() ;
     }
     
 }

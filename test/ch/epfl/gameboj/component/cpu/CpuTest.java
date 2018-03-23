@@ -484,27 +484,38 @@ class CpuTest {
     
 
     @Test
-    void AbsoluteJumpsSetsPcCorrectly() { // /!\ Doesn't check cc
-	    	GameBoy gameboy = new GameBoy(null);
-	    	Cpu cpu = gameboy.cpu();
+    void AbsoluteJumpsWorks() { // /!\ Doesn't check cc
 	    	Opcode[] arbitrary = {Opcode.INC_C,
 	    			Opcode.INC_D};
 	    	Assembler arb = new Assembler();
 	    	for (Opcode op : arbitrary) {
 	    		arb.emit(op);
 	    	}
-	    	
+	    	int [] previous = stateAfter(arb).toArray();
+	    
 	    	
 	    	{ //JP_HL
-	    	Assembler asm = new Assembler();	   
+	    	 Assembler asm = new Assembler(); 
+	    	 for (Opcode op : arbitrary) {
+		    		asm.emit(op);
+		    	}
+	    	 
 	    	 int randomNum = ThreadLocalRandom.current().nextInt(0, 1<<16 );
 		    	asm.emit(Opcode.LD_HL_N16,randomNum);
 		    asm.emit(Opcode.JP_HL);
 		    assertEquals(randomNum,(stateAfter(asm)).pc());
+		    for (int i=1 ; i<previous.length-2;i++) {
+		    		assertEquals(previous[i],stateAfter(asm).toArray()[i]);
+		    }
+		    assertEquals(randomNum,stateAfter(asm).hl());
+		    
 	    	}
 	    	
 	    	{ //JP_N16
-	    		Assembler asm = new Assembler();	   
+	    		Assembler asm = new Assembler();
+	    		for (Opcode op : arbitrary) {
+		    		asm.emit(op);
+		    	}
 	    		int randomNum = ThreadLocalRandom.current().nextInt(0, 1<<16 );
 		    	 asm.emit(Opcode.JP_N16,randomNum);
 			    assertEquals(randomNum,(stateAfter(asm)).pc());
@@ -512,6 +523,34 @@ class CpuTest {
 	    	}
 	    
     }
+    
+    //@Test
+    //void RelativeJumpsWorks() {
+	  //  	Opcode[] arbitrary = {Opcode.INC_C,
+    //  			Opcode.INC_D};
+    //  	Assembler arb = new Assembler();
+    //  	for (Opcode op : arbitrary) {
+    //  		arb.emit(op);
+    //  	}
+    //  	int [] previous = stateAfter(arb).toArray();
+    //  	
+    //  Assembler asm = new Assembler();
+    //  for (Opcode op : arbitrary) {
+    //		asm.emit(op);
+    //  }
+    //  Random random = new Random();
+    //  byte randByte = (byte)Bits.clip(8,random.nextInt());
+    //  asm.emit(Opcode.JR_E8,randByte);
+	    
+    //  System.out.println(randByte);
+    //  assertEquals(randByte,stateAfter(asm).pc());
+    //  for (int i=1 ; i<previous.length ; i++ ) {
+    //  		System.out.println(i);
+    //  		assertEquals(previous[i],(stateAfter(asm).toArray())[i]);
+    //  }
+    //}
+    
+    
    
     
     private int getTotalCycles(Opcode[] os) {
