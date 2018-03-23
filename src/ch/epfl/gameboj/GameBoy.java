@@ -3,6 +3,7 @@
  */
 package ch.epfl.gameboj;
 
+import ch.epfl.gameboj.component.Timer;
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
@@ -18,6 +19,7 @@ public class GameBoy {
     private RamController workRam;
     private RamController echoRam;
     private Cpu cpu;
+    private Timer timer;
     
     private long currentCycle = 0;
     
@@ -29,6 +31,8 @@ public class GameBoy {
         echoRam.attachTo(bus);
         cpu = new Cpu();
         cpu.attachTo(bus);
+        timer = new Timer(cpu);
+        timer.attachTo(bus);
     }
 
     /**
