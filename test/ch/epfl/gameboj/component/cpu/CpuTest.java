@@ -7,17 +7,23 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
+import ch.epfl.gameboj.GameBoy;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Alu;
+import ch.epfl.gameboj.component.cpu.Assembler;
+import ch.epfl.gameboj.component.cpu.CpuState;
+import ch.epfl.gameboj.component.cpu.Assembler.Program;
+
 
 /**
  * @author David Gonzalez leon (270845)
@@ -411,6 +417,24 @@ class CpuTest {
         assertEquals(89, getA(c));
     }
     
+
+    @Test
+    void AbsoluteJumpsWork() {
+	    	GameBoy gameboy = new GameBoy(null);
+	    	Cpu cpu = gameboy.cpu();
+	    	Opcode[] arbitrary = {Opcode.INC_C,
+	    			Opcode.INC_D};
+	    	
+	    	{ //JP_HL
+	    	Assembler asm = new Assembler();	   
+	    	for (Opcode op : arbitrary) {
+	    		asm.emit(op);
+	    	}
+	    	 int randomNum = ThreadLocalRandom.current().nextInt(0, 1<<16 );
+		    	asm.emit(Opcode.LD_HL_N16,randomNum);
+		    assertEquals(randomNum,(stateAfter(asm)).pc());
+	    	}
+    }
    
     
     private int getTotalCycles(Opcode[] os) {
@@ -458,5 +482,21 @@ class CpuTest {
     private int getHL(Cpu c) {
     		return Bits.make16(getH(c),getL(c));
     }
+    
+    private CpuState stateAfter(Assembler asm, Component... components) {
+    		Program prog = asm.program();
+        GameBoy gameboy = new GameBoy(null);
+        Component rom = prog.rom();
+        Cpu cpu = gameboy.cpu();
+        Bus bus = gameboy.bus();
+        rom.attachTo(bus);
+        for (Component c2: components)
+            c2.attachTo(bus);
+        gameboy.runUntil(prog.cycles());
+        return CpuState.ofArray(cpu._testGetPcSpAFBCDEHL());
+    }
+    
+    
+    
     
 }
