@@ -383,6 +383,21 @@ class CpuTest {
     }
     
     @Test
+    void RSTWorks() {
+        Opcode[] RST = new Opcode[] {Opcode.RST_0, Opcode.RST_1, Opcode.RST_2, Opcode.RST_3, Opcode.RST_4, Opcode.RST_5, Opcode.RST_6, Opcode.RST_7};
+        int i = 0;
+        for (Opcode o:RST) {
+            Cpu c = new Cpu();
+            Ram r = new Ram(0xFFFF);
+            Bus b = connect(c, r);
+            b.write(0, o.encoding);
+            cycleCpu(c, o.cycles);
+            assertEquals(8*i, getPC(c));
+            ++i;
+        }
+    }
+    
+    @Test
     void settingIMEWorks() {
         Opcode[] EIDI = new Opcode[] {Opcode.EI, Opcode.DI};
         Interrupt interruption = Interrupt.VBLANK;
@@ -400,6 +415,20 @@ class CpuTest {
             }
         }
     }
+    
+    @Test
+    void RETIWorks() {
+        Interrupt interruption = Interrupt.VBLANK;
+        Opcode o = Opcode.RETI;
+        Cpu c = new Cpu();
+        Ram r = new Ram(0xFFFF);
+        Bus b = connect(c, r);
+        settingInterruptions(interruption, c);
+        b.write(0, o.encoding);
+        cycleCpu(c, o.cycles);
+        assertEquals(AddressMap.INTERRUPTS[interruption.mask()], getPC(c));
+    }
+    
     @Test
     void allInterruptionsWork() {
         Interrupt[] interrupts = new Interrupt[] {Interrupt.VBLANK, Interrupt.LCD_STAT, Interrupt.TIMER, Interrupt.SERIAL, Interrupt.JOYPAD};
