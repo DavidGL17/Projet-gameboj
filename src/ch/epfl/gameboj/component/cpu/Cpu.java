@@ -118,9 +118,9 @@ public class Cpu implements Component, Clocked {
     
     private void reallyCycle(long cycle) {
     		if (IME) {
-			int RaisedAndActive = highRam.read(AddressMap.REG_IE) & highRam.read(AddressMap.REG_IF);
+			int RaisedAndActive = registerIE & registerIF;
 			int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));				if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
-				registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?	
+				registerPC=AddressMap.INTERRUPTS[toManage];	
 			}
 		}
 		
