@@ -6,16 +6,8 @@ package ch.epfl.gameboj.component.cpu;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-<<<<<<< HEAD
 import java.util.concurrent.ThreadLocalRandom;
 
-=======
-
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-
-
->>>>>>> origin/master
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -28,17 +20,8 @@ import ch.epfl.gameboj.component.cpu.Assembler.Program;
 import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
-<<<<<<< HEAD
-
-=======
-import ch.epfl.gameboj.component.Component;
-import ch.epfl.gameboj.component.cpu.Alu;
-import ch.epfl.gameboj.component.cpu.Assembler;
-import ch.epfl.gameboj.component.cpu.CpuState;
-import ch.epfl.gameboj.component.cpu.Assembler.Program;
 
 
->>>>>>> origin/master
 
 /**
  * @author David Gonzalez leon (270845)
