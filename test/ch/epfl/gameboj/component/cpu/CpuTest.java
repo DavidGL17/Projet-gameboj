@@ -432,7 +432,7 @@ class CpuTest {
         Bus b = connect(c, r);
         settingInterruptions(interruption, c);
         b.write(0, o.encoding);
-        cycleCpu(c, o.cycles);
+        cycleCpu(c, o.cycles+1);
         assertEquals(AddressMap.INTERRUPTS[interruption.mask()], getPC(c));
     }
     
