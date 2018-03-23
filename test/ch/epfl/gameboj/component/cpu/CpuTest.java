@@ -6,9 +6,12 @@ package ch.epfl.gameboj.component.cpu;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+<<<<<<< HEAD
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+=======
+>>>>>>> 1feb4013fb37cf8a63ded9891754b2429411648f
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -16,14 +19,18 @@ import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.GameBoy;
 import ch.epfl.gameboj.bits.Bits;
+import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
+<<<<<<< HEAD
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Alu;
 import ch.epfl.gameboj.component.cpu.Assembler;
 import ch.epfl.gameboj.component.cpu.CpuState;
 import ch.epfl.gameboj.component.cpu.Assembler.Program;
 
+=======
+>>>>>>> 1feb4013fb37cf8a63ded9891754b2429411648f
 
 /**
  * @author David Gonzalez leon (270845)
@@ -391,6 +398,67 @@ class CpuTest {
         assertEquals(0xff, b.read(AddressMap.HIGH_RAM_END));
     }
     
+    @Test
+    void RSTWorks() {
+        Opcode[] RST = new Opcode[] {Opcode.RST_0, Opcode.RST_1, Opcode.RST_2, Opcode.RST_3, Opcode.RST_4, Opcode.RST_5, Opcode.RST_6, Opcode.RST_7};
+        int i = 0;
+        for (Opcode o:RST) {
+            Cpu c = new Cpu();
+            Ram r = new Ram(0xFFFF);
+            Bus b = connect(c, r);
+            b.write(0, o.encoding);
+            cycleCpu(c, o.cycles);
+            assertEquals(8*i, getPC(c));
+            ++i;
+        }
+    }
+    
+    @Test
+    void settingIMEWorks() {
+        Opcode[] EIDI = new Opcode[] {Opcode.EI, Opcode.DI};
+        Interrupt interruption = Interrupt.VBLANK;
+        for (Opcode o:EIDI) {
+            Cpu c = new Cpu();
+            Ram r = new Ram(0xFFFF);
+            Bus b = connect(c, r);
+            settingInterruptions(interruption, c);
+            b.write(0, o.encoding);
+            cycleCpu(c, o.cycles);
+            if (o ==Opcode.EI) {
+                assertEquals(AddressMap.INTERRUPTS[interruption.mask()], getPC(c));
+            } else {
+                assertEquals(o.totalBytes, getPC(c));
+            }
+        }
+    }
+    
+    @Test
+    void RETIWorks() {
+        Interrupt interruption = Interrupt.VBLANK;
+        Opcode o = Opcode.RETI;
+        Cpu c = new Cpu();
+        Ram r = new Ram(0xFFFF);
+        Bus b = connect(c, r);
+        settingInterruptions(interruption, c);
+        b.write(0, o.encoding);
+        cycleCpu(c, o.cycles);
+        assertEquals(AddressMap.INTERRUPTS[interruption.mask()], getPC(c));
+    }
+    
+    @Test
+    void allInterruptionsWork() {
+        Interrupt[] interrupts = new Interrupt[] {Interrupt.VBLANK, Interrupt.LCD_STAT, Interrupt.TIMER, Interrupt.SERIAL, Interrupt.JOYPAD};
+        Opcode imeActivator = Opcode.EI;
+        for (Interrupt i : interrupts) {
+            Cpu c = new Cpu();
+            Ram r = new Ram(0xFFFF);
+            Bus b = connect(c, r);
+            settingInterruptions(i, c);
+            b.write(0, imeActivator.encoding);
+            cycleCpu(c, imeActivator.cycles);
+            assertEquals(AddressMap.INTERRUPTS[i.mask()], getPC(c));
+        }
+    }
     
     @Test
     void fibonacciTest() {
@@ -450,6 +518,11 @@ class CpuTest {
             bits += os[i].totalBytes;
         }
         return bits;
+    }
+    
+    private void settingInterruptions(Interrupt i, Cpu c) {
+        c.requestInterrupt(i);
+        c.write(AddressMap.REG_IE, i.mask());
     }
     
     private int getPC(Cpu c) {
