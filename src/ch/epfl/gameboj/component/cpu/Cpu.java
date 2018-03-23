@@ -39,7 +39,9 @@ public class Cpu implements Component, Clocked {
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.DIRECT);
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.PREFIXED);
     private Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
-    private boolean IME = false; //Mise en oeuvre de IME ??????????
+    private boolean IME = false; 
+    private int registerIE=0;
+    private int registerIF=0;
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
         Opcode[] table = new Opcode[0XFFFF];
@@ -68,6 +70,10 @@ public class Cpu implements Component, Clocked {
     public int read(int address) {
         if (Preconditions.checkBits16(address)>=AddressMap.HIGH_RAM_START && address<AddressMap.HIGH_RAM_END) {
             return highRam.read(address-AddressMap.HIGH_RAM_START);
+        } else if (address==AddressMap.REG_IE){
+        		return registerIE;
+        } else if (address==AddressMap.REG_IF) {
+        		return registerIF;
         }
         return NO_DATA;
     }
@@ -79,6 +85,10 @@ public class Cpu implements Component, Clocked {
     public void write(int address, int data) {
         if (Preconditions.checkBits16(address)>=AddressMap.HIGH_RAM_START && address<AddressMap.HIGH_RAM_END) {
             highRam.write(address-AddressMap.HIGH_RAM_START, Preconditions.checkBits8(data));
+        } else if (address==AddressMap.REG_IE) {
+        		registerIE=Preconditions.checkBits8(data);
+        } else if (address==AddressMap.REG_IF) {
+        		registerIF=Preconditions.checkBits8(data);
         }
     }
     
