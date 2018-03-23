@@ -9,7 +9,7 @@ import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 
-public class Timer implements Component, Clocked {
+public final class Timer implements Component, Clocked {
 	
 	private Cpu cpu;
 	private int principalCounter;
