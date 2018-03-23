@@ -416,7 +416,7 @@ class CpuTest {
             b.write(0, o.encoding);
             cycleCpu(c, o.cycles+1);
             if (o ==Opcode.EI) {
-                assertEquals(AddressMap.INTERRUPTS[interruption.mask()]+1, getPC(c));
+                assertEquals(AddressMap.INTERRUPTS[interruption.index()]+1, getPC(c));
             } else {
                 assertEquals(o.totalBytes+1, getPC(c));
             }
@@ -433,7 +433,7 @@ class CpuTest {
         settingInterruptions(interruption, c);
         b.write(0, o.encoding);
         cycleCpu(c, o.cycles+1);
-        assertEquals(AddressMap.INTERRUPTS[interruption.mask()], getPC(c));
+        assertEquals(AddressMap.INTERRUPTS[interruption.index()]+1, getPC(c));
     }
     
     @Test
@@ -447,7 +447,7 @@ class CpuTest {
             settingInterruptions(i, c);
             b.write(0, imeActivator.encoding);
             cycleCpu(c, imeActivator.cycles+1);
-            assertEquals(AddressMap.INTERRUPTS[i.mask()]+1, getPC(c));
+            assertEquals(AddressMap.INTERRUPTS[i.index()]+1, getPC(c));
         }
     }
     
