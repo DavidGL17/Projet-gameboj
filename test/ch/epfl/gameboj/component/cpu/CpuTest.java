@@ -447,7 +447,7 @@ class CpuTest {
             settingInterruptions(i, c);
             b.write(0, imeActivator.encoding);
             cycleCpu(c, imeActivator.cycles+1);
-            assertEquals(AddressMap.INTERRUPTS[i.mask()], getPC(c));
+            assertEquals(AddressMap.INTERRUPTS[i.mask()]+1, getPC(c));
         }
     }
     
