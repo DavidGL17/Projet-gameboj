@@ -3,12 +3,13 @@
  */
 package ch.epfl.gameboj;
 
+import java.util.Objects;
+
 import ch.epfl.gameboj.component.Timer;
 import ch.epfl.gameboj.component.cartridge.Cartridge;
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
-import jdk.internal.joptsimple.internal.Objects;
 
 /**
  * 
@@ -26,7 +27,7 @@ public class GameBoy {
     private long currentCycle = 0;
     
     public GameBoy(Cartridge cartridge) {
-        Objects.ensureNotNull(cartridge);
+        Objects.requireNonNull(cartridge);
         Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
         workRam = new RamController(ram, AddressMap.WORK_RAM_START);
         echoRam = new RamController(ram, AddressMap.ECHO_RAM_START, AddressMap.ECHO_RAM_END);

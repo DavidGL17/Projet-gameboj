@@ -17,8 +17,8 @@ public final class MBC0 implements Component {
     private Rom rom;
     
     public MBC0(Rom rom) {
-        Objects.ensureNotNull(rom);
-        Preconditions.checkArgument(rom.size()!= 0x8000);
+        Preconditions.checkArgument(rom!=null);
+        Preconditions.checkArgument(rom.size()== 0x8000);
         this.rom = rom;
     }
 

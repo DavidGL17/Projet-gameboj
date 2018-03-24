@@ -26,13 +26,15 @@ public class Cartridge implements Component {
     
     public static Cartridge ofFile(File romFile) throws IOException {
         try(FileInputStream input = new FileInputStream(romFile)){
-            byte[] data = new byte[0x8000];
+            byte[] data = new byte[(int)romFile.length()];
             int n = 0;
-            do {
+            while (n != -1){
                 n = input.read(data);
-            } while (n != -1);
+            };
             Preconditions.checkArgument(data[0x147]==0);
-            return new Cartridge(new MBC0(new Rom(data)));
+            Rom rom = new Rom(data);
+            Cartridge c = new Cartridge(new MBC0(rom));
+            return c;
         } catch (FileNotFoundException i) {
             throw new IOException();
         }
