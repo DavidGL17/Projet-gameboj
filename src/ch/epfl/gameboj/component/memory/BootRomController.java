@@ -28,10 +28,15 @@ public final class BootRomController implements Component {
 
 	@Override
 	public void write(int address, int data) {
-		if (bootIsDisabled && address==AddressMap.REG_BOOT_ROM_DISABLE) {
+		if (!bootIsDisabled && address==AddressMap.REG_BOOT_ROM_DISABLE) {
 			bootIsDisabled=true;
 		}
-		cartridge.write(address,data); //Pas de raison de faire les vérifications maintenant
+        cartridge.write(address, data); // Pas de raison de faire les
+                                        // vérifications maintenant (réponse) en
+                                        // l'occurence cartridge et MBC0 font
+                                        // tous les deux des vérifications donc
+                                        // tu peux partoir du principe que ça va
+                                        // être détecter
 		
 	}
 
