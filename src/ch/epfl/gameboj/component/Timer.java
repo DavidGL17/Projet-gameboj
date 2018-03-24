@@ -12,10 +12,10 @@ import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 public final class Timer implements Component, Clocked {
 	
 	private Cpu cpu;
-	private int principalCounter;
-	private int secondaryCounter;
-	private int TMA;
-	private int TAC;
+	private int principalCounter=0;
+	private int secondaryCounter=0;
+	private int TMA=0;
+	private int TAC=0;
 	
 	public Timer(Cpu cpu){
 		if (cpu==null)
