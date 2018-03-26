@@ -460,7 +460,6 @@ public class Cpu implements Component, Clocked {
         // Bit test and set
         case BIT_U3_R8: {
         	int value = Bits.extract(opcode.encoding, 3,3);
-        	System.out.println(value);
         	Reg reg = extractReg(opcode,0);
         	combineAluFlags(Alu.testBit(Regs.get(reg), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
         } break;
@@ -471,8 +470,6 @@ public class Cpu implements Component, Clocked {
         case CHG_U3_R8: {
         	int value = Bits.extract(opcode.encoding, 3, 3);
         	Reg reg=extractReg(opcode,0);
-        	System.out.println(value);
-        	System.out.println();
         	Regs.set(reg,Bits.set(Regs.get(reg),value,extractSet(opcode)));
         } break;
         case CHG_U3_HLR: {
