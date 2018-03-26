@@ -25,7 +25,7 @@ public class BootRomControllerTest {
         assertThrows(NullPointerException.class, ()->{new BootRomController(null);});
     }
     
-    @Test
+    @Test 
     void readWorksProperlyBeforeDisabling() throws IOException {
         int i = 0;
         BootRomController br = new BootRomController(Cartridge.ofFile(new File("01-special.gb")));
@@ -35,7 +35,7 @@ public class BootRomControllerTest {
         }
     }
     
-    @Test
+    @Test //Celui la est pas complétement juste
     void BootRomControllerDisablesHimselfCorrectly() throws IOException {
         int i = 0;
         BootRomController br = new BootRomController(Cartridge.ofFile(new File("01-special.gb")));
