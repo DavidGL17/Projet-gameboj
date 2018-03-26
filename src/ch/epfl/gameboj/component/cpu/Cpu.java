@@ -92,6 +92,10 @@ public class Cpu implements Component, Clocked {
         }
     }
     
+    /**
+     * Allows the state of the Cpu to be known for test purposes 
+     * @return an array containing the values contained by each Register or pair of Registers
+     */
     public int[] _testGetPcSpAFBCDEHL() {
         return new int[] {registerPC,registerSP, Regs.get(Reg.A), Regs.get(Reg.F), Regs.get(Reg.B), Regs.get(Reg.C), Regs.get(Reg.D), Regs.get(Reg.E), Regs.get(Reg.H), Regs.get(Reg.L)};    
     }
@@ -100,37 +104,62 @@ public class Cpu implements Component, Clocked {
      * @see ch.epfl.gameboj.component.Clocked#cycle(long)
      */
     @Override
+    /**
+     * Determines wether the gameboy should be functionning or waiting in order to simulate a gameboy
+     * if the gameboy is in HALT, determines wether the GameBoy should start functionning again
+     * @param cycle - the cycle to execute
+     */
     public void cycle(long cycle) {
     	
     		if (nextNonIdleCycle==Long.MAX_VALUE) { //Halt
     			int RaisedAndActive = bus.read(AddressMap.REG_IE) & bus.read(AddressMap.REG_IF);
-				int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));
-				if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
-					registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?
+			int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));
+			if ((toManage>=0)&&(toManage<=4)) {
+				if (!IME) {
+					registerPC=registerPC+1;
+				} else {
+					manageInterruption(toManage);
 					nextNonIdleCycle=cycle;
-					reallyCycle(cycle);
 				}
-				
+			}
     		}
     		if(cycle >=nextNonIdleCycle) {
     			reallyCycle(cycle);
 	        }
     }
     
+    /**
+     * Performs a cycle of GameBoy
+     * @param cycle - the cycle to execute
+     */
     private void reallyCycle(long cycle) {
     		if (IME) {
 			int RaisedAndActive = registerIE & registerIF;
-			int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));				if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
-				registerPC=AddressMap.INTERRUPTS[toManage];	
-			}
+			int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));	
+			manageInterruption(toManage);
+			nextNonIdleCycle=cycle+5;
 		}
-		
+			
     		if (read8(registerPC)==0xCB) {
     			dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()],cycle);
     		} else {
 	    		dispatch(DIRECT_OPCODE_TABLE[read8(registerPC)],cycle);
 	    		}
 	}
+    
+    /**
+     * Sets SP, PC, IME, and IF according to the management of interruption toMangage
+     * @param toManage the index of the interruption, possibly invalid
+     */
+    private void manageInterruption(int toManage) {
+	    	if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
+	    		IME=false;
+	    		Bits.set(registerIF,toManage,false);	
+	    		push16(registerPC);
+	    		registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?
+			}
+    		}
+   
     
 	private void setNextNonIdleCycle(long cycle, Opcode opcode) { // Doesn't use additional cycle
     		int additional=0;
