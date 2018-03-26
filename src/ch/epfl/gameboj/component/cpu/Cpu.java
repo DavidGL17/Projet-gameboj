@@ -176,7 +176,7 @@ public class Cpu implements Component, Clocked {
     }
     
     private void dispatch(Opcode opcode, long cycle) {
-        int nextPC = registerPC + opcode.totalBytes;
+        int nextPC = Bits.clip(16,registerPC + opcode.totalBytes);
         setNextNonIdleCycle(cycle, opcode);
         
         switch(opcode.family) {

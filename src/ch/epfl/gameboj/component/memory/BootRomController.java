@@ -30,9 +30,9 @@ public final class BootRomController implements Component {
 	@Override
 	public void write(int address, int data) {
 		if (!bootIsDisabled && address==AddressMap.REG_BOOT_ROM_DISABLE) {
-			bootIsDisabled=true;
-		}
+            bootIsDisabled = true;
+        }
         cartridge.write(address, data);
-	}
+    }
 
 }

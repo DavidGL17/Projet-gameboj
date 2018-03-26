@@ -45,7 +45,7 @@ public class Cartridge implements Component {
      */
     @Override
     public int read(int address) {
-        return MBC.read(Preconditions.checkBits16(address));
+        return MBC.read(address);
     }
 
     /* (non-Javadoc)
@@ -53,7 +53,7 @@ public class Cartridge implements Component {
      */
     @Override
     public void write(int address, int data) {
-        MBC.write(Preconditions.checkBits16(address), Preconditions.checkBits8(data));
+        MBC.write(address, data);
     }
 
 }

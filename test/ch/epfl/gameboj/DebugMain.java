@@ -22,11 +22,13 @@ public final class DebugMain {
             "08-misc instrs.gb", "09-op r,r.gb", "10-bit ops.gb",
             "11-op a,(hl).gb", "instr_timing.gb", };
     private static String[] testsPassed = new String[] {};
-    
-    
+
     public static void main(String[] args) {
+        int i = 1;
         for (String test : testsFailed) {
+            System.out.println("Test " + i + " : " + testsFailed[i]);
             test(test, "30000000");
+            ++i;
         }
     }
 

@@ -28,7 +28,7 @@ public final class Timer implements Component, Clocked {
 	public void cycle(long cycle) { 
 		
 		boolean s0 = state();
-		principalCounter = Bits.clip(16,principalCounter+1);
+		principalCounter = Bits.clip(16,principalCounter+4);
 		incIFChange(s0);
 				
 	}
