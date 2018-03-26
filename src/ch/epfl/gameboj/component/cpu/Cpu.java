@@ -112,16 +112,15 @@ public class Cpu implements Component, Clocked {
 	    public void cycle(long cycle) {
 	    	
 	    		if (nextNonIdleCycle==Long.MAX_VALUE) { //Halt
-	    			int RaisedAndActive = bus.read(AddressMap.REG_IE) & bus.read(AddressMap.REG_IF);
+	    			int RaisedAndActive = registerIE & registerIF;
 				int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));
 				if ((toManage>=0)&&(toManage<=4)) {
-					if (!IME) {
-						registerPC=registerPC+1;
-					} else {
-						manageInterruption(toManage);
-						nextNonIdleCycle=cycle;
-					}
+					nextNonIdleCycle=cycle;
+					interruptHandler(toManage);
+				} else {
+					return;
 				}
+				
 	    		}
 	    		if(cycle >=nextNonIdleCycle) {
 	    			reallyCycle(cycle);
@@ -136,8 +135,11 @@ public class Cpu implements Component, Clocked {
 	    		if (IME) {
 				int RaisedAndActive = registerIE & registerIF;
 				int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));	
-				manageInterruption(toManage);
-				nextNonIdleCycle=cycle+5;
+				if ((toManage>=0)&&(toManage<=4)) {
+					interruptHandler(toManage);
+					nextNonIdleCycle=cycle+5;
+					return;
+				}
 			}
 				
 	    		if (read8(registerPC)==0xCB) {
@@ -151,8 +153,8 @@ public class Cpu implements Component, Clocked {
 	     * Sets SP, PC, IME, and IF according to the management of interruption toMangage
 	     * @param toManage the index of the interruption, possibly invalid
 	     */
-	    private void manageInterruption(int toManage) {
-		    	if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
+	    private void interruptHandler(int toManage) {
+		    	if ((toManage>=0)&&(toManage<=4)&&IME) { // iff there is exception to treat;
 		    		IME=false;
 		    		Bits.set(registerIF,toManage,false);	
 		    		push16(registerPC);
@@ -611,6 +613,7 @@ public class Cpu implements Component, Clocked {
 	        // Misc control
 	        case HALT: {
 	        		nextNonIdleCycle=Long.MAX_VALUE;
+	        		nextPC=registerPC+1;
 	        } break;
 	        case STOP:
 	          throw new Error("STOP is not implemented");
