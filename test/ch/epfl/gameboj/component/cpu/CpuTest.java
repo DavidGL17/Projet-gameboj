@@ -476,7 +476,7 @@ class CpuTest {
         assertEquals(89, getA(c));
     }
     
-
+    @Disabled
     @Test
     void AbsoluteJumpsWorks() { // /!\ Doesn't check cc
 	    	Opcode[] arbitrary = {Opcode.INC_C,
