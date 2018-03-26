@@ -33,12 +33,12 @@ public class Cpu implements Component, Clocked {
     
     private long nextNonIdleCycle = 0;
     private Bus bus;
-    private RegisterFile<Reg> Regs = new RegisterFile<>(Reg.values());
+    private final RegisterFile<Reg> Regs = new RegisterFile<>(Reg.values());
     private int registerPC = 0;
     private int registerSP = 0;
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.DIRECT);
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(Opcode.Kind.PREFIXED);
-    private Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
+    private final Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
     private boolean IME = false; 
     private int registerIE=0;
     private int registerIF=0;
