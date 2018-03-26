@@ -26,7 +26,7 @@ public final class DebugMain {
     public static void main(String[] args) {
         int i = 1;
         for (String test : testsFailed) {
-            System.out.println("Test " + i + " : " + testsFailed[i]);
+            System.out.println("Test " + i + " : " + testsFailed[i-1]);
             test(test, "30000000");
             ++i;
         }
