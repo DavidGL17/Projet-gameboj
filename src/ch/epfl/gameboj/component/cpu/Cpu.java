@@ -531,9 +531,9 @@ public class Cpu implements Component, Clocked {
                     s8 = Bits.complement8(s8 - 1);
                 }
                 if (negativeNumber) {
-                    nextPC = Bits.clip(16,nextPC + opcode.totalBytes-s8);
+                    nextPC = Bits.clip(16,nextPC-s8);
                 } else {
-                    nextPC = Bits.clip(16,nextPC + opcode.totalBytes+s8);
+                    nextPC = Bits.clip(16,nextPC+s8);
                 }
             }
         } break;
