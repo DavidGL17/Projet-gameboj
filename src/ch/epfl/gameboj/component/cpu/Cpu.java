@@ -103,13 +103,14 @@ public class Cpu implements Component, Clocked {
     public void cycle(long cycle) {
     	
     		if (nextNonIdleCycle==Long.MAX_VALUE) { //Halt
-    			int RaisedAndActive = highRam.read(AddressMap.REG_IE) & highRam.read(AddressMap.REG_IF);
+    			int RaisedAndActive = bus.read(AddressMap.REG_IE) & bus.read(AddressMap.REG_IF);
 				int toManage = 31-Integer.numberOfLeadingZeros(Integer.lowestOneBit(RaisedAndActive));
 				if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
 					registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?
+					nextNonIdleCycle=cycle;
+					reallyCycle(cycle);
 				}
-				nextNonIdleCycle=cycle;
-				reallyCycle(cycle);
+				
     		}
     		if(cycle >=nextNonIdleCycle) {
     			reallyCycle(cycle);
