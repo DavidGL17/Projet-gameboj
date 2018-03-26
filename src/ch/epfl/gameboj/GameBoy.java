@@ -18,11 +18,11 @@ import ch.epfl.gameboj.component.memory.RamController;
  * 
  */
 public class GameBoy {
-    private Bus bus = new Bus();
-    private RamController workRam;
-    private RamController echoRam;
-    private Cpu cpu;
-    private Timer timer;
+    private final Bus bus = new Bus();
+    private final RamController workRam;
+    private final RamController echoRam;
+    private final Cpu cpu;
+    private final Timer timer;
     
     private long currentCycle = 0;
     
