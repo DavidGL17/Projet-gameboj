@@ -44,7 +44,7 @@ public class Cpu implements Component, Clocked {
     private int registerIF=0;
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[0XFFFF];
+        Opcode[] table = new Opcode[0X200];
         for (Opcode o : Opcode.values()) {
             if (o.kind == kind) {
                 table[o.encoding] = o;
@@ -518,9 +518,9 @@ public class Cpu implements Component, Clocked {
                 s8 = Bits.complement8(s8 - 1);
             }
             if (negativeNumber) {
-                registerPC = Bits.clip(16,nextPC -s8);
+                nextPC = Bits.clip(16,nextPC -s8);
             } else {
-                registerPC = Bits.clip(16,nextPC +s8);
+                nextPC = Bits.clip(16,nextPC +s8);
             }
         } break;
         case JR_CC_E8: {

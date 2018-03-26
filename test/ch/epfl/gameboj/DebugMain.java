@@ -15,17 +15,27 @@ import ch.epfl.gameboj.component.cpu.Cpu;
  *
  */
 public final class DebugMain {
-    public static void main(String[] args) throws IOException {
-        File romFile = new File(args[0]);
-        long cycles = Long.parseLong(args[1]);
+    public static void main(String[] args) {
+        test("01-special.gb", "40000000");;
+    }
 
-        GameBoy gb = new GameBoy(Cartridge.ofFile(romFile));
-        Component printer = new DebugPrintComponent();
-        printer.attachTo(gb.bus());
-        while (gb.cycles() < cycles) {
-            long nextCycles = Math.min(gb.cycles() + 17556, cycles);
-            gb.runUntil(nextCycles);
-            gb.cpu().requestInterrupt(Cpu.Interrupt.VBLANK);
+    private static void test(String arg1, String arg2) {
+        try {
+            File romFile = new File(arg1);
+            long cycles = Long.parseLong(arg2);
+
+            GameBoy gb = new GameBoy(Cartridge.ofFile(romFile));
+            Component printer = new DebugPrintComponent();
+            printer.attachTo(gb.bus());
+            while (gb.cycles() < cycles) {
+                long nextCycles = Math.min(gb.cycles() + 17556, cycles);
+                gb.runUntil(nextCycles);
+                gb.cpu().requestInterrupt(Cpu.Interrupt.VBLANK);
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
