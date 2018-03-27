@@ -67,6 +67,7 @@ public final class Ram {
      *             if the value is not an 8 bits value
      */
     public void write(int index, int value) {
-        data[Objects.checkIndex(index, data.length)] = (byte) Preconditions.checkBits8(value);
+        data[Objects.checkIndex(index, data.length)] = (byte) Preconditions
+                .checkBits8(value);
     }
 }

@@ -15,7 +15,8 @@ public final class Rom {
     private final byte[] data;
 
     /**
-     * Constructs a rom memory and copies the elements of the parameter in the data array of the memory
+     * Constructs a rom memory and copies the elements of the parameter in the
+     * data array of the memory
      * 
      * @param data,
      *            a byte array
@@ -46,7 +47,8 @@ public final class Rom {
      *            the index were the octet is located
      * @return The element located at the specified index
      * @throws IndexOutOfBoundsException
-     *             if the index is bigger or smaller than the size of the rom's memory
+     *             if the index is bigger or smaller than the size of the rom's
+     *             memory
      */
     public int read(int index) {
         return Byte.toUnsignedInt(data[Objects.checkIndex(index, data.length)]);

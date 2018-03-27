@@ -25,14 +25,15 @@ public class GameBoy {
     private final Cpu cpu;
     private final Timer timer;
     private final BootRomController bootRomController;
-    
+
     private long currentCycle = 0;
-    
+
     public GameBoy(Cartridge cartridge) {
         Objects.requireNonNull(cartridge);
         Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
         workRam = new RamController(ram, AddressMap.WORK_RAM_START);
-        echoRam = new RamController(ram, AddressMap.ECHO_RAM_START, AddressMap.ECHO_RAM_END);
+        echoRam = new RamController(ram, AddressMap.ECHO_RAM_START,
+                AddressMap.ECHO_RAM_END);
         workRam.attachTo(bus);
         echoRam.attachTo(bus);
         cpu = new Cpu();
@@ -51,7 +52,7 @@ public class GameBoy {
     public Bus bus() {
         return bus;
     }
-    
+
     /**
      * Returns the gameBoy's Cpu
      * 
@@ -60,26 +61,35 @@ public class GameBoy {
     public Cpu cpu() {
         return cpu;
     }
-    
+
+    /**
+     * Returns the gameBoy's Timer
+     * 
+     * @return bus the gameBoys Timer
+     */
     public Timer timer() {
         return timer;
     }
-    
+
     /**
-     * Runs all the gameboy's elements implementing the interface clocked cycle-1 times
+     * Runs all the gameboy's elements implementing the interface clocked
+     * cycle-1 times
      * 
-     * @param cycle, the number of cycles + 1 the components will run
-     * @throws IllegalArgumentException if the param cycle si strictly inferior than the number of cycles already simulated
+     * @param cycle,
+     *            the number of cycles + 1 the components will run
+     * @throws IllegalArgumentException
+     *             if the param cycle si strictly inferior than the number of
+     *             cycles already simulated
      */
     public void runUntil(long cycle) {
-        Preconditions.checkArgument(cycle>=currentCycle);
-        for (int i = 0;i<cycle;++i) {
-            timer.cycle(currentCycle+i);
-            cpu.cycle(currentCycle+i);
+        Preconditions.checkArgument(cycle >= currentCycle);
+        for (int i = 0; i < cycle; ++i) {
+            timer.cycle(currentCycle + i);
+            cpu.cycle(currentCycle + i);
         }
         currentCycle += cycle;
     }
-    
+
     /**
      * Returns the number of cycles the gameboy has already simulated
      * 

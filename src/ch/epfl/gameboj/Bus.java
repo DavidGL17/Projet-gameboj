@@ -13,7 +13,7 @@ import ch.epfl.gameboj.component.Component;
  *
  */
 public final class Bus {
-    ArrayList<Component> composants = new ArrayList<Component>();
+    private final ArrayList<Component> composants = new ArrayList<Component>();
 
     /**
      * Attaches the given component to the bus

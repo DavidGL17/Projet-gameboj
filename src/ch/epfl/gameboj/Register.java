@@ -11,5 +11,6 @@ public interface Register {
     public default int index() {
         return this.ordinal();
     }
+
     abstract int ordinal();
 }
