@@ -8,7 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -39,15 +41,16 @@ public class BootRomControllerTest {
         }
     }
 
-    @Disabled
-    @Test // Celui la est pas complétement juste
+    @Test 
     void BootRomControllerDisablesHimselfCorrectly() throws IOException {
         int i = 0;
         BootRomController br = new BootRomController(
-                Cartridge.ofFile(new File("01-special.gb")));
+                Cartridge.ofFile(new File("BootRomControllerTest.txt")));
         br.write(AddressMap.REG_BOOT_ROM_DISABLE, 0);
         for (byte b : BootRom.DATA) {
-            assertNotEquals(Byte.toUnsignedInt(b), br.read(i));
+            if (b != 25) {
+                assertNotEquals(Byte.toUnsignedInt(b), br.read(i));
+            }
             ++i;
         }
     }
