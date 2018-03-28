@@ -41,9 +41,9 @@ public final class DebugMain {
             Component printer = new DebugPrintComponent();
             printer.attachTo(gb.bus());
             while (gb.cycles() < cycles) {
-                long nextCycles = Math.min(gb.cycles() + 17556, cycles);
-                gb.runUntil(nextCycles);
-                gb.cpu().requestInterrupt(Cpu.Interrupt.VBLANK);
+              long nextCycles = Math.min(gb.cycles() + 17556, cycles);
+              gb.runUntil(nextCycles);
+              gb.cpu().requestInterrupt(Cpu.Interrupt.VBLANK);
             }
         } catch (NumberFormatException e) {
             e.printStackTrace();

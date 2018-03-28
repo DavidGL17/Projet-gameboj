@@ -26,18 +26,16 @@ public final class Timer implements Component, Clocked {
 
 	@Override
 	public void cycle(long cycle) { 
-		
 		boolean s0 = state();
-		principalCounter = Bits.clip(16,principalCounter);
+		principalCounter = Bits.clip(16,principalCounter+4);
 		incIFChange(s0);
-				
 	}
 
 	@Override
 	public int read(int address) {
 
 		if (address == AddressMap.REG_DIV){
-			return principalCounter;
+			return Bits.extract(principalCounter,8,8);
 		} else if (address == AddressMap.REG_TIMA){
 			return secondaryCounter;
 		}else if (address == AddressMap.REG_TMA) {
@@ -51,17 +49,21 @@ public final class Timer implements Component, Clocked {
 	@Override
 	public void write(int address, int data) {
 
-		if (address == AddressMap.REG_DIV){
-			principalCounter=Bits.make16(Preconditions.checkBits8(data), Bits.clip(8,principalCounter)) ;
-		} else if (address == AddressMap.REG_TIMA){
-			secondaryCounter=Preconditions.checkBits8(data);
-		}else if (address == AddressMap.REG_TMA) {
-			TMA=Preconditions.checkBits8(data);
-		} else if (address == AddressMap.REG_TAC) {
-			TAC=Preconditions.checkBits8(data);
-		}
+	    if (address == AddressMap.REG_DIV){
+	        boolean s0 = state();
+	        principalCounter=Bits.make16(Preconditions.checkBits8(data), Bits.clip(8,principalCounter)) ;
+	        incIFChange(s0);
+	    } else if (address == AddressMap.REG_TIMA){
+	        secondaryCounter=Preconditions.checkBits8(data);
+	    }else if (address == AddressMap.REG_TMA) {
+	        TMA=Preconditions.checkBits8(data);
+	    } else if (address == AddressMap.REG_TAC) {
+	        boolean s0 = state();
+	        TAC=Preconditions.checkBits8(data);
+	        incIFChange(s0);
+	    }
 	}
-	
+
 	
 	private boolean state() {
 			switch(Bits.extract(TAC, 0, 3)) {
@@ -85,13 +87,12 @@ public final class Timer implements Component, Clocked {
 		}
 	
 	private void incIFChange(boolean previous) {
-		
 		if (!state()&&previous) {
 			if (secondaryCounter==0xFF) {
 				cpu.requestInterrupt(Interrupt.TIMER);
 				secondaryCounter=TMA;
 			} else {
-				secondaryCounter++;
+				++secondaryCounter;
 			}
 		}
 	}
