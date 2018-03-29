@@ -25,11 +25,11 @@ public final class Timer implements Component, Clocked {
 
     @Override
     public void cycle(long cycle) {
-        for (int i = 0; i < cycle; ++i) {
+//        for (int i = 0; i < cycle; ++i) {
             boolean s0 = state();
             principalCounter = Bits.clip(16, principalCounter + 4);
             incIFChange(s0);
-        }
+//        }
     }
 
     @Override

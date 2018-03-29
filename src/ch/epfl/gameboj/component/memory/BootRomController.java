@@ -3,6 +3,8 @@
  */
 package ch.epfl.gameboj.component.memory;
 
+import java.util.Objects;
+
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cartridge.Cartridge;
@@ -14,6 +16,7 @@ public final class BootRomController implements Component {
 	private boolean bootIsDisabled = false;
 	
 	public BootRomController(Cartridge cartridge) {
+	    Objects.requireNonNull(cartridge);
 		this.cartridge=cartridge;
 	}
 
