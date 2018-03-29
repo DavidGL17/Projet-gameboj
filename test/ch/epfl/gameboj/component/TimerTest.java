@@ -103,6 +103,6 @@ class TimerTest {
         t.write(AddressMap.REG_TIMA, 0xFF);
         t.write(AddressMap.REG_TMA, 0xAB);
         t.cycle(4);
-        assertTrue(Bits.test(2, c.read(AddressMap.REG_IF)));
+        assertTrue(Bits.test(c.read(AddressMap.REG_IF),2));
     }
 }
