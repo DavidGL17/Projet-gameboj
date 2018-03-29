@@ -69,17 +69,17 @@ public final class Timer implements Component, Clocked {
     private boolean state() {
         switch (Bits.extract(TAC, 0, 3)) {
         case 0b100: 
-            return (Bits.test(principalCounter, 9));
+            return checkBitsActivated(9);
         case 0b101: 
-            return (Bits.test(principalCounter, 3));
+            return checkBitsActivated(3);
         case 0b110: 
-            return (Bits.test(principalCounter, 5));
+            return checkBitsActivated(5);
         case 0b111: 
-            return (Bits.test(principalCounter, 7));
+            return checkBitsActivated(7);
         default: 
             return false;
         }
-        //Version test. Sans le &&principalCounter il augmente bien Tima, par contre l'exception n'est kamais lancée
+        //Version test. (Sans le &&principalCounter il augmente bien Tima, par contre l'exception n'est kamais lancée)
 //	    switch (Bits.extract(TAC, 0, 3)) {
 //	    case 0b100: {
 //	        return ((principalCounter & principalCounterMask(9)) == 0)&&principalCounter!=0;
@@ -99,12 +99,12 @@ public final class Timer implements Component, Clocked {
 //	    }
 	}
 
-    private int principalCounterMask(int size) {
-        int prinCounterMask = 0;
-        for (int i = 0; i <= size; ++i) {
-            prinCounterMask += Bits.mask(i);
+    private boolean checkBitsActivated(int msb) {
+        boolean bitsActivated= false;
+        for (int i = 0; i <= msb; ++i) {
+           bitsActivated |= Bits.test(principalCounter, i);
         }
-        return prinCounterMask;
+        return bitsActivated;
     }
 
     private void incIFChange(boolean previous) {
