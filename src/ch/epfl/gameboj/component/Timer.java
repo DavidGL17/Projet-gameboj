@@ -87,7 +87,7 @@ public final class Timer implements Component, Clocked {
 		}
 	
 	private void incIFChange(boolean previous) {
-		if (!state()&&previous) {
+		if (!(state()&&previous)) {
 			if (secondaryCounter==0xFF) {
 				cpu.requestInterrupt(Interrupt.TIMER);
 				secondaryCounter=TMA;
