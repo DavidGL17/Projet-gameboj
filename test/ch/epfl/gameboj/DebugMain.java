@@ -34,7 +34,7 @@ public final class DebugMain {
 
     private static void test(String arg1, String arg2) {
         try {
-            File romFile = new File(arg1);
+            File romFile = new File("01-special.gb");
             long cycles = Long.parseLong(arg2);
 
             GameBoy gb = new GameBoy(Cartridge.ofFile(romFile));

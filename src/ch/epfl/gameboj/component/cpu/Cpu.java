@@ -204,7 +204,7 @@ public class Cpu implements Component, Clocked {
     private void dispatch(Opcode opcode, long cycle) {
         int nextPC = Bits.clip(16, registerPC + opcode.totalBytes);
         setNextNonIdleCycle(cycle, opcode);
-
+//        System.out.println("PC : "+registerPC+" Opcode : "+opcode);
         switch(opcode.family) {
         case NOP: {
         } break;
@@ -578,11 +578,13 @@ public class Cpu implements Component, Clocked {
         case JR_CC_E8: {
             if (conditionalInstruction(opcode)) {
                 int s8 = read8AfterOpcode();
+//                System.out.println(Integer.toBinaryString(s8-1));
                 boolean negativeNumber = false;
                 if (Bits.test(s8, 7)) {
                     negativeNumber = true;
                     s8 = Bits.complement8(s8 - 1);
                 }
+//                System.out.println(negativeNumber);
                 if (negativeNumber) {
                     nextPC = Bits.clip(16,nextPC-s8);
                 } else {
