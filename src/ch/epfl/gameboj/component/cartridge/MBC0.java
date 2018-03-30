@@ -3,10 +3,11 @@
  */
 package ch.epfl.gameboj.component.cartridge;
 
+import java.util.Objects;
+
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.memory.Rom;
-import jdk.internal.joptsimple.internal.Objects;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -17,7 +18,7 @@ public final class MBC0 implements Component {
     private Rom rom;
     
     public MBC0(Rom rom) {
-        Preconditions.checkArgument(rom!=null);
+        Objects.requireNonNull(rom);
         Preconditions.checkArgument(rom.size()== 0x8000);
         this.rom = rom;
     }

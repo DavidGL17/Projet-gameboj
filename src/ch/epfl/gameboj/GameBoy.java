@@ -29,7 +29,6 @@ public class GameBoy {
     private long currentCycle = 0;
 
     public GameBoy(Cartridge cartridge) {
-        Objects.requireNonNull(cartridge);
         Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
         workRam = new RamController(ram, AddressMap.WORK_RAM_START);
         echoRam = new RamController(ram, AddressMap.ECHO_RAM_START,
@@ -40,7 +39,8 @@ public class GameBoy {
         cpu.attachTo(bus);
         timer = new Timer(cpu);
         timer.attachTo(bus);
-        bootRomController = new BootRomController(cartridge);
+        bootRomController = new BootRomController(
+                Objects.requireNonNull(cartridge));
         bootRomController.attachTo(bus);
     }
 
