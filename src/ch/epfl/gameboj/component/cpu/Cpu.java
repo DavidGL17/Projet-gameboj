@@ -163,21 +163,6 @@ public class Cpu implements Component, Clocked {
     }
 
     /**
-     * Sets SP, PC, IME, and IF according to the management of interruption toMangage
-     * @param toManage the index of the interruption, possibly invalid
-     */
-    private void manageInterruption(int toManage) {
-        if ((toManage>=0)&&(toManage<=4)) { // iff there is exception to treat;
-            IME=false;
-            Bits.set(registerIF,toManage,false);	
-            push16(registerPC);
-            registerPC=AddressMap.INTERRUPTS[toManage]; // PC --> Gestion exceptions c'est tout ?
-        }
-    }
-
-
-
-    /**
      * Sets the nextNonIdleCycle according to the current cycle and the opcode being executed
      * @param cycle - the cycle being executed
      * @param opcode
@@ -514,13 +499,17 @@ public class Cpu implements Component, Clocked {
 
         // Bit test and set
         case BIT_U3_R8: {
-            int value = Bits.extract(opcode.encoding, 3,3);
+//            int value = Bits.extract(opcode.encoding, 3,3);
             Reg reg = extractReg(opcode,0);
-            combineAluFlags(Alu.testBit(Regs.get(reg), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
+            int flags = Alu.unpackFlags(Alu.testBit(Regs.get(reg), Bits.extract(opcode.encoding, 3, 3)));
+            setFlags(Bits.test(flags, 7)? 0 : 0x80);
+//            combineAluFlags(Alu.testBit(Regs.get(reg), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
         } break;
         case BIT_U3_HLR: {
-            int value = Bits.extract(opcode.encoding, 3, 3);
-            combineAluFlags(Alu.testBit(read8AtHl(), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
+            int flags = Alu.unpackFlags(Alu.testBit(read8AtHl(), Bits.extract(opcode.encoding, 3, 3)));
+            setFlags(Bits.test(flags, 7)? 0 : 0x80);
+//            int value = Bits.extract(opcode.encoding, 3, 3);
+//            combineAluFlags(Alu.testBit(read8AtHl(), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
         } break;
         case CHG_U3_R8: {
             int value = Bits.extract(opcode.encoding, 3, 3);

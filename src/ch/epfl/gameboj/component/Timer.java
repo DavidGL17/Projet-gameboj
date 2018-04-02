@@ -25,14 +25,13 @@ public final class Timer implements Component, Clocked {
 
     @Override
     public void cycle(long cycle) {
-            boolean s0 = state();
-            principalCounter = Bits.clip(16, principalCounter + 4);
-            incIFChange(s0);
+        boolean s0 = state();
+        principalCounter = Bits.clip(16, principalCounter + 4);
+        incIFChange(s0);
     }
 
     @Override
     public int read(int address) {
-
         if (address == AddressMap.REG_DIV) {
             return Bits.extract(principalCounter, 8, 8);
         } else if (address == AddressMap.REG_TIMA) {
@@ -66,41 +65,46 @@ public final class Timer implements Component, Clocked {
 
     private boolean state() {
         switch (Bits.extract(TAC, 0, 3)) {
-        case 0b100: 
+        case 0b100:
             return checkBitsActivated(9);
-        case 0b101: 
+        case 0b101:
             return checkBitsActivated(3);
-        case 0b110: 
+        case 0b110:
             return checkBitsActivated(5);
-        case 0b111: 
+        case 0b111:
             return checkBitsActivated(7);
-        default: 
+        default:
             return false;
         }
-        //Version test. (Sans le &&principalCounter il augmente bien Tima, par contre l'exception n'est kamais lancée)
-//	    switch (Bits.extract(TAC, 0, 3)) {
-//	    case 0b100: {
-//	        return ((principalCounter & principalCounterMask(9)) == 0)&&principalCounter!=0;
-//	    }
-//	    case 0b101: {
-//	        return ((principalCounter & principalCounterMask(3)) == 0)&&principalCounter!=0;
-//	    }
-//	    case 0b110: {
-//	        return ((principalCounter & principalCounterMask(5)) == 0)&&principalCounter!=0;
-//	    }
-//	    case 0b111: {
-//	        return ((principalCounter & principalCounterMask(7)) == 0)&&principalCounter!=0;
-//	    }
-//	    default: {
-//	        return false;
-//	    }
-//	    }
-	}
+        // Version test. (Sans le &&principalCounter il augmente bien Tima, par
+        // contre l'exception n'est kamais lancée)
+        // switch (Bits.extract(TAC, 0, 3)) {
+        // case 0b100: {
+        // return ((principalCounter & principalCounterMask(9)) ==
+        // 0)&&principalCounter!=0;
+        // }
+        // case 0b101: {
+        // return ((principalCounter & principalCounterMask(3)) ==
+        // 0)&&principalCounter!=0;
+        // }
+        // case 0b110: {
+        // return ((principalCounter & principalCounterMask(5)) ==
+        // 0)&&principalCounter!=0;
+        // }
+        // case 0b111: {
+        // return ((principalCounter & principalCounterMask(7)) ==
+        // 0)&&principalCounter!=0;
+        // }
+        // default: {
+        // return false;
+        // }
+        // }
+    }
 
     private boolean checkBitsActivated(int msb) {
-        boolean bitsActivated= false;
+        boolean bitsActivated = false;
         for (int i = 0; i <= msb; ++i) {
-           bitsActivated |= Bits.test(principalCounter, i);
+            bitsActivated |= Bits.test(principalCounter, i);
         }
         return bitsActivated;
     }

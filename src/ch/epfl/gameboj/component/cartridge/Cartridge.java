@@ -28,8 +28,10 @@ public class Cartridge implements Component {
         try(FileInputStream input = new FileInputStream(romFile)){
             byte[] data = new byte[(int)romFile.length()];
             int n = 0;
-            while (n != -1){
-                n = input.read(data);
+            int i = 0;
+            while ((n =input.read())!= -1){
+                data[i] = (byte)n;
+                ++i;
             };
             Preconditions.checkArgument(data[0x147]==0);
             Rom rom = new Rom(data);
