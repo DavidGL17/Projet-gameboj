@@ -193,7 +193,7 @@ public class Cpu implements Component, Clocked {
         switch(opcode.family) {
         case NOP: {
         } break;
-        case LD_R8_HLR: {
+        case LD_R8_HLR: {//erreur pour le test 11
             Regs.set(extractReg(opcode, 3), read8AtHl());
         } break;
         case LD_A_HLRU: {
