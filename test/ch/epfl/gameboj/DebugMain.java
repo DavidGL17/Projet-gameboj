@@ -23,10 +23,8 @@ public final class DebugMain {
             "10-bit ops.gb", "11-op a,(hl).gb", "instr_timing.gb", };
 
     public static void main(String[] args) {
-        int i = 1;
-        for (String test : testsFailed) {
+        for (String test : args) {
             test(test, "30000000");
-            ++i;
         }
     }
 
