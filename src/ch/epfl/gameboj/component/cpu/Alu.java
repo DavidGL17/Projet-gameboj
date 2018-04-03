@@ -484,23 +484,20 @@ public final class Alu {
         final boolean n = false;
         final boolean h = false;
         boolean c = false;
-        
-        
-        
+
         if (Bits.test(v, 0))
             c = true;
-        int result=v;
-        
-        if (Bits.test(v,7)){
-        		result+=Bits.mask(8);
+        int result = v;
+
+        if (Bits.test(v, 7)) {
+            result += Bits.mask(8);
         }
-        
+
         result = result >>> 1;
-        
-        
-        result = Bits.clip(8,result);
-        
-         return packValueFlags(result, (result == 0), n, h, c);
+
+        result = Bits.clip(8, result);
+
+        return packValueFlags(result, (result == 0), n, h, c);
     }
 
     /**
@@ -622,20 +619,13 @@ public final class Alu {
      *            - an int, the 8-bit int
      * @param bitIndex
      *            - an int, the index
-     * @return 0b_Z010_0000 where Z=1 iff the bit is activated
+     * @return 0b_Z010_0000 where Z=1 iff the bit is not activated
      */
     public static int testBit(int v, int bitIndex) {
-
-        Preconditions.checkBits8(v);
         Objects.checkIndex(bitIndex, 8);
-
-        final boolean Z = !Bits.test(v, bitIndex);
-        final boolean N = false;
-        final boolean H = true;
-        final boolean C = false;
-
-        return packValueFlags(0, Z, N, H, C);
-
+        return packValueFlags(0,
+                !Bits.test(Preconditions.checkBits8(v), bitIndex), false, true,
+                false);
     }
 
     /**

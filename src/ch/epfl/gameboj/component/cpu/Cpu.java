@@ -90,9 +90,9 @@ public class Cpu implements Component, Clocked {
         if (Preconditions.checkBits16(address)>=AddressMap.HIGH_RAM_START && address<AddressMap.HIGH_RAM_END) {
             highRam.write(address-AddressMap.HIGH_RAM_START, Preconditions.checkBits8(data));
         } else if (address==AddressMap.REG_IE) {
-            registerIE=Preconditions.checkBits8(data);
+            registerIE=Bits.clip(5,Preconditions.checkBits8(data));
         } else if (address==AddressMap.REG_IF) {
-            registerIF=Preconditions.checkBits8(data);
+            registerIF=Bits.clip(5,Preconditions.checkBits8(data));
         }
     }
 
@@ -193,7 +193,7 @@ public class Cpu implements Component, Clocked {
         switch(opcode.family) {
         case NOP: {
         } break;
-        case LD_R8_HLR: {//erreur pour le test 11
+        case LD_R8_HLR: {
             Regs.set(extractReg(opcode, 3), read8AtHl());
         } break;
         case LD_A_HLRU: {
@@ -499,17 +499,13 @@ public class Cpu implements Component, Clocked {
 
         // Bit test and set
         case BIT_U3_R8: {//Enfaite z doit être à 1 si le bit vaut 0, ce qui est l'inverse de ce que return alu
-//            int value = Bits.extract(opcode.encoding, 3,3);
+            int value = Bits.extract(opcode.encoding, 3,3);
             Reg reg = extractReg(opcode,0);
-            int flags = Alu.unpackFlags(Alu.testBit(Regs.get(reg), Bits.extract(opcode.encoding, 3, 3)));
-            setFlags(Bits.test(flags, 7)? 0 : 0x80);
-//            combineAluFlags(Alu.testBit(Regs.get(reg), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
+            combineAluFlags(Alu.testBit(Regs.get(reg), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
         } break;
         case BIT_U3_HLR: {
-            int flags = Alu.unpackFlags(Alu.testBit(read8AtHl(), Bits.extract(opcode.encoding, 3, 3)));
-            setFlags(Bits.test(flags, 7)? 0 : 0x80);
-//            int value = Bits.extract(opcode.encoding, 3, 3);
-//            combineAluFlags(Alu.testBit(read8AtHl(), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
+            int value = Bits.extract(opcode.encoding, 3, 3);
+            combineAluFlags(Alu.testBit(read8AtHl(), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);
         } break;
         case CHG_U3_R8: {
             int value = Bits.extract(opcode.encoding, 3, 3);
@@ -567,13 +563,11 @@ public class Cpu implements Component, Clocked {
         case JR_CC_E8: {
             if (conditionalInstruction(opcode)) {
                 int s8 = read8AfterOpcode();
-//                System.out.println(Integer.toBinaryString(s8-1));
                 boolean negativeNumber = false;
                 if (Bits.test(s8, 7)) {
                     negativeNumber = true;
                     s8 = Bits.complement8(s8 - 1);
                 }
-//                System.out.println(negativeNumber);
                 if (negativeNumber) {
                     nextPC = Bits.clip(16,nextPC-s8);
                 } else {
