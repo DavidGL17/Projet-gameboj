@@ -498,7 +498,7 @@ public class Cpu implements Component, Clocked {
         } break;
 
         // Bit test and set
-        case BIT_U3_R8: {//Enfaite z doit être à 1 si le bit vaut 0, ce qui est l'inverse de ce que return alu
+        case BIT_U3_R8: {
             int value = Bits.extract(opcode.encoding, 3,3);
             Reg reg = extractReg(opcode,0);
             combineAluFlags(Alu.testBit(Regs.get(reg), value),FlagSrc.ALU,FlagSrc.ALU,FlagSrc.ALU,FlagSrc.CPU);

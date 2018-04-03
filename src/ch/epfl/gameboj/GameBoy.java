@@ -83,11 +83,11 @@ public class GameBoy {
      */
     public void runUntil(long cycle) {
         Preconditions.checkArgument(cycle >= currentCycle);
-        for (int i = 0; i < cycle; ++i) {
-            timer.cycle(currentCycle + i);
-            cpu.cycle(currentCycle + i);
+        while (currentCycle<cycle) {
+            timer.cycle(currentCycle);
+            cpu.cycle(currentCycle);
+            ++currentCycle;
         }
-        currentCycle += cycle;
     }
 
     /**
