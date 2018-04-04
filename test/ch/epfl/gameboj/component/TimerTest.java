@@ -105,14 +105,55 @@ class TimerTest {
 
     @Test
     void TimerRequestsInterruptionTIMAFull() {
-        Cpu c = new Cpu();
-        Timer t = new Timer(c);
-        t.write(AddressMap.REG_TAC, 0b101);
-        t.write(AddressMap.REG_TIMA, 0xFF);
-        t.write(AddressMap.REG_TMA, 0xAB);
-        for (int i = 0;i<4;++i) {
-            t.cycle(i);
-        }
-        assertTrue(Bits.test(c.read(AddressMap.REG_IF),Interrupt.TIMER.index()));
+    		{
+	        Cpu c = new Cpu();
+	        Timer t = new Timer(c);
+	        t.write(AddressMap.REG_TAC, 0b101);
+	        t.write(AddressMap.REG_TIMA, 0xFF);
+	        t.write(AddressMap.REG_TMA, 0xAB);
+	        for (int i = 0;i<4;++i) {
+	            t.cycle(i);
+	        }
+	        assertTrue(Bits.test(c.read(AddressMap.REG_IF),Interrupt.TIMER.index()));
+    		}
+        
+	    	{
+	        Cpu c = new Cpu();
+	        Timer t = new Timer(c);
+	        t.write(AddressMap.REG_TAC, 0b100);
+	        t.write(AddressMap.REG_TIMA, 0xFF);
+	        t.write(AddressMap.REG_TMA, 0xAB);
+	        for (int i = 0;i<(1<<8);++i) {
+	            t.cycle(i);
+	        }
+	        assertTrue(Bits.test(c.read(AddressMap.REG_IF),Interrupt.TIMER.index()));
+	    	}
+	    	
+	    	{
+	    		Cpu c = new Cpu();
+			Timer t = new Timer(c);
+			t.write(AddressMap.REG_TAC, 0b110);
+			t.write(AddressMap.REG_TIMA, 0xFF);
+			t.write(AddressMap.REG_TMA, 0xAB);
+			for (int i = 0; i < (1<<4); ++i) {
+				t.cycle(i);
+			}
+			assertTrue(Bits.test(c.read(AddressMap.REG_IF),Interrupt.TIMER.index()));
+	    	}
+	    	
+	    	{
+	    		Cpu c = new Cpu();
+			Timer t = new Timer(c);
+			t.write(AddressMap.REG_TAC, 0b101);
+			t.write(AddressMap.REG_TIMA, 0xFF);
+			t.write(AddressMap.REG_TMA, 0xAB);
+			for (int i = 0; i < (1<<7); ++i) {
+				t.cycle(i);
+			}
+			assertTrue(Bits.test(c.read(AddressMap.REG_IF),Interrupt.TIMER.index()));
+	    	}
     }
+    
+    
+    
 }
