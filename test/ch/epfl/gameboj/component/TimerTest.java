@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.cpu.Cpu;
+import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -103,7 +104,7 @@ class TimerTest {
     }
 
     @Test
-    void TimerThrowsExceptionTIMAFull() {
+    void TimerRequestsInterruptionTIMAFull() {
         Cpu c = new Cpu();
         Timer t = new Timer(c);
         t.write(AddressMap.REG_TAC, 0b101);
@@ -112,6 +113,6 @@ class TimerTest {
         for (int i = 0;i<4;++i) {
             t.cycle(i);
         }
-        assertTrue(Bits.test(c.read(AddressMap.REG_IF),2));
+        assertTrue(Bits.test(c.read(AddressMap.REG_IF),Interrupt.TIMER.index()));
     }
 }

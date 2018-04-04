@@ -13,7 +13,7 @@ public final class Timer implements Component, Clocked {
 
     private Cpu cpu;
     private int principalCounter = 0;
-    private int secondaryCounter = 0;
+    private int TIMA = 0;
     private int TMA = 0;
     private int TAC = 0;
 
@@ -35,7 +35,7 @@ public final class Timer implements Component, Clocked {
         if (address == AddressMap.REG_DIV) {
             return Bits.extract(principalCounter, 8, 8);
         } else if (address == AddressMap.REG_TIMA) {
-            return secondaryCounter;
+            return TIMA;
         } else if (address == AddressMap.REG_TMA) {
             return TMA;
         } else if (address == AddressMap.REG_TAC) {
@@ -53,7 +53,7 @@ public final class Timer implements Component, Clocked {
                     Bits.clip(8, principalCounter));
             incIFChange(s0);
         } else if (address == AddressMap.REG_TIMA) {
-            secondaryCounter = Preconditions.checkBits8(data);
+            TIMA = Preconditions.checkBits8(data);
         } else if (address == AddressMap.REG_TMA) {
             TMA = Preconditions.checkBits8(data);
         } else if (address == AddressMap.REG_TAC) {
@@ -83,21 +83,28 @@ public final class Timer implements Component, Clocked {
          }
     }
 
-    private boolean checkBitsActivated(int msb) {
-        boolean bitsActivated = true;
-        for (int i = 0; i <= msb; ++i) {
-            bitsActivated = bitsActivated && Bits.test(principalCounter, i);
-        }
-        return bitsActivated;
-    }
+    
+    //Problème : impose un passage par 11...1 (i+1 bits ou i est la valeur désignée par TAC)
+    	// Or notre Timer simulé avance de 4 en 4 donc le bit de poids 0 vaut toujours 0
+    // Ainsi si on veut mesurer tous les états d'activations on aura toujours 0/faux.
+    // La disjonction n'est pas ce que l'on souhaite faire :
+    // si le bit de poids i-1 uniquement est activé alors on considérera que tous jusqu'à i le sont, ce qui est faux
+    //
+    // private boolean checkBitsActivated(int msb) {
+        // boolean bitsActivated = true;
+        // for (int i = 0; i <= msb; ++i) {
+            // bitsActivated |= Bits.test(principalCounter, i);
+        // }
+        // return bitsActivated;
+    // }
 
     private void incIFChange(boolean previous) {
         if (!state() && previous) {
-            if (secondaryCounter == 0xFF) {
+            if (TIMA == 0xFF) {
                 cpu.requestInterrupt(Interrupt.TIMER);
-                secondaryCounter = TMA;
+                TIMA = TMA;
             } else {
-                ++secondaryCounter;
+                ++TIMA;
             }
         }
     }
