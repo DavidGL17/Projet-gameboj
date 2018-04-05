@@ -154,7 +154,7 @@ public class Cpu implements Component, Clocked {
         if ((toManage >= 0) && (toManage <= 4) && IME) { // iff there is
             // exception to treat;
             IME = false;
-            Bits.set(registerIF, toManage, false);
+            registerIF=Bits.set(registerIF, toManage, false);
             push16(registerPC);
             registerPC = AddressMap.INTERRUPTS[toManage]; // PC --> Gestion
             // exceptions c'est
