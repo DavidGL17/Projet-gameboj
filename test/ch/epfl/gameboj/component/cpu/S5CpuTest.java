@@ -404,16 +404,20 @@ public final class S5CpuTest {
     @Test
     void ieAndIfCanBeWrittenAndRead() {
         for (int ief = 0; ief <= 0x1F; ++ief) {
-            int iefN = ~ief & 0xFF;
+            int iefN = ~ief & 0x1F;
             Assembler asm = new Assembler();
             asm.emit(LD_A_N8, ief);
-            asm.emit(LD_N8R_A, 0xFF);
+            asm.emit(LD_N8R_A, 0xFF); 
+            // [0xFF]=ief
             asm.emit(LD_A_N8, iefN);
             asm.emit(LD_N8R_A, 0x0F);
+            // [0x0F]=iefN
             asm.emit(XOR_A_A);
             asm.emit(LD_A_N8R, 0xFF);
             asm.emit(LD_B_A);
             asm.emit(LD_A_N8R, 0x0F);
+            // B=ief
+            // A=iefN
             assertEquals(CpuState.of(0xE, 0, iefN, 0x80, ief, 0, 0, 0, 0, 0), stateAfter(asm));
         }
     }
