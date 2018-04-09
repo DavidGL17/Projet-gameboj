@@ -11,20 +11,12 @@ import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.ComponentTest;
-<<<<<<< HEAD
 import ch.epfl.gameboj.component.cartridge.CartridgeTestProf;
-=======
-import ch.epfl.gameboj.component.cartridge.CartridgeTest;
->>>>>>> b0c38d26b1a4e6125df75c629404ada81bcce4e8
 
 public final class BootRomControllerTestProf implements ComponentTest {
     @Override
     public Component newComponent() {
-<<<<<<< HEAD
         return new BootRomController(CartridgeTestProf.cartridgeWithData(new byte[0x8000]));
-=======
-        return new BootRomController(CartridgeTest.cartridgeWithData(new byte[0x8000]));
->>>>>>> b0c38d26b1a4e6125df75c629404ada81bcce4e8
     }
 
     @Test
@@ -57,11 +49,7 @@ public final class BootRomControllerTestProf implements ComponentTest {
         rng.nextBytes(romData);
         romData[0x147] = 0;
         
-<<<<<<< HEAD
         BootRomController c = new BootRomController(CartridgeTestProf.cartridgeWithData(romData));
-=======
-        BootRomController c = new BootRomController(CartridgeTest.cartridgeWithData(romData));
->>>>>>> b0c38d26b1a4e6125df75c629404ada81bcce4e8
         
         for (int a = 0; a <= 0xFF; ++a)
             assertEquals(Byte.toUnsignedInt(bootRomData[a]), c.read(a));

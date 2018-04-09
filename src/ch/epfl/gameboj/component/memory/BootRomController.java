@@ -23,7 +23,7 @@ public final class BootRomController implements Component {
 	@Override
 	public int read(int address) {
 		if (!bootIsDisabled) {
-			if (address>=AddressMap.BOOT_ROM_START && address<=AddressMap.BOOT_ROM_END) {
+			if (address>=AddressMap.BOOT_ROM_START && address<AddressMap.BOOT_ROM_END) {
 				return Byte.toUnsignedInt(BootRom.DATA[address]);
 			}
 		}

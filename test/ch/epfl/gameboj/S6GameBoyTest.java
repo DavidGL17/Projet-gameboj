@@ -16,11 +16,7 @@ import java.util.zip.GZIPInputStream;
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.component.Component;
-<<<<<<< HEAD
 import ch.epfl.gameboj.component.cartridge.CartridgeTestProf;
-=======
-import ch.epfl.gameboj.component.cartridge.CartridgeTest;
->>>>>>> b0c38d26b1a4e6125df75c629404ada81bcce4e8
 import ch.epfl.gameboj.component.cpu.Cpu;
 
 public final class S6GameBoyTest {
@@ -33,11 +29,7 @@ public final class S6GameBoyTest {
 
     @Test
     void runUntilWorksWhenNotAdvancing() {
-<<<<<<< HEAD
         GameBoy g = new GameBoy(CartridgeTestProf.cartridgeWithData(new byte[0x8000]));
-=======
-        GameBoy g = new GameBoy(CartridgeTest.cartridgeWithData(new byte[0x8000]));
->>>>>>> b0c38d26b1a4e6125df75c629404ada81bcce4e8
         for (long c = 0; c <= 1000; ++c) {
             g.runUntil(c);
             g.runUntil(c);
@@ -47,11 +39,7 @@ public final class S6GameBoyTest {
 
     @Test
     void runUntilFailsWhenGoingBackwardsInTime() {
-<<<<<<< HEAD
         GameBoy g = new GameBoy(CartridgeTestProf.cartridgeWithData(new byte[0x8000]));
-=======
-        GameBoy g = new GameBoy(CartridgeTest.cartridgeWithData(new byte[0x8000]));
->>>>>>> b0c38d26b1a4e6125df75c629404ada81bcce4e8
         g.runUntil(2018);
         assertThrows(IllegalArgumentException.class, () -> {
             g.runUntil(2017); 
@@ -71,11 +59,7 @@ public final class S6GameBoyTest {
             try (InputStream inStream = new GZIPInputStream(new ByteArrayInputStream(b64Decoder.decode(e)))) {
                 byte[] romData = inStream.readAllBytes();
                 assert romData.length == 0x8000;
-<<<<<<< HEAD
                 GameBoy gb = new GameBoy(CartridgeTestProf.cartridgeWithData(romData));
-=======
-                GameBoy gb = new GameBoy(CartridgeTest.cartridgeWithData(romData));
->>>>>>> b0c38d26b1a4e6125df75c629404ada81bcce4e8
                 RecordingComponent recordingC = new RecordingComponent(s);
                 recordingC.attachTo(gb.bus());
                 int cycles = reqCycles.next();
