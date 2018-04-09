@@ -47,15 +47,16 @@ public final class Timer implements Component, Clocked {
 
     @Override
     public void write(int address, int data) {
+    		Preconditions.checkBits8(data);
         if (Preconditions.checkBits16(address) == AddressMap.REG_DIV) {
             principalCounter=0;
         } else if (address == AddressMap.REG_TIMA) {
-            TIMA = Preconditions.checkBits8(data);
+            TIMA = data;
         } else if (address == AddressMap.REG_TMA) {
-            TMA = Preconditions.checkBits8(data);
+            TMA = data;
         } else if (address == AddressMap.REG_TAC) {
             boolean s0 = state();
-            TAC = Preconditions.checkBits8(data);
+            TAC = data;
             incIFChange(s0);
         }
     }
