@@ -13,7 +13,7 @@ import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.ComponentTest;
 import ch.epfl.gameboj.component.cartridge.CartridgeTest;
 
-public final class BootRomControllerTest implements ComponentTest {
+public final class BootRomControllerTestProf implements ComponentTest {
     @Override
     public Component newComponent() {
         return new BootRomController(CartridgeTest.cartridgeWithData(new byte[0x8000]));
