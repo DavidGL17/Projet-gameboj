@@ -32,7 +32,7 @@ public class Cartridge implements Component {
             while ((n =input.read())!= -1){
                 data[i] = (byte)n;
                 ++i;
-            };
+            }
             Preconditions.checkArgument(data[0x147]==0);
             Rom rom = new Rom(data);
             Cartridge c = new Cartridge(new MBC0(rom));
