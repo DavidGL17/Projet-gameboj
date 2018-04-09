@@ -16,8 +16,8 @@ public final class BitVector {
     
     public BitVector(int size, boolean initialValue) {
         Preconditions.checkArgument(size>=0&&(size%32)==0);
-        table = new int[size];
-        Arrays.fill(table, initialValue?1:0);
+        table = new int[size/32];
+        Arrays.fill(table, initialValue?0xFFFF:0);
     }
     
     public BitVector(int size) {
