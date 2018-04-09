@@ -24,12 +24,6 @@ public final class RegisterFile<E extends Register> {
         registers = new int[allRegs.length];
     }
 
-    /**
-     * Checks at which index is the given register stocked
-     * 
-     * @param reg
-     * @return
-     */
     private int getIndex(E reg) {
         for (int i = 0; i < allRegs.size(); ++i) {
             if (allRegs.get(i) == reg) {
@@ -70,7 +64,7 @@ public final class RegisterFile<E extends Register> {
      * @param reg,
      *            the given register
      * @param b,
-     *            the numbre of the bit we want to test
+     *            the number of the bit we want to test
      * @return 1 if the bit waas 1, false otherwise
      */
     public boolean testBit(E reg, Bit b) {

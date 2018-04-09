@@ -16,10 +16,10 @@ import ch.epfl.gameboj.component.memory.Rom;
 public final class MBC0 implements Component {
 
     private Rom rom;
-    
+
     public MBC0(Rom rom) {
         Objects.requireNonNull(rom);
-        Preconditions.checkArgument(rom.size()== 0x8000);
+        Preconditions.checkArgument(rom.size() == 0x8000);
         this.rom = rom;
     }
 
@@ -35,14 +35,13 @@ public final class MBC0 implements Component {
      */
     @Override
     public int read(int address) {
-        if (0<=Preconditions.checkBits16(address) && address<0x8000) {
+        if (0 <= Preconditions.checkBits16(address) && address < 0x8000) {
             return rom.read(address);
         }
         return NO_DATA;
     }
 
-    
-    /* 
+    /*
      * Does nothing, as it is not possible to write on a rom
      */
     @Override

@@ -18,7 +18,7 @@ import ch.epfl.gameboj.component.memory.RamController;
  * @author Melvin Malonga-Matouba (288405)
  * 
  */
-public class GameBoy {
+public final class GameBoy {
     private final Bus bus = new Bus();
     private final RamController workRam;
     private final RamController echoRam;
@@ -33,14 +33,15 @@ public class GameBoy {
         workRam = new RamController(ram, AddressMap.WORK_RAM_START);
         echoRam = new RamController(ram, AddressMap.ECHO_RAM_START,
                 AddressMap.ECHO_RAM_END);
-        workRam.attachTo(bus);
-        echoRam.attachTo(bus);
         cpu = new Cpu();
-        cpu.attachTo(bus);
         timer = new Timer(cpu);
-        timer.attachTo(bus);
         bootRomController = new BootRomController(
                 Objects.requireNonNull(cartridge));
+
+        workRam.attachTo(bus);
+        echoRam.attachTo(bus);
+        cpu.attachTo(bus);
+        timer.attachTo(bus);
         bootRomController.attachTo(bus);
     }
 
@@ -83,7 +84,7 @@ public class GameBoy {
      */
     public void runUntil(long cycle) {
         Preconditions.checkArgument(cycle >= currentCycle);
-        while (currentCycle<cycle) {
+        while (currentCycle < cycle) {
             timer.cycle(currentCycle);
             cpu.cycle(currentCycle);
             ++currentCycle;
