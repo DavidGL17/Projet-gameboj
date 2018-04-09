@@ -404,6 +404,7 @@ class CpuTest {
         }
     }
     
+    @Disabled
     @Test
     void settingIMEWorks() {
         Opcode[] EIDI = new Opcode[] {Opcode.EI, Opcode.DI};
@@ -422,7 +423,7 @@ class CpuTest {
             }
         }
     }
-    
+    @Disabled
     @Test
     void RETIWorks() {
         Interrupt interruption = Interrupt.VBLANK;
@@ -436,6 +437,7 @@ class CpuTest {
         assertEquals(AddressMap.INTERRUPTS[interruption.index()]+1, getPC(c));
     }
     
+    @Disabled
     @Test
     void allInterruptionsWork() {
         Interrupt[] interrupts = new Interrupt[] {Interrupt.VBLANK, Interrupt.LCD_STAT, Interrupt.TIMER, Interrupt.SERIAL, Interrupt.JOYPAD};

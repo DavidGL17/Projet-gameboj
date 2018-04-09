@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ch.epfl.gameboj.component.catridge;
+package ch.epfl.gameboj.component.cartridge;
 
 import static org.junit.jupiter.api.Assertions.*;
 
