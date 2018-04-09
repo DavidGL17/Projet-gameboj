@@ -32,6 +32,7 @@ public final class Timer implements Component, Clocked {
 
     @Override
     public int read(int address) {
+    		Preconditions.checkBits16(address);
         if (address == AddressMap.REG_DIV) {
             return Bits.extract(principalCounter, 8, 8);
         } else if (address == AddressMap.REG_TIMA) {
@@ -46,12 +47,10 @@ public final class Timer implements Component, Clocked {
 
     @Override
     public void write(int address, int data) {
-
+    		Preconditions.checkBits8(data);
+    		Preconditions.checkBits16(address);
         if (address == AddressMap.REG_DIV) {
-            boolean s0 = state();
-            principalCounter = Bits.make16(Preconditions.checkBits8(data),
-                    Bits.clip(8, principalCounter));
-            incIFChange(s0);
+            principalCounter=0;
         } else if (address == AddressMap.REG_TIMA) {
             TIMA = Preconditions.checkBits8(data);
         } else if (address == AddressMap.REG_TMA) {
