@@ -41,7 +41,7 @@ class TimerTest {
             switch (i) {
             case AddressMap.REG_DIV:
                 t.write(i, randomNumber);
-                assertEquals(randomNumber, t.read(i));
+                assertEquals(0, t.read(i));
                 break;
             case AddressMap.REG_TAC: // Ce test ne passes pas si on met un
                                      // chiffre plus grand que 3 bits. On
