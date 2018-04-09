@@ -8,5 +8,10 @@ package ch.epfl.gameboj.component;
  *
  */
 public interface Clocked {
+    /**
+     * Simulates the behaviour of a component during a single cycle
+     * 
+     * @param cycle
+     */
     abstract void cycle(long cycle);
 }

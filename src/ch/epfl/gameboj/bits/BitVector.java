@@ -15,7 +15,7 @@ import ch.epfl.gameboj.Preconditions;
 
 //Juste pour être au clair, poids d'un bit croissant de l'index de l'entier dans lequel il se trouve 
 public final class BitVector {
-    private int[] table;
+    private final int[] table;
     
     public BitVector(int size, boolean initialValue) {
         Preconditions.checkArgument(size>=0&&(size%32)==0);
@@ -27,6 +27,9 @@ public final class BitVector {
         this(size,false);
     }
     
+    private BitVector(int[] table) {
+        this.table = table.clone();
+    }
     
     public static class Builder {
     	

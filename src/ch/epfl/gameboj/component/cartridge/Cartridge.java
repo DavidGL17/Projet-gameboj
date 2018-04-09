@@ -16,33 +16,34 @@ import ch.epfl.gameboj.component.memory.Rom;
  * @author David Gonzalez leon (270845)
  *
  */
-public class Cartridge implements Component {
+public final class Cartridge implements Component {
 
     private final Component MBC;
-    
+
     private Cartridge(Component MBC) {
         this.MBC = MBC;
     }
-    
+
     public static Cartridge ofFile(File romFile) throws IOException {
-        try(FileInputStream input = new FileInputStream(romFile)){
-            byte[] data = new byte[(int)romFile.length()];
+        try (FileInputStream input = new FileInputStream(romFile)) {
+            byte[] data = new byte[(int) romFile.length()];
             int n = 0;
             int i = 0;
-            while ((n =input.read())!= -1){
-                data[i] = (byte)n;
+            while ((n = input.read()) != -1) {
+                data[i] = (byte) n;
                 ++i;
             }
-            Preconditions.checkArgument(data[0x147]==0);
+            Preconditions.checkArgument(data[0x147] == 0);
             Rom rom = new Rom(data);
-            Cartridge c = new Cartridge(new MBC0(rom));
-            return c;
+            return new Cartridge(new MBC0(rom));
         } catch (FileNotFoundException i) {
             throw new IOException();
         }
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see ch.epfl.gameboj.component.Component#read(int)
      */
     @Override
@@ -50,12 +51,15 @@ public class Cartridge implements Component {
         return MBC.read(Preconditions.checkBits16(address));
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see ch.epfl.gameboj.component.Component#write(int, int)
      */
     @Override
     public void write(int address, int data) {
-    		MBC.write(Preconditions.checkBits16(address), Preconditions.checkBits8(data));
+        MBC.write(Preconditions.checkBits16(address),
+                Preconditions.checkBits8(data));
     }
 
 }

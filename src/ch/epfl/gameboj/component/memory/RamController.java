@@ -66,15 +66,10 @@ public final class RamController implements Component {
         return (address >= startAddress && address < endAddress);
     }
 
-    /**
-     * Returns the element located at the given index
+    /*
+     * (non-Javadoc)
      * 
-     * @param address
-     *            The address where the element is located
-     * @return The element located at the given address or NO_DATA if the Ram
-     *         does not have any element at that address
-     * @throws IllegalArgumentException
-     *             if the address is not a 16 bits value
+     * @see ch.epfl.gameboj.component.Component#read(int)
      */
     @Override
     public int read(int address) {
@@ -85,17 +80,10 @@ public final class RamController implements Component {
         }
     }
 
-    /**
-     * Storages the given value at the given address or does nothing if the
-     * RamController can't stock anything at that address
+    /*
+     * (non-Javadoc)
      * 
-     * @param address
-     *            the address where we want to locate our element
-     * @param data
-     *            the data we want to storage
-     * @throws IllegalArgumentException
-     *             if the address is not a 16 bits value or if the data is not a
-     *             8 bits value
+     * @see ch.epfl.gameboj.component.Component#write(int, int)
      */
     @Override
     public void write(int address, int data) {
