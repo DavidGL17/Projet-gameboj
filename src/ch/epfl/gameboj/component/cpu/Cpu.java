@@ -68,7 +68,7 @@ public final class Cpu implements Component, Clocked {
     @Override
     public void attachTo(Bus bus) {
         this.bus = bus;
-        this.attachTo(bus);
+        Component.super.attachTo(bus);
     }
 
     // Inherited reading and writing method from Component
