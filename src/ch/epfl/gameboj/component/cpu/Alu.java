@@ -22,8 +22,14 @@ public final class Alu {
     };
 
     public enum Flag implements Bit {
-        UNUSED_0(0b1), UNUSED_1(0b10), UNUSED_2(0b100), UNUSED_3(0b1000), C(
-                0b10000), H(0b100000), N(0b1000000), Z(0b10000000);
+        UNUSED_0(0b1), 
+        UNUSED_1(0b10), 
+        UNUSED_2(0b100), 
+        UNUSED_3(0b1000), 
+        C(0b10000), 
+        H(0b100000), 
+        N(0b1000000), 
+        Z(0b10000000);
 
         private int mask = 0;
 
@@ -119,11 +125,9 @@ public final class Alu {
      *             if the value is not within range
      */
     private static int checkFlagValueIsWithinRange(int valueFlags) {
-        if ((valueFlags & 0x0F) != 0 || valueFlags >= 0x1000000) {
-            throw new IllegalArgumentException();
-        } else {
-            return valueFlags;
-        }
+        Preconditions.checkArgument(
+                !((valueFlags & 0x0F) != 0 || valueFlags >= 0x1000000));
+        return valueFlags;
     }
 
     /**
@@ -155,9 +159,7 @@ public final class Alu {
             int count = 0;
             boolean[] bits = { Bits.test(l, i), Bits.test(r, i), carry };
             for (int j = 0; j < 3; ++j) {
-                if (bits[j]) {
-                    ++count;
-                }
+                count += bits[j] ? 1 : 0;
             }
             switch (count) {
             case 0:
@@ -190,29 +192,6 @@ public final class Alu {
     }
 
     /**
-     * Ads two ints bit by bit up to the size bit
-     * 
-     * @param l,
-     *            an int
-     * @param r,
-     *            an int
-     * @param size,
-     *            the number of bit by bit addition it makes
-     * @param carryH,
-     *            the index at the point in which the method has to register the
-     *            flag H
-     * @param carryC,
-     *            the index at the point in which the method has to register the
-     *            flag C
-     * @return an array, containing the result, and the value of the flags H and
-     *         C as 1 if they are true
-     */
-    private static int[] addition(int l, int r, int size, int carryH,
-            int carryC) {
-        return addition(l, r, size, carryH, carryC, false);
-    }
-
-    /**
      * Returns the sum of the two 8 bits ints and of the initial carry bit and
      * the flags Z0HC
      * 
@@ -227,9 +206,8 @@ public final class Alu {
      *             if one of the ints is not an 8 bit value
      */
     public static int add(int l, int r, boolean c0) {
-        Preconditions.checkBits8(r);
-        Preconditions.checkBits8(l);
-        int sum[] = addition(l, r, 8, 3, 7, c0);
+        int sum[] = addition(Preconditions.checkBits8(l),
+                Preconditions.checkBits8(r), 8, 3, 7, c0);
         return packValueFlags(sum[0], (sum[0] == 0), false, sum[1] == 1,
                 sum[2] == 1);
     }
@@ -262,9 +240,8 @@ public final class Alu {
      *             if one of the ints is not an 16 bit value
      */
     public static int add16L(int l, int r) {
-        Preconditions.checkBits16(r);
-        Preconditions.checkBits16(l);
-        int sum[] = addition(l, r, 16, 3, 7);
+        int sum[] = addition(Preconditions.checkBits16(l),
+                Preconditions.checkBits16(r), 16, 3, 7, false);
         return packValueFlags(sum[0], false, false, sum[1] == 1, sum[2] == 1);
     }
 
@@ -281,9 +258,8 @@ public final class Alu {
      *             if one of the ints is not an 16 bit value
      */
     public static int add16H(int l, int r) {
-        Preconditions.checkBits16(r);
-        Preconditions.checkBits16(l);
-        int sum[] = addition(l, r, 16, 11, 15);
+        int sum[] = addition(Preconditions.checkBits16(l),
+                Preconditions.checkBits16(r), 16, 11, 15, false);
         return packValueFlags(sum[0], false, false, sum[1] == 1, sum[2] == 1);
     }
 
@@ -302,9 +278,7 @@ public final class Alu {
      *             if one of the ints is not an 8 bit value
      */
     public static int sub(int l, int r, boolean b0) {
-        Preconditions.checkBits8(r);
-        Preconditions.checkBits8(l);
-        if (l == r && !b0) {
+        if (Preconditions.checkBits8(l) == Preconditions.checkBits8(r) && !b0) {
             return packValueFlags(0, true, true, false, false);
         }
         int difference = 0;
