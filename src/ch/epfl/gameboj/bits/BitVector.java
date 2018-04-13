@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj.bits;
 
 import java.util.Arrays;
@@ -84,15 +81,22 @@ public final class BitVector {
         return Bits.test(index % 32, table[index / 32]);
     }
 
-    public int[] not() {
+    
+    private int[] notTable() {
         int[] notTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
-            notTable[i] = -1 & table[i];
+            // notTable[i] = -1 & table[i]; ne fait pas ce qu'on veut :
+        		// exemple : table[i]=-1 --> notTable[i]=-1
+        		notTable[i] = ~ table[i];
         }
         return notTable;
     }
+    
+    public BitVector not() {
+    		return new BitVector(notTable());
+    }
 
-    public int[] and(BitVector that) {
+    private int[] andTable(BitVector that) {
         Preconditions.checkArgument(that.size() == this.size());
         int[] andTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
@@ -100,8 +104,12 @@ public final class BitVector {
         }
         return andTable;
     }
+    
+    public BitVector and(BitVector that) {
+    		return new BitVector(andTable(that));
+    }
 
-    public int[] or(BitVector that) {
+    private int[] orTable(BitVector that) {
         Preconditions.checkArgument(that.size() == this.size());
         int[] orTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
@@ -109,10 +117,14 @@ public final class BitVector {
         }
         return orTable;
     }
+    
+    public BitVector or(BitVector that) {
+    		return new BitVector(orTable(that));
+    }
 
     public static class Builder {
 
-        private byte[] table;
+        private byte[] table=null;
 
         /**
          * Builds a Builder
