@@ -24,10 +24,18 @@ import ch.epfl.gameboj.component.memory.Ram;
  *
  */
 public final class Cpu implements Component, Clocked {
+    
+    
+    /**
+     * Represents the 8 bit registers of the cpu
+     */
     private enum Reg implements Register {
         A, F, B, C, D, E, H, L
     }
 
+    /**
+     * Represents the 16 bit registers of the cpu
+     */
     private enum Reg16 implements Register {
         AF, BC, DE, HL
     }
