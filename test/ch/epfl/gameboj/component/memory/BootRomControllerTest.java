@@ -47,9 +47,7 @@ public class BootRomControllerTest {
         for (byte b : BootRom.DATA) {
             if (b != 25) {
                 assertNotEquals(Byte.toUnsignedInt(b), br.read(i));
-            } else {
-                System.out.println(1);
-            }
+            } 
             ++i;
         }
     }

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj.component;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,6 +16,7 @@ import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 
 /**
  * @author David Gonzalez leon (270845)
+ * @author Melvin Malonga-Matouba (288405)
  *
  */
 class TimerTest {
@@ -34,7 +32,6 @@ class TimerTest {
     void TimerReadAndWriteWork() {
         // int randomNumber = Bits.clip(8, new Random().nextInt());
         int randomNumber = 9;
-        System.out.println(randomNumber);
         for (int i = 0; i < 0xFFFF; ++i) {
             Cpu c = new Cpu();
             Timer t = new Timer(c);
