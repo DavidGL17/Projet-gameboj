@@ -18,9 +18,6 @@ import ch.epfl.gameboj.bits.Bits;
 
 public final class Alu {
 
-    private Alu() {
-    };
-
     public enum Flag implements Bit {
         UNUSED_0(0b1), 
         UNUSED_1(0b10), 
@@ -30,9 +27,9 @@ public final class Alu {
         H(0b100000), 
         N(0b1000000), 
         Z(0b10000000);
-
+    
         private int mask = 0;
-
+    
         Flag(int mask) {
             this.mask = mask;
         }
@@ -44,6 +41,9 @@ public final class Alu {
 
     public static enum RotDir {
         LEFT, RIGHT;
+    }
+
+    private Alu() {
     }
 
     /**

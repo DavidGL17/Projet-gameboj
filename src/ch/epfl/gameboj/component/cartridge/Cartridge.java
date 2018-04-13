@@ -19,6 +19,7 @@ import ch.epfl.gameboj.component.memory.Rom;
 public final class Cartridge implements Component {
 
     private final Component MBC;
+    private static final int MBCIdentificationAdress = 0x147;
 
     private Cartridge(Component MBC) {
         this.MBC = MBC;
@@ -33,7 +34,7 @@ public final class Cartridge implements Component {
                 data[i] = (byte) n;
                 ++i;
             }
-            Preconditions.checkArgument(data[0x147] == 0);
+            Preconditions.checkArgument(data[MBCIdentificationAdress] == 0);
             Rom rom = new Rom(data);
             return new Cartridge(new MBC0(rom));
         } catch (FileNotFoundException i) {

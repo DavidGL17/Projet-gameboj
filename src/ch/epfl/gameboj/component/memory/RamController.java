@@ -3,6 +3,8 @@
  */
 package ch.epfl.gameboj.component.memory;
 
+import java.util.Objects;
+
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.component.Component;
 
@@ -33,10 +35,7 @@ public final class RamController implements Component {
      *             size of the ram
      */
     public RamController(Ram ram, int startAddress, int endAddress) {
-        if (ram == null) {
-            throw new NullPointerException();
-        }
-        Preconditions.checkArgument(endAddress - startAddress <= ram.size());
+        Preconditions.checkArgument(endAddress - startAddress <= Objects.requireNonNull(ram).size());
         this.startAddress = Preconditions.checkBits16(startAddress);
         this.endAddress = Preconditions.checkBits16(endAddress);
         this.ram = ram;

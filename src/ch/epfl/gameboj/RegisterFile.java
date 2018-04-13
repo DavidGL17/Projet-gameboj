@@ -24,15 +24,6 @@ public final class RegisterFile<E extends Register> {
         registers = new int[allRegs.length];
     }
 
-    private int getIndex(E reg) {
-        for (int i = 0; i < allRegs.size(); ++i) {
-            if (allRegs.get(i) == reg) {
-                return i;
-            }
-        }
-        throw new IllegalArgumentException();
-    }
-
     /**
      * Returns the 8 bit value contained in the given register
      * 
@@ -84,5 +75,14 @@ public final class RegisterFile<E extends Register> {
     public void setBit(E reg, Bit bit, boolean newValue) {
         registers[getIndex(reg)] = Bits.set(registers[getIndex(reg)],
                 bit.index(), newValue);
+    }
+
+    private int getIndex(E reg) {
+        for (int i = 0; i < allRegs.size(); ++i) {
+            if (allRegs.get(i) == reg) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException();
     }
 }
