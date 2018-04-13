@@ -13,11 +13,14 @@ import ch.epfl.gameboj.Preconditions;
 // Juste pour être au clair, poids d'un bit croissant de l'index de l'entier
 // dans lequel il se trouve
 public final class BitVector {
+	
     private final int[] table;
+    private final int size;
 
     public BitVector(int size, boolean initialValue) {
         Preconditions.checkArgument(size >= 0 && (size % 32) == 0);
         table = new int[size / 32];
+        this.size=size;
         Arrays.fill(table, initialValue ? -1 : 0);
     }
 
@@ -27,6 +30,7 @@ public final class BitVector {
 
     private BitVector(int[] table) {
         this.table = table.clone();
+        size=table.length<<5;
     }
 
     private BitVector(BitVector bv) {
@@ -73,7 +77,7 @@ public final class BitVector {
     }
 
     public int size() {
-        return table.length * 32;
+        return size;
     }
 
     public boolean testBit(int index) {
@@ -121,7 +125,25 @@ public final class BitVector {
     public BitVector or(BitVector that) {
     		return new BitVector(orTable(that));
     }
-
+    
+    private enum ExtensionType {
+    		BYZERO, WRAPPED
+    }
+    
+	private int bitAtIndexOfExtension(int index, ExtensionType ext) {
+		switch (ext) {
+		case BYZERO:
+			if (index >= 0 && index < size()) {
+				return testBit(index) ? 1 : 0;
+			}
+			return 0;
+			break;
+		case WRAPPED:
+			return testBit(Math.floorMod(index, size())) ? 1 : 0;
+	   }
+   }
+   
+   
     public static class Builder {
 
         private byte[] table=null;
