@@ -18,8 +18,7 @@ import ch.epfl.gameboj.bits.Bits;
 
 public final class Alu {
 
-    private Alu() {
-    };
+    private Alu() {}
 
     public enum Flag implements Bit {
         UNUSED_0(0b1), 

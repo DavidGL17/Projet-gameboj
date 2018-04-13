@@ -38,15 +38,16 @@ public final class Cpu implements Component, Clocked {
 
     private Bus bus;
     private final Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
-    
+
     private final RegisterFile<Reg> Regs = new RegisterFile<>(Reg.values());
     private int registerPC = 0;
     private int registerSP = 0;
     private int registerIE = 0;
     private int registerIF = 0;
     private boolean IME = false;
-    
+
     private long nextNonIdleCycle = 0;
+    private final int PREFIX = 0xCB;
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(
             Opcode.Kind.DIRECT);
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(
@@ -56,7 +57,7 @@ public final class Cpu implements Component, Clocked {
      * Builds a table of opcodes of the specified kind
      */
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[0X200];
+        Opcode[] table = new Opcode[0x200];
         for (Opcode o : Opcode.values()) {
             if (o.kind == kind) {
                 table[o.encoding] = o;
@@ -181,7 +182,7 @@ public final class Cpu implements Component, Clocked {
             }
         }
 
-        if (read8(registerPC) == 0xCB) {
+        if (read8(registerPC) == PREFIX) {
             dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()], cycle);
         } else {
             dispatch(DIRECT_OPCODE_TABLE[read8(registerPC)], cycle);
@@ -223,7 +224,7 @@ public final class Cpu implements Component, Clocked {
         if (Arrays.asList(conditionals).contains(opcode.family)) {
             additional = (conditionalInstruction(opcode))
                     ? opcode.additionalCycles
-                    : 0;
+                            : 0;
         }
         nextNonIdleCycle = cycle + opcode.cycles + additional;
     }
@@ -297,11 +298,11 @@ public final class Cpu implements Component, Clocked {
         }
         break;
         case LD_N8R_A: {
-            write8(0xFF00 + read8AfterOpcode(), Regs.get(Reg.A));
+            write8(AddressMap.REGS_START + read8AfterOpcode(), Regs.get(Reg.A));
         }
         break;
         case LD_CR_A: {
-            write8(0xFF00 + Regs.get(Reg.C), Regs.get(Reg.A));
+            write8(AddressMap.REGS_START + Regs.get(Reg.C), Regs.get(Reg.A));
         }
         break;
         case LD_N16R_A: {
@@ -1164,6 +1165,8 @@ public final class Cpu implements Component, Clocked {
 
     }
 
+    /// Management of interruptions
+
     /**
      * Checks if the condition described associated to an opcode is satisfied.
      * 
@@ -1186,7 +1189,11 @@ public final class Cpu implements Component, Clocked {
         }
     }
 
-    // Management of the Flags
+    /// Management of the Flags
+
+    private enum FlagSrc {
+        V0, V1, ALU, CPU
+    }
 
     /**
      * Loads in the register r the value from packed vf
@@ -1234,10 +1241,6 @@ public final class Cpu implements Component, Clocked {
         write8(reg16(Reg16.HL), Alu.unpackValue(vf));
         setFlags(vf);
     }
-
-    private enum FlagSrc {
-        V0, V1, ALU, CPU
-    };
 
     /**
      * Loads in F the flags according to the vf value, state of F, and FlagSrcs

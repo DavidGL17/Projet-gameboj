@@ -15,6 +15,8 @@ import ch.epfl.gameboj.component.Component;
 public final class Bus {
     private final ArrayList<Component> composants = new ArrayList<Component>();
 
+    private final int defaultReturnValue = 0xff;
+
     /**
      * Attaches the given component to the bus
      * 
@@ -47,10 +49,10 @@ public final class Bus {
                     return value;
                 }
             }
-            return 0xff;
+            return defaultReturnValue;
 
         } else {
-            return 0xff;
+            return defaultReturnValue;
         }
     }
 
