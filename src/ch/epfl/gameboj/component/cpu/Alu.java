@@ -118,15 +118,14 @@ public final class Alu {
      * Checks if the input composed of a value and the flags is within the
      * possible range
      * 
-     * @param valueFlags,
-     *            the value and the flags
+     * @param valueFlags, the value and the flags
      * @return valueFlags, if it is within the range
      * @throws IllegalArgumentException
      *             if the value is not within range
      */
     private static int checkFlagValueIsWithinRange(int valueFlags) {
         Preconditions.checkArgument(
-                !((valueFlags & 0x0F) != 0 || valueFlags >= 0x1000000));
+                !((valueFlags & 0x0F) != 0 || valueFlags >= 0xFFFFF0));
         return valueFlags;
     }
 
