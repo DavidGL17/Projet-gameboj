@@ -19,6 +19,7 @@ import ch.epfl.gameboj.component.cpu.Alu.RotDir;
 import ch.epfl.gameboj.component.memory.Ram;
 
 /**
+ * 
  * @author David Gonzalez leon (270845)
  * @author Melvin Malonga-Matouba (288405)
  *
@@ -39,21 +40,22 @@ public final class Cpu implements Component, Clocked {
     private enum Reg16 implements Register {
         AF, BC, DE, HL
     }
-
+    
+    /**
+     * Represents the different type of Interruption
+     */
     public enum Interrupt implements Bit {
         VBLANK, LCD_STAT, TIMER, SERIAL, JOYPAD
     }
 
     private Bus bus;
     private final Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
-
     private final RegisterFile<Reg> Regs = new RegisterFile<>(Reg.values());
     private int registerPC = 0;
     private int registerSP = 0;
     private int registerIE = 0;
     private int registerIF = 0;
     private boolean IME = false;
-
     private long nextNonIdleCycle = 0;
     private final int PREFIX = 0xCB;
     private static final Opcode[] DIRECT_OPCODE_TABLE = buildOpcodeTable(
@@ -73,6 +75,8 @@ public final class Cpu implements Component, Clocked {
         }
         return table;
     }
+    
+    /// Methods imposed by Component
 
     /*
      * (non-Javadoc)
@@ -121,6 +125,8 @@ public final class Cpu implements Component, Clocked {
         }
     }
 
+    /// Functionality offered to other Components
+    
     /**
      * Allows an Interruption to be raised
      * 
@@ -131,7 +137,8 @@ public final class Cpu implements Component, Clocked {
         registerIF = registerIF | i.mask();
     }
 
-    // -------------------------------------------------------------//
+    /// Visibility for test purposes
+    
     /**
      * Allows the state of the Cpu to be known for test purposes
      * 
@@ -145,6 +152,8 @@ public final class Cpu implements Component, Clocked {
                 Regs.get(Reg.L) };
     }
 
+    /// Method imposed by Clocked
+    
     /**
      * Determines wether the gameboy should be functionning or waiting in order
      * to simulate a gameboy if the gameboy is in HALT, determines wether the
@@ -205,14 +214,11 @@ public final class Cpu implements Component, Clocked {
      *            the index of the interruption, possibly invalid
      */
     private void interruptHandler(int toManage) {
-        if ((toManage >= 0) && (toManage <= 4) && IME) { // iff there is
-            // exception to treat;
+        if ((toManage >= 0) && (toManage <= 4) && IME) {
             IME = false;
             registerIF = Bits.set(registerIF, toManage, false);
             push16(registerPC);
-            registerPC = AddressMap.INTERRUPTS[toManage]; // PC --> Gestion
-            // exceptions c'est
-            // tout ?
+            registerPC = AddressMap.INTERRUPTS[toManage]; 
         }
     }
 
@@ -236,7 +242,8 @@ public final class Cpu implements Component, Clocked {
         }
         nextNonIdleCycle = cycle + opcode.cycles + additional;
     }
-
+    
+    
     /**
      * Operates the action corresponding to the opcode and updates
      * nextNonIdleCycle accordingly
@@ -244,7 +251,7 @@ public final class Cpu implements Component, Clocked {
      * @param opcode
      *            - the opcode
      * @param cycle
-     *            - the cycle being execued
+     *            - the cycle being executed
      */
     private void dispatch(Opcode opcode, long cycle) {
         int nextPC = Bits.clip(16, registerPC + opcode.totalBytes);
@@ -918,7 +925,7 @@ public final class Cpu implements Component, Clocked {
     // Management of the stack
 
     /**
-     * Decreases SP by 2 and writes v at the adress SP
+     * Decreases SP by 2 and writes v at the address SP
      * 
      * @param v
      *            the 16-bits value to represent
@@ -929,7 +936,7 @@ public final class Cpu implements Component, Clocked {
     }
 
     /**
-     * Reads what's stored at the adress SP and increases SP by 2
+     * Reads what's stored at the address SP and increases SP by 2
      * 
      * @return the 16-bits value represented
      */
@@ -1199,6 +1206,10 @@ public final class Cpu implements Component, Clocked {
 
     /// Management of the Flags
 
+    /*
+     * Represents the different sources that may be used to determine the actual
+     * value that should take Register F
+     */
     private enum FlagSrc {
         V0, V1, ALU, CPU
     }

@@ -17,7 +17,11 @@ import ch.epfl.gameboj.bits.Bits;
  */
 
 public final class Alu {
-
+	
+	/*
+	 * Represents the bits of Register F as well as the flags that can be raised
+	 * while performing arithmetic operations
+	 */
     public enum Flag implements Bit {
         UNUSED_0(0b1), 
         UNUSED_1(0b10), 
@@ -39,12 +43,14 @@ public final class Alu {
         }
     }
 
+    /*
+     * Represents a Direction
+     */
     public static enum RotDir {
         LEFT, RIGHT;
     }
 
-    private Alu() {
-    }
+    private Alu() { };
 
     /**
      * Returns a value where the bits corresponding to each fanion are 1 if the

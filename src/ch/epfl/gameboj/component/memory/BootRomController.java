@@ -1,6 +1,3 @@
-/**
- * @author Melvin Malonga-Matouba (288405)
- */
 package ch.epfl.gameboj.component.memory;
 
 import java.util.Objects;
@@ -10,11 +7,20 @@ import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cartridge.Cartridge;
 import ch.epfl.gameboj.component.memory.BootRom;
 
+/**
+ * 
+ * @author Melvin Malonga-Matouba (288405)
+ * 
+ */
 
 public final class BootRomController implements Component {
 	private Cartridge cartridge;
 	private boolean bootIsDisabled = false;
 	
+	/**
+	 * Builds a BootRomController controlling the access to a Cartridge
+	 * @param cartridge, the Cartridge to which it controls the acccess
+	 */
 	public BootRomController(Cartridge cartridge) {
 	    Objects.requireNonNull(cartridge);
 		this.cartridge=cartridge;

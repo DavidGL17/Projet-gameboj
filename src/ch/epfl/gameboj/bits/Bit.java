@@ -3,7 +3,7 @@ package ch.epfl.gameboj.bits;
 
 /*
  * 
- * @author Melvin (288405)
+ * @author Melvin Malonga-Matouba (288405)
  * 
  * 
  */
@@ -13,14 +13,14 @@ public interface Bit {
 	
 	/**
 	 * Uses automatically inherited method from type enum
-	 * @return the ordinal of this enumeration constant
+	 * @return the ordinal of this enumeration instance
 	 */
 	abstract int ordinal();
 	
 	
 	/**
 	 * Computes the index
-	 * @return an int : the index
+	 * @return the index
 	 */
 	default int index(){
 		return ordinal();
@@ -28,7 +28,7 @@ public interface Bit {
 	
 	/**
 	 * Computes the mask
-	 * @return an int : the mask
+	 * @return the mask
 	 */
 	default int mask(){
 		

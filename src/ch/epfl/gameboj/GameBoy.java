@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj;
 
 import java.util.Objects;
@@ -25,9 +22,12 @@ public final class GameBoy {
     private final Cpu cpu;
     private final Timer timer;
     private final BootRomController bootRomController;
-
     private long currentCycle = 0;
 
+    /**
+     * Builds a GameBoy
+     * @param cartridge, the cartridge the GameBoy will run
+     */
     public GameBoy(Cartridge cartridge) {
         Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
         workRam = new RamController(ram, AddressMap.WORK_RAM_START);

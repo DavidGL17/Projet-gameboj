@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj;
 
 import java.util.ArrayList;
@@ -9,13 +6,15 @@ import ch.epfl.gameboj.bits.Bit;
 import ch.epfl.gameboj.bits.Bits;
 
 /**
+ * 
  * @author David Gonzalez leon (270845)
  *
  */
 public final class RegisterFile<E extends Register> {
+	
     private final ArrayList<E> allRegs = new ArrayList<>();
     private final int[] registers;
-
+    
     public RegisterFile(E[] allRegs) {
         Preconditions.checkArgument(allRegs.length > 0);
         for (int i = 0; i < allRegs.length; ++i) {

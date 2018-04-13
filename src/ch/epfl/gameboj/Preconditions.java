@@ -2,16 +2,15 @@ package ch.epfl.gameboj;
 
 /**
  * 
- * 
  * @author David (270845)
  *
  */
 public interface Preconditions {
 
     /**
-     * checks if the param b is true
+     * Checks if the param b is true
      * 
-     * @param b
+     * @param b, the property to verify
      * @throws IllegalArgumentException
      *             if b is false
      */
@@ -24,8 +23,8 @@ public interface Preconditions {
     /**
      * Checks if an int is in the range of 0 to 0xff
      * 
-     * @param v
-     * @return v
+     * @param v, the int
+     * @return the argument v
      * @throws IllegalArgumentException
      *             if v is not in the range of 0 to 0xff
      */
@@ -40,8 +39,8 @@ public interface Preconditions {
     /**
      * Checks if an int is in the range of 0 to 0xffff
      * 
-     * @param v
-     * @return v
+     * @param v, the int
+     * @return the argument v
      * @throws IllegalArgumentException
      *             if v is not in the range of 0 to 0xffff
      */

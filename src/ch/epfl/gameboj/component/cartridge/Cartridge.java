@@ -7,24 +7,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.memory.Rom;
 
 /**
+ * 
  * @author David Gonzalez leon (270845)
  *
  */
 public final class Cartridge implements Component {
 
     private final Component MBC;
-    private static final int MBCIdentificationAdress = 0x147;
+    private static final int MBC_IDENTIFICATION_ADDRESS = 0x147;
 
     private Cartridge(Component MBC) {
         this.MBC = MBC;
     }
-
+    
+    /**
+     * Builds a Cartridge accordingly to a file containing the Rom
+     * @param romFile, the file
+     * @return the built Cartridge
+     * @throws IOException
+     * 			if the reading of romFile causes an IOException
+     */
     public static Cartridge ofFile(File romFile) throws IOException {
         try (FileInputStream input = new FileInputStream(romFile)) {
             byte[] data = new byte[(int) romFile.length()];
@@ -34,7 +41,7 @@ public final class Cartridge implements Component {
                 data[i] = (byte) n;
                 ++i;
             }
-            Preconditions.checkArgument(data[MBCIdentificationAdress] == 0);
+            Preconditions.checkArgument(data[MBC_IDENTIFICATION_ADDRESS] == 0);
             Rom rom = new Rom(data);
             return new Cartridge(new MBC0(rom));
         } catch (FileNotFoundException i) {

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj.component.cartridge;
 
 import java.util.Objects;
@@ -44,7 +41,7 @@ public final class MBC0 implements Component {
     }
 
     /*
-     * Does nothing, as it is not possible to write on a rom
+     * Does nothing, as it is not possible to write on a memory bank of type 0
      */
     @Override
     public void write(int address, int data) {

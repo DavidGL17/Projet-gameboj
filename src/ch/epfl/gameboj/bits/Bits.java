@@ -12,11 +12,13 @@ import ch.epfl.gameboj.Preconditions;
  */
 
 public final class Bits{
+	
 	private Bits(){};
+	
 	/**
 	 * Computes the mask corresponding to a certain index
-	 * @param index - an int : the index of the bit to activate
-	 * @return an int : the corresponding mask
+	 * @param index, the index of the bit to activate
+	 * @return the corresponding mask
 	 * @throws IndexOutOfBoundsException
 	 * 			If parameter i doesn't belong to [0,31]
 	 */
@@ -27,9 +29,9 @@ public final class Bits{
 	
 	/**
 	 * Determines if the bit of a given weight is activated in an int
-	 * @param bits - an int : the int
-	 * @param index - an int : the weight of the bit
-	 * @return a boolean : wether the bit of weight index is activated in bits
+	 * @param bits, the int
+	 * @param index, the weight of the bit
+	 * @return wether the bit of weight index is activated in bits
 	 * @throws IndexOutOfBoundsException
 	 * 			If the index is invalid for a bit in a int
 	 */
@@ -42,8 +44,8 @@ public final class Bits{
 	
 	/**
 	 * Determines wether a certain Bit is activated in an int
-	 * @param bits - an int : the int
-	 * @param bit - an Bit : the Bit
+	 * @param bits, the int
+	 * @param bit, the Bit
 	 * @return a boolean : wether bit is activated in bits
 	 * @throws IndexOutOfBoundsException
 	 * 			If the return of bit.index() is out of [0,31] ---> Check the class of bit
@@ -55,10 +57,10 @@ public final class Bits{
 	
 	/**
 	 * Computes a byte where the bit of weight index is set to 1 or 0
-	 * @param bits - an int : the original int
-	 * @param index - an int : the weight of the bit
-	 * @param newValue - a boolean : true iff the bit should be set to 1, false to 0
-	 * @return an int : the int with index-th bit's value set
+	 * @param bits, the original int
+	 * @param index, the weight of the bit
+	 * @param newValue, true if the bit should be set to 1, false to 0
+	 * @return bits but with index-th bit's value set
 	 * @throws IndexOutOfBoundsException
 	 * 			If the index is invalid for a bit in an int
 	 */
@@ -81,9 +83,9 @@ public final class Bits{
 	
 	/**
 	 * Computes the int corresponding to the (size) least significant bits
-	 * @param size - an int : the number of bits
-	 * @param bits - an int : the original code
-	 * @return an int : the code corresponding to the (size) LSB
+	 * @param size, the number of bits
+	 * @param bits, the original int
+	 * @return the int corresponding to the (size) LSB
 	 * @throw IllegalArgumentException
 	 * 			if parameter size isn't within [0,32]
 	 */
@@ -104,10 +106,10 @@ public final class Bits{
 	
 	/**
 	 * Extract the bits from index start to start+size of an int
-	 * @param bits - an int : the int
-	 * @param start - an int : the index of the first extracted bit
-	 * @param size - an int : the number of bits to extract
-	 * @return an int : the extracted bit-sequence
+	 * @param bits, the int
+	 * @param start, the index of the first extracted bit
+	 * @param size, the number of bits to extract
+	 * @return the extracted bit-sequence
 	 * @throws IndexOutOfBoundsException
 	 * 			if the start and size is invalid for a bit-sequence in an int
 	 */
@@ -117,13 +119,15 @@ public final class Bits{
 	
 	
 	/**
-	 * Computes the rotation of a number given the size of the number and distance of rotation
-	 * @param size - an int : the size of the number
-	 * @param bits - an int : the value of a number
-	 * @param distance _ an int : the number by which the bits are rotated
+	 * Computes the rotation of a number given the size of the number and distance
+	 * of rotation
+	 * @param size, the size of the number
+	 * @param bits, the value of a number
+	 * @param distance, the number of bits by which the bits are rotated 
+	 * 		positive if the direction of the rotation is left, negative otherwise
 	 * @return the rotated int sequence
-	 * @throws IllegalArgumentException
-	 * @throws IndexOutOfBoundsException
+	 * @throws IllegalArgumentException 
+	 * 			if size isn't within [0,32] 
 	 */
 	public static int rotate(int size, int bits, int distance) {
 	    if ((size<=0)||(size>Integer.SIZE) ) {
@@ -153,8 +157,8 @@ public final class Bits{
 	
 	/**
 	 * Computes from a byte the int where the 8 LSB are the same and the rest is of the sign of the MSB
-	 * @param b - an int : a byte
-	 * @return an int : the int code
+	 * @param b, the byte
+	 * @return the int
 	 * @throws IllegalArgumentException
 	 * 			if b isn't a byte
 	 */
@@ -168,8 +172,8 @@ public final class Bits{
 	
 	/**
 	 * Computes a byte where the bits are reversed relative to center
-	 * @param b - an int : the byte
-	 * @return  an int : the byte
+	 * @param b, the byte
+	 * @return the byte
 	 * @throws IllegalArgumentException
 	 * 			if b isn't a byte
 	 */
@@ -186,8 +190,8 @@ public final class Bits{
 	
 	/**
 	 * Computes the complement of a byte
-	 * @param b - an int : the byte
-	 * @return an int : the byte
+	 * @param b, the byte
+	 * @return the byte
 	 * @throws IllegalArgumentException
 	 * 			if b isn't a byte
 	 */
@@ -197,8 +201,8 @@ public final class Bits{
 	
 	/**
 	 * Computes a 16 bits code given to 8-bits sequences.
-	 * @param highB - an int : the 8 MSB code
-	 * @param lowB - an int : the 8 LSB code
+	 * @param highB, the 8 MSB code
+	 * @param lowB, the 8 LSB code
 	 * @return the concatenated 16-bits value
 	 * @throws IllegalArgumentException
 	 * 			if either highB or lowB isn't a byte

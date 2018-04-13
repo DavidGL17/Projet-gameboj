@@ -1,6 +1,4 @@
-/**
- * @author Melvin Malonga-Matouba (288405)
- */
+
 package ch.epfl.gameboj.component;
 
 import ch.epfl.gameboj.AddressMap;
@@ -9,6 +7,12 @@ import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 
+/*
+ * 
+ * @author Melvin Malonga-Matouba (288405)
+ * 
+ */
+
 public final class Timer implements Component, Clocked {
 
     private final Cpu cpu;
@@ -16,7 +20,11 @@ public final class Timer implements Component, Clocked {
     private int TIMA = 0;
     private int TMA = 0;
     private int TAC = 0;
-
+    
+    /**
+     * Builds a Timer attached to a CPU
+     * @param cpu to which this is attached
+     */
     public Timer(Cpu cpu) {
         if (cpu == null)
             throw new NullPointerException();
@@ -60,7 +68,11 @@ public final class Timer implements Component, Clocked {
             incIFChange(s0);
         }
     }
-
+    
+    /**
+     * Checks wether the condition imposed by register TAC is verified currently
+     * @return wether the condition is verified
+     */
     private boolean state() {
         switch (Bits.extract(TAC, 0, 3)) {
         case 0b100: {

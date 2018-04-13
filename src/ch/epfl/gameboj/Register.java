@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj;
 
 /**
@@ -8,6 +5,7 @@ package ch.epfl.gameboj;
  *
  */
 public interface Register {
+	
     /**
      * @return ordinal
      */
