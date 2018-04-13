@@ -36,6 +36,45 @@ public final class BitVector {
         this(bv.table);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object arg0) {
+        if (arg0 instanceof int[]) {
+            return Arrays.equals(table, (int[]) arg0);
+        } 
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(table);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        String s = "";
+        for (int i = 0;i<table.length;++i) {
+            for (int j = 0;j<32;++j) {
+                s += Bits.test(table[i], j) ? '1' : '0';
+            }
+        }
+        return s;
+    }
+
     public int size() {
         return table.length * 32;
     }
