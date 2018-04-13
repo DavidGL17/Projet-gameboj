@@ -2,7 +2,6 @@ package ch.epfl.gameboj.bits;
 
 import java.util.Arrays;
 import java.util.Objects;
-
 import ch.epfl.gameboj.Preconditions;
 
 /**
@@ -19,7 +18,7 @@ public final class BitVector {
 
     public BitVector(int size, boolean initialValue) {
         Preconditions.checkArgument(size >= 0 && (size % 32) == 0);
-        table = new int[size / 32];
+        table = new int[size / 32 + 1]; // size/32 faux exemple size = 1 size/32=0
         this.size=size;
         Arrays.fill(table, initialValue ? -1 : 0);
     }
@@ -101,7 +100,7 @@ public final class BitVector {
     }
 
     private int[] andTable(BitVector that) {
-        Preconditions.checkArgument(that.size() == this.size());
+        Preconditions.checkArgument(that.size() == size);
         int[] andTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
             andTable[i] = table[i] & that.table[i];
@@ -114,7 +113,7 @@ public final class BitVector {
     }
 
     private int[] orTable(BitVector that) {
-        Preconditions.checkArgument(that.size() == this.size());
+        Preconditions.checkArgument(that.size() == size);
         int[] orTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
             orTable[i] = table[i] | that.table[i];
@@ -130,16 +129,56 @@ public final class BitVector {
     		BYZERO, WRAPPED
     }
     
-	private int bitAtIndexOfExtension(int index, ExtensionType ext) {
-		switch (ext) {
-		case BYZERO:
-			if (index >= 0 && index < size()) {
-				return testBit(index) ? 1 : 0;
+    private int[] extractTable(int start, int size, ExtensionType ext) {
+		int[] newTable = new int[size / 32 + 1];
+		if (Math.floorMod(start, 32) == 0) {
+			switch (ext) {
+			case BYZERO:
+				int i = 0;
+				while (i < newTable.length) {
+					while (i + start < 0) {
+						newTable[i] = 0;
+						i++;
+					}
+					while (i + start < this.size) {
+						newTable[i] = table[start + i];
+						i++;
+					}
+					newTable[i] = table[i + start];
+				}
+				break;
+			case WRAPPED:
+				for (int j = 0; j < newTable.length; j++) {
+					newTable[j] = table[Math.floorMod(start + j, this.size)];
+				}
+				break;
 			}
-			return 0;
-			break;
-		case WRAPPED:
-			return testBit(Math.floorMod(index, size())) ? 1 : 0;
+		} else {
+			for (int i=0; i<newTable.length ; i++) {
+				int value=0;
+				for (int j=0 ; j<Integer.SIZE ; j++) {
+					value+=(testBit(i*Integer.SIZE+j)?1 :0) << j;
+				}
+				newTable[i]= value;
+			}
+    		}
+		return newTable;
+    }
+    
+	private int bitAtIndexOfExtension(int index, ExtensionType ext) {
+		if (index >= 0 && index < size) {
+			return testBit(index) ? 1 : 0;
+		} else {
+			switch (ext) {
+			case BYZERO:
+				return 0;
+			case WRAPPED:
+				return testBit(Math.floorMod(index,size)) ? 1 : 0;
+			default:
+				Objects.requireNonNull(ext);
+				throw new IllegalArgumentException(" How ? ");
+			}
+		
 	   }
    }
    
