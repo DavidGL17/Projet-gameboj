@@ -86,21 +86,23 @@ public final class Alu {
     /**
      * Extracts the value from an int, supressing the flags
      * 
-     * @param valueFlags, the int we want to extract the value from
+     * @param valueFlags, the int from which we want to extract the value 
      * @return the value
+     * @throws IllegalArgumentException if valueFlags isn't valid
      */
     public static int unpackValue(int valueFlags) {
-        return (checkFlagValueIsWithinRange(valueFlags) & 0xffff00) >>> 8;
+        return (checkFlagValueIsValid(valueFlags) & 0xffff00) >>> 8;
     }
 
     /**
      * Extracts the flags from an int, supressing the value
      * 
-     * @param valueFlags, the int we want to extract the flags from
+     * @param valueFlags, the int from which we want to extract the flags
      * @return the flags in a 8 bit int
+     * @throws IllegalArgumentException if valueFlags isn't valid
      */
     public static int unpackFlags(int valueFlags) {
-        return (checkFlagValueIsWithinRange(valueFlags) & 0xff);
+        return (checkFlagValueIsValid(valueFlags) & 0xff);
     }
 
     /**
@@ -109,9 +111,9 @@ public final class Alu {
      * 
      * @param valueFlags, the value and the flags
      * @return valueFlags, if it is within the range
-     * @throws IllegalArgumentException if the value is not within range
+     * @throws IllegalArgumentException if valueFlags isn't valid
      */
-    private static int checkFlagValueIsWithinRange(int valueFlags) {
+    private static int checkFlagValueIsValid(int valueFlags) {
         Preconditions.checkArgument(
                 !((valueFlags & 0x0F) != 0 || valueFlags >= 0xFFFFF0));
         return valueFlags;
@@ -121,8 +123,8 @@ public final class Alu {
      * Ads two ints bit by bit up to the size bit, and also adds the initial
      * carry bit.
      * 
-     * @param l, an int
-     * @param r, an int
+     * @param l, the first term
+     * @param r, the second term
      * @param size, the number of bit by bit addition it makes
      * @param carryH, the index at the point in which the method has to register
      * the flag H
@@ -179,7 +181,7 @@ public final class Alu {
      * @param l, the first 8 bit int
      * @param r, the second 8 bit int
      * @param c0, the initial carry bit
-     * @return a 16 bit int with the value and the flags
+     * @return the result and the flags in the same int
      * @throws IllegalArgumentException if one of the ints is not an 8 bit value
      */
     public static int add(int l, int r, boolean c0) {
@@ -194,7 +196,7 @@ public final class Alu {
      * 
      * @param l, the first 8 bit int
      * @param r, the second 8 bit int
-     * @return a 16 bit int with the value and the flags
+     * @return the result and the flags in the same int
      * @throws IllegalArgumentException if one of the ints is not an 8 bit value
      */
     public static int add(int l, int r) {
@@ -207,9 +209,8 @@ public final class Alu {
      * 
      * @param l, the first 16 bit int
      * @param r, the second 16 bit int
-     * @return a 24 bit int with the value and the flags
-     * @throws IllegalArgumentException
-     *             if one of the ints is not an 16 bit value
+     * @return the result and the flags in the same int 
+     * @throws IllegalArgumentException if one of the ints is not an 16 bit value
      */
     public static int add16L(int l, int r) {
         int sum[] = addition(Preconditions.checkBits16(l),
@@ -223,7 +224,7 @@ public final class Alu {
      * 
      * @param l, the first 16 bit int
      * @param r, the second 16 bit int
-     * @return a 24 bit int with the value and the flags
+     * @return the result and the flags in the same int
      * @throws IllegalArgumentException if one of the ints is not an 16 bit value
      */
     public static int add16H(int l, int r) {
@@ -236,10 +237,10 @@ public final class Alu {
      * Computes the substraction of two 8 bits int and of the initial carry bit,
      * returns the result and the flags Z1HC
      * 
-     * @param l, a 8 bit int
-     * @param r, a 8 bit int
+     * @param l, the first 8 bit int
+     * @param r, the second 8 bit int
      * @param b0, the initial carry bit
-     * @return the result and the flags in a same int
+     * @return the result and the flags in the same int
      * @throws IllegalArgumentException if one of the ints is not an 8 bit value
      */
     public static int sub(int l, int r, boolean b0) {
@@ -279,9 +280,9 @@ public final class Alu {
      * Computes the substraction l-r, of two 8 bits int, returns the result and
      * the flags Z1HC
      * 
-     * @param l, a 8 bit int
-     * @param r, a 8 bit int
-     * @return the result and the flags in a same int
+     * @param l, the first 8 bit int
+     * @param r, the second 8 bit int
+     * @return the result and the flags in the same int
      * @throws IllegalArgumentException if one of the ints is not an 8 bit value
      */
     public static int sub(int l, int r) {
@@ -310,9 +311,10 @@ public final class Alu {
     /**
      * Computes the AND operation and corresponding flags
      * 
-     * @param l, an int, first term
-     * @param r, an int, second term
+     * @param l, the first term
+     * @param r, the second term
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if one of the int is not an 8 bit int
      */
     public static int and(int l, int r) {
 
@@ -331,9 +333,10 @@ public final class Alu {
     /**
      * Computes the OR operation and corresponding flags
      * 
-     * @param l, an int, first term
-     * @param r, an int, second term
+     * @param l, first term
+     * @param r, second term
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if one of the int is not an 8 bit int 
      */
     public static int or(int l, int r) {
 
@@ -351,9 +354,10 @@ public final class Alu {
     /**
      * Computes the XOR operation and corresponding flags
      * 
-     * @param l, an int, first term
-     * @param r, an int, second term
+     * @param l, the first term
+     * @param r, the second term
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if one of the int is not an 8 bit int
      */
     public static int xor(int l, int r) {
 
@@ -372,8 +376,10 @@ public final class Alu {
     /**
      * Computes the left shift and corresponding flags
      * 
-     * @param v, an int, the value to shift
+     * @param v, the value to shift
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if v is not an 8 bit int
+     * 
      */
     public static int shiftLeft(int v) {
 
@@ -397,8 +403,9 @@ public final class Alu {
     /**
      * Computes the arithmetic rigth shift and corresponding flags
      * 
-     * @param v, an int, the value to shift
+     * @param v, the value to shift
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if v is not an 8 bit int
      */
     public static int shiftRightA(int v) {
 
@@ -426,8 +433,9 @@ public final class Alu {
     /**
      * Computes the logical rigth shift and corresponding flags
      * 
-     * @param v, an int, the value to shift
+     * @param v, the value to shift
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if v is not an 8 bit int
      */
     public static int shiftRightL(int v) {
 
@@ -450,9 +458,10 @@ public final class Alu {
     /**
      * Computes the rotation in a direction and corresponding flags
      * 
-     * @param d, a RotDir, the direction of the rotation
-     * @param v, an int, the value to rotate
+     * @param d, the direction of the rotation
+     * @param v, the value to rotate
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if v is not an 8 bit int or if d is null
      */
     public static int rotate(RotDir d, int v) {
 
@@ -480,6 +489,7 @@ public final class Alu {
      * @param v, an int, the value
      * @param c, a boolean, wether the carry is 1
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if v is not an 8 bit int or d is null
      */
     public static int rotate(RotDir d, int v, boolean c) {
 
@@ -509,8 +519,9 @@ public final class Alu {
     /**
      * Computes the byte where the 4 LSB and 4 MSB swap position
      * 
-     * @param v, an int, the value
+     * @param v, the value
      * @return the packed valueFlags
+     * @throws IllegalArgumentException if v is not an 8 bit int
      */
     public static int swap(int v) {
 
@@ -531,9 +542,12 @@ public final class Alu {
     /**
      * Computes wether a bit is activated in a 8-bit int
      * 
-     * @param v, an int, the 8-bit int
-     * @param bitIndex, an int, the index
+     * @param v, the 8-bit int
+     * @param bitIndex, the index
      * @return 0b_Z010_0000 where Z=1 iff the bit is not activated
+     * @throws IllegalArgumentException if v is not an 8 bit int
+     * @throws IndexOutOfBoundsException if bitIndex isn't between 0 and 8 
+     *      
      */
     public static int testBit(int v, int bitIndex) {
         Objects.checkIndex(bitIndex, 8);
