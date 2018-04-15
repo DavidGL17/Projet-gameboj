@@ -197,7 +197,7 @@ public final class BitVector {
    }
    
    
-    public static class Builder {
+    public final static class Builder {
 
         private byte[] table=null;
 
@@ -235,7 +235,7 @@ public final class BitVector {
          * @return the BitVector
          */
         public BitVector build() {
-            // If the Builder hasn't been constructed throw NullPointerException
+        		Objects.requireNonNull(table);
             int[] argument = buildIntTable();
             table = null;
             return new BitVector(argument);
