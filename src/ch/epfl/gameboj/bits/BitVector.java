@@ -124,6 +124,17 @@ public final class BitVector {
     }
     
     
+    public BitVector extractZeroExtended(int start, int size) {
+    	
+    		return new BitVector(extractTable(start,size,ExtensionType.BYZERO));
+    	
+    }
+    
+    public BitVector extractWrapped(int start, int size) {
+    	
+    		return new BitVector(extractTable(start,size,ExtensionType.WRAPPED));
+    }
+    
     private enum ExtensionType {
     		BYZERO, WRAPPED
     }
