@@ -17,8 +17,8 @@ public final class BitVector {
     private final int size;
 
     public BitVector(int size, boolean initialValue) {
-        Preconditions.checkArgument(size >= 0 && (size % 32) == 0);
-        table = new int[size / 32 + 1]; // size/32 faux exemple size = 1 size/32=0
+        Preconditions.checkArgument(size > 0 && (size % 32) == 0);
+        table = new int[size / 32]; // size/32 faux exemple size = 1 size/32=0 Réponse : oui mais la size est forcémment un multiple de 32, donc size/32 = 0 ça veut dire que size = 0
         this.size=size;
         Arrays.fill(table, initialValue ? -1 : 0);
     }
@@ -82,8 +82,8 @@ public final class BitVector {
     }
 
     public boolean testBit(int index) {
-        Preconditions.checkArgument(index < table.length * 32 && index >= 0);
-        return Bits.test(index % 32, table[index / 32]);
+        Preconditions.checkArgument(index <size && index >= 0);
+        return Bits.test(table[index / 32],index % 32);
     }
 
     
@@ -208,7 +208,7 @@ public final class BitVector {
          *            the number of Bit of the desired BitVector
          */
         public Builder(int size) {
-            Preconditions.checkArgument(size >= 0 && size % 32 == 0);
+            Preconditions.checkArgument(size > 0 && size % 32 == 0);
             table = new byte[Math.floorDiv(size, 8)];
         }
 
