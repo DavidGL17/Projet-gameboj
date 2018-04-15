@@ -125,6 +125,17 @@ public final class BitVector {
     		return new BitVector(orTable(that));
     }
     
+    
+    @Override
+    public String toString() {
+    		String res = new String();
+    		for (int i=0 ; i<table.length ; i++) {
+    			res=res+((Integer)table[i]).toString();
+    		}
+    		return res;
+    	
+    	
+    }
     private enum ExtensionType {
     		BYZERO, WRAPPED
     }
