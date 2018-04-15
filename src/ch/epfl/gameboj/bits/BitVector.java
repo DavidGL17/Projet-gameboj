@@ -66,13 +66,11 @@ public final class BitVector {
      */
     @Override
     public String toString() {
-        String s = "";
-        for (int i = 0;i<table.length;++i) {
-            for (int j = 0;j<32;++j) {
-                s += Bits.test(table[i], j) ? '1' : '0';
-            }
-        }
-        return s;
+    		String res = new String();
+    			for (int i=0 ; i<table.length ; i++) {
+				res=res+((Integer)table[i]).toString();
+			}
+		return res;
     }
 
     public int size() {
@@ -126,16 +124,6 @@ public final class BitVector {
     }
     
     
-    @Override
-    public String toString() {
-    		String res = new String();
-    		for (int i=0 ; i<table.length ; i++) {
-    			res=res+((Integer)table[i]).toString();
-    		}
-    		return res;
-    	
-    	
-    }
     private enum ExtensionType {
     		BYZERO, WRAPPED
     }
