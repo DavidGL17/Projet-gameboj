@@ -17,8 +17,8 @@ public final class BitVector {
     private final int size;
 
     public BitVector(int size, boolean initialValue) {
-        Preconditions.checkArgument(size > 0 && (size % 32) == 0);
-        table = new int[size / 32]; // size/32 faux exemple size = 1 size/32=0 Réponse : oui mais la size est forcémment un multiple de 32, donc size/32 = 0 ça veut dire que size = 0
+        Preconditions.checkArgument(size >= 0 && (size % 32) == 0);
+        table = new int[size / 32]; 
         this.size=size;
         Arrays.fill(table, initialValue ? -1 : 0);
     }
@@ -28,7 +28,7 @@ public final class BitVector {
     }
 
     private BitVector(int[] table) {
-        this.table = table.clone();
+        this.table = table; // Ne pas faire une copie conforme !
         size=table.length<<5;
     }
 
@@ -90,8 +90,6 @@ public final class BitVector {
     private int[] notTable() {
         int[] notTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
-            // notTable[i] = -1 & table[i]; ne fait pas ce qu'on veut :
-        		// exemple : table[i]=-1 --> notTable[i]=-1
         		notTable[i] = ~ table[i];
         }
         return notTable;

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package ch.epfl.gameboj.bits;
 
 import org.junit.jupiter.api.Test;
@@ -7,7 +6,18 @@ import static ch.epfl.test.TestRandomizer.newRandom;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Random;
+
 import ch.epfl.gameboj.bits.BitVector;
+import ch.epfl.gameboj.bits.BitVector.Builder;
+
+/**
+ * 
+ * @author David Gonzales Leon (270845)
+ * @author Melvin Malonga-Matouba (288405)
+ *
+ */
 
 public class BitVectorTest {
 	
@@ -44,9 +54,6 @@ public class BitVectorTest {
 		
 	}
 	
-	final BitVectorExample[] ExampleBuilders = {
-		new BitVectorExample(0, {{}}, "")
-	};
 	
 	@Test
 	void bitVectorBuilderBuildsCorrectly() {
@@ -63,26 +70,7 @@ public class BitVectorTest {
 	}
 	
 	
-=======
-/**
- * 
- */
-package ch.epfl.gameboj.bits;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.util.Random;
-
-import org.junit.jupiter.api.Test;
-
-import ch.epfl.gameboj.bits.BitVector.Builder;
-
-/**
- * @author David Gonzalez leon (270845)
- *
- */
-class BitVectorTest {
 
     @Test
     void constructionThrowsException() {
@@ -113,16 +101,15 @@ class BitVectorTest {
         int[] table = new int[] { 0xAA, 0xAA, 0x55, 0x55};
         BitVector.Builder b = new Builder(32);
         b.setByte(0, (byte) table[0]);
-        b.setByte(1, (byte) table[0]);
-        b.setByte(2, (byte) table[1]);
-        b.setByte(3, (byte) table[1]);
+        b.setByte(1, (byte) table[1]);
+        b.setByte(2, (byte) table[2]);
+        b.setByte(3, (byte) table[3]);
         BitVector vector = b.build();
         for (int i = 0; i < 4; ++i) {
-            for (int j = 0;j<32;++j) {
-                assertEquals(Bits.test(table[i], j), vector.testBit(32*i + j));
+            for (int j = 0;j<8;++j) {
+                assertEquals(Bits.test(table[i], j), vector.testBit(8*i + j));
             }
         }
     }
 
->>>>>>> d0eb93d5dddcc206d5e7dfb14a55f6ecc4584aa7
 }
