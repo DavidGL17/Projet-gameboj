@@ -68,10 +68,14 @@ public final class BitVector {
     public String toString() {
     		String res = new String();
     			for (int i=0 ; i<table.length ; i++) {
-				res=res+((Integer)table[i]).toString();
+    	            for (int j = 0;j<32;++j) {
+    	                res += Bits.test(table[i], j) ? '1' : '0';
+    	            }
+
 			}
 		return res;
     }
+    
 
     public int size() {
         return size;
