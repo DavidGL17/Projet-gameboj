@@ -192,7 +192,7 @@ public class BitVectorTest {
         assertEquals(new BitVector(result).toString(), res.toString());
 
         // notMultiple of 32
-        result = new int[] { 0x0000FA00 };
+        result = new int[] { 0x00FA0000 };
         res = vector.extractZeroExtended(-16, 32);
         assertEquals(new BitVector(result).toString(), res.toString());
     }
@@ -207,7 +207,7 @@ public class BitVectorTest {
         assertEquals(new BitVector(result).toString(), res.toString());
 
         // notMultiple of 32
-        result = new int[] { 0x0000FAFA };
+        result = new int[] { 0x00FAFA00 };
         res = vector.extractWrapped(-16, 32);
         assertEquals(new BitVector(result).toString(), res.toString());
     }
