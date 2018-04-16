@@ -117,7 +117,7 @@ public final class BitVector {
     }
     
     
-    private enum ExtensionType {
+    protected enum ExtensionType {
     		BYZERO, WRAPPED
     }
     
@@ -188,7 +188,7 @@ public final class BitVector {
          *            the number of Bit of the desired BitVector
          */
         public Builder(int size) {
-            Preconditions.checkArgument(size >= 0 && size % 32 == 0);
+            Preconditions.checkArgument(size > 0 && size % 32 == 0);
             table = new byte[Math.floorDiv(size, 8)];
             Arrays.fill(table,(byte)0);
         }
