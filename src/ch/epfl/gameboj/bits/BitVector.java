@@ -137,7 +137,6 @@ public final class BitVector {
 			}
 		return newTable;
     }
-<<<<<<< HEAD
 
     private int bitAtIndexOfExtension(int index, ExtensionType ext) {
         if (index >= 0 && index < size) {
@@ -156,7 +155,6 @@ public final class BitVector {
         }
     }
 
-=======
 	
 	private int getIntAtIndexOfExtension(int index, ExtensionType ext) {
 		switch (ext) {
@@ -173,25 +171,7 @@ public final class BitVector {
 			throw new IllegalStateException("how");
 	}
     
-	private int bitAtIndexOfExtension(int index, ExtensionType ext) {
-		if (index >= 0 && index < size) {
-			return testBit(index) ? 1 : 0;
-		} else {
-			switch (ext) {
-			case BYZERO:
-				return 0;
-			case WRAPPED:
-				return testBit(Math.floorMod(index,size)) ? 1 : 0;
-			default:
-				Objects.requireNonNull(ext);
-				throw new IllegalArgumentException(" How ? ");
-			}
-		
-	   }
-   }
    
-   
->>>>>>> 4764773ad4de5c7cab1e890a70027b83e7546228
     public final static class Builder {
 
         private byte[] table = null;
