@@ -66,15 +66,24 @@ public final class BitVector {
      */
     @Override
     public String toString() {
-        String res = "";
-        final String LEADING_ZEROS = "0000000000000000000000000000000";
-        for (int i = 0; i < table.length; i++) {
-           String add=LEADING_ZEROS+Integer.toBinaryString(table[i]);
-           add=add.substring(add.length()-32,add.length());
-           res+=add;
-        }
-        return res;
+    		String res = "";
+    		for (int value : table) {
+    			for (int i=0 ; i<Integer.SIZE ; i++) {
+    				res = res + ((Integer) (Bits.test(value,i) ? 1 : 0)).toString() ;
+    			}
+    		}
+    		return res;
     }
+    //public String toString() {
+      //  String res = "";
+        //final String LEADING_ZEROS = "0000000000000000000000000000000";
+        //for (int i = 0; i < table.length; i++) {
+          // String add=LEADING_ZEROS+Integer.toBinaryString(table[i]);
+           //add=add.substring(add.length()-32,add.length());
+           //res+=add;
+      //  }
+       // return res;
+   // }
 
     public int size() {
         return size;
