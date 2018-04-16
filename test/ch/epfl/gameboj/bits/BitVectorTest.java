@@ -242,7 +242,25 @@ public class BitVectorTest {
         for (int i = start;i<length+start;++i) {
             result[i-start] = bitAtIndexOfExtensiontest(i, ExtensionType.BYZERO, testVector);
         }
-        assertEquals(new BitVector(result).toString(), testVector.extractZeroExtended(start, length).toString());
+        assertEquals(new BitVector(result).toString(), vector.extractZeroExtended(start, length).toString());
+    }
+    
+    @Test
+    void extractWrappedWorks() {
+        Random rng = new Random();
+        int[] table = new int[rng.nextInt(10)];
+        for (int i = 0;i<table.length;++i) {
+            table[i] = Bits.clip(32, rng.nextInt());
+        }
+        BitVector vector = new BitVector(table.clone());
+        int start = Bits.clip(6, rng.nextInt());
+        int length = 32 * rng.nextInt(5);
+        BitVector testVector = new BitVector(table);
+        int[] result = new int[length];
+        for (int i = start;i<length+start;++i) {
+            result[i-start] = bitAtIndexOfExtensiontest(i, ExtensionType.WRAPPED, testVector);
+        }
+        assertEquals(new BitVector(result).toString(), vector.extractWrapped(start, length).toString());
     }
     
     
