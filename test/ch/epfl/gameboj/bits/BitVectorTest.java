@@ -183,7 +183,7 @@ public class BitVectorTest {
     }
 
     @Test
-    void extractZeroExtendedWorks() {
+    void extractZeroExtendedWorksBasic() {
         // Multiple de 32
         int[] table = new int[] { 0xAF0000FA, 0xFA0000AF };
         int[] result = new int[] { 0, 0xAF0000FA };
@@ -198,7 +198,7 @@ public class BitVectorTest {
     }
 
     @Test
-    void extractWrappedWorks() {
+    void extractWrappedWorksBasic() {
         // Multiple de 32
         int[] table = new int[] { 0xAF0000FA, 0xFA0000AF };
         int[] result = new int[] { 0xFA0000AF, 0xAF0000FA };
@@ -227,8 +227,26 @@ public class BitVectorTest {
         assertEquals(new BitVector(res).toString(), b.build().toString());
     }
     
+    @Test
+    void extractZeroExtendedWorks() {
+        Random rng = new Random();
+        int[] table = new int[rng.nextInt(10)];
+        for (int i = 0;i<table.length;++i) {
+            table[i] = Bits.clip(32, rng.nextInt());
+        }
+        BitVector vector = new BitVector(table.clone());
+        int start = Bits.clip(6, rng.nextInt());
+        int length = 32 * rng.nextInt(5);
+        BitVector testVector = new BitVector(table);
+        int[] result = new int[length];
+        for (int i = start;i<length+start;++i) {
+            result[i-start] = bitAtIndexOfExtensiontest(i, ExtensionType.BYZERO, testVector);
+        }
+        assertEquals(new BitVector(result).toString(), testVector.extractZeroExtended(start, length).toString());
+    }
     
-    private int bitAtIndexOfExtension(int index, ExtensionType ext, BitVector vector) {
+    
+    private int bitAtIndexOfExtensiontest(int index, ExtensionType ext, BitVector vector) {
         if (index >= 0 && index < vector.size()) {
             return vector.testBit(index) ? 1 : 0;
         } else {
