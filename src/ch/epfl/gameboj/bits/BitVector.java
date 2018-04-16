@@ -132,7 +132,7 @@ public final class BitVector {
 			int cellShift=Math.floorDiv(start,32);
 			for (int i=0; i<newTable.length ; i++) {
 				int value=Bits.extract(getIntAtIndexOfExtension(cellShift+i,ext),internalShift,Integer.SIZE-internalShift)
-				| (Bits.clip(getIntAtIndexOfExtension(cellShift+i+1,ext),internalShift)<<(32-internalShift));
+				| (Bits.clip(internalShift,getIntAtIndexOfExtension(cellShift+i+1,ext))<<(32-internalShift));
 				newTable[i]=value;		
 			}
 		return newTable;
