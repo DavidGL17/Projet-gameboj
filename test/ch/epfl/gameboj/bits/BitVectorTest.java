@@ -3,9 +3,14 @@ package ch.epfl.gameboj.bits;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Objects;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
+
+import ch.epfl.gameboj.bits.BitVector.Builder;
+import ch.epfl.gameboj.bits.BitVector.ExtensionType;
+
 
 /**
  * 
@@ -76,16 +81,16 @@ public class BitVectorTest {
             new BitVectorTableExample(new int[] { 0xAF_0000_AF },
                     "11110101000000000000000011110101") };
 
-    @Test
-    void BitVectorBuilderBuildsCorrectly() {
-        for (BitVectorBuildingExample example : ValidExampleBuilders) {
-            example.setAll();
-            System.out
-                    .println(((BitVector.Builder) example.builder).toString());
-            BitVector vector = example.builder.build();
-            assertEquals(example.correspondingString, vector.toString());
-        }
-    }
+//    @Test
+//    void BitVectorBuilderBuildsCorrectly() {
+//        for (BitVectorBuildingExample example : ValidExampleBuilders) {
+//            example.setAll();
+//            System.out
+//                    .println(((BitVector.Builder) example.builder).toString());
+//            BitVector vector = example.builder.build();
+//            assertEquals(example.correspondingString, vector.toString());
+//        }
+//    }
 
     @Test
     void BitVectorPrivatesConstructorWorks() {
@@ -207,4 +212,34 @@ public class BitVectorTest {
         assertEquals(new BitVector(result).toString(), res.toString());
     }
 
+    @Test
+    void BuilderThrowsExceptionAtCreation() {
+        assertThrows(IllegalArgumentException.class, ()->new Builder(0));
+        assertThrows(IllegalArgumentException.class, ()->new Builder(-1));
+        assertThrows(IllegalArgumentException.class, ()->new Builder(21));
+    }
+    
+    @Test
+    void BitVectorBuilderBuildWorks() {
+        int[] res = new int[] {0xAF00AF00};
+        BitVector.Builder b = new Builder(32);
+    }
+    
+    
+    private int bitAtIndexOfExtension(int index, ExtensionType ext, BitVector vector) {
+        if (index >= 0 && index < vector.size()) {
+            return vector.testBit(index) ? 1 : 0;
+        } else {
+            switch (ext) {
+            case BYZERO:
+                return 0;
+            case WRAPPED:
+                return vector.testBit(Math.floorMod(index,vector.size())) ? 1 : 0;
+            default:
+                Objects.requireNonNull(ext);
+                throw new IllegalArgumentException(" How ? ");
+            }
+        
+       }
+   }
 }
