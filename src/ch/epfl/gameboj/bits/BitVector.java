@@ -27,7 +27,7 @@ public final class BitVector {
         this(size, false);
     }
 
-    private BitVector(int[] table) {
+    public BitVector(int[] table) {
         this.table = table; // Ne pas faire une copie conforme !
         size=table.length<<5;
     }
@@ -68,8 +68,8 @@ public final class BitVector {
     public String toString() {
     		String res = new String();
     			for (int i=0 ; i<table.length ; i++) {
-    	            for (int j = 0;j<32;++j) {
-    	                res += Bits.test(table[i], j) ? '1' : '0';
+    	            for (int j = 0 ; j<32 ; ++j) {
+    	                res = res + (Bits.test(table[i], j) ? '1' : '0');
     	            }
 
 			}
@@ -87,63 +87,54 @@ public final class BitVector {
     }
 
     
-    private int[] notTable() {
+    public BitVector not() {
         int[] notTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
         		notTable[i] = ~ table[i];
         }
-        return notTable;
+        return new BitVector(notTable);
     }
     
-    public BitVector not() {
-    		return new BitVector(notTable());
-    }
+   
 
-    private int[] andTable(BitVector that) {
+    public BitVector and(BitVector that) {
         Preconditions.checkArgument(that.size() == size);
         int[] andTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
             andTable[i] = table[i] & that.table[i];
         }
-        return andTable;
+        return new BitVector(andTable);
     }
     
-    public BitVector and(BitVector that) {
-    		return new BitVector(andTable(that));
-    }
 
-    private int[] orTable(BitVector that) {
+    public BitVector or(BitVector that) {
         Preconditions.checkArgument(that.size() == size);
         int[] orTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
             orTable[i] = table[i] | that.table[i];
         }
-        return orTable;
+        return new BitVector(orTable);
     }
     
-    public BitVector or(BitVector that) {
-    		return new BitVector(orTable(that));
-    }
-    
-    
-    public BitVector extractZeroExtended(int start, int size) {
-    	
-    		return new BitVector(extractTable(start,size,ExtensionType.BYZERO));
-    	
-    }
-    
-    public BitVector extractWrapped(int start, int size) {
-    	
-    		return new BitVector(extractTable(start,size,ExtensionType.WRAPPED));
-    }
     
     private enum ExtensionType {
     		BYZERO, WRAPPED
     }
     
-    private int[] extractTable(int start, int size, ExtensionType ext) {
+    public BitVector extractZeroExtended(int start, int size) {
+		
+			return new BitVector(extractTable(start,size,ExtensionType.BYZERO));
+		
+	}
+
+	public BitVector extractWrapped(int start, int size) {
+		
+			return new BitVector(extractTable(start,size,ExtensionType.WRAPPED));
+	}
+
+	private int[] extractTable(int start, int size, ExtensionType ext) {
 		int[] newTable = new int[size / 32 + 1];
-		if (Math.floorMod(start, 32) == 0) {
+		if (Math.floorMod(start, 32) == 0) { // Optionnal
 			switch (ext) {
 			case BYZERO:
 				int i = 0;
@@ -206,8 +197,9 @@ public final class BitVector {
          *            the number of Bit of the desired BitVector
          */
         public Builder(int size) {
-            Preconditions.checkArgument(size > 0 && size % 32 == 0);
+            Preconditions.checkArgument(size >= 0 && size % 32 == 0);
             table = new byte[Math.floorDiv(size, 8)];
+            Arrays.fill(table,(byte)0);
         }
 
         /**
@@ -246,12 +238,17 @@ public final class BitVector {
          */
         private int[] buildIntTable() {
             int[] res = new int[table.length / 4];
+            Arrays.fill(res,0);
             for (int rank = 0; rank < res.length; rank++) {
                 res[rank] = table[rank * 4]
                         + (table[rank * 4 + 1] + (table[rank * 4 + 2]
                                 + (table[rank * 4 + 3] << 8) << 8) << 8);
             }
             return res;
+        }
+        
+        public String toString() {
+        		return Arrays.toString(table);
         }
     }
 }

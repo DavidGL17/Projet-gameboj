@@ -21,14 +21,32 @@ import ch.epfl.gameboj.bits.BitVector.Builder;
 
 public class BitVectorTest {
 	
-	private static class BitVectorExample{
+	private static class BitVectorTableExample{
+		final int[] table ;
+		BitVector vector;
+		final String correspondingString;
+		
+		BitVectorTableExample(int[] table, String correspondingString){
+			this.table=table;
+			vector=new BitVector(table);
+			this.correspondingString=correspondingString;
+		}
+		
+		BitVector build() {
+			vector= new BitVector(table);
+			return vector;
+		}
+		
+	}
+	
+	private static class BitVectorBuildingExample{
 		final int size;
 		final byte[][] bytes;
 		final String correspondingString;
 		BitVector.Builder builder=null;
 		BitVector vector=null;
 		
-		BitVectorExample(int size, byte[][] bytes, String str){
+		BitVectorBuildingExample(int size, byte[][] bytes, String str){
 			this.size=size;
 			this.bytes=bytes;
 			correspondingString=str;
@@ -36,36 +54,62 @@ public class BitVectorTest {
 		
 		BitVector.Builder setAll(){
 			builder=new BitVector.Builder(size);
-			for (int i=0 ; i<bytes.length ; i++) {
-				builder.setByte(bytes[i][0],bytes[i][1]);
-			}
+			for (byte[] line : bytes) {
+					builder.setByte(line[0],line[1]);
+				}
 			return builder;
 		}
 		
-		BitVector build() {
-			if (builder==null) {
-				setAll();
-				return build();
-			} else {
-				return builder.build();
-			}
+		
+		
+	}
+
+	private static final BitVectorBuildingExample[] ValidExampleBuilders = 
+			new BitVectorBuildingExample [] {
+			new BitVectorBuildingExample(32, new byte [][] {{0,(byte)0xAF},{3,(byte)0xAF}} , "11110101000000000000000011110101"),
+			
+					
+			
+	};
+	
+	private static final BitVectorBuildingExample[] InvalidExampleBuilders = 
+			new BitVectorBuildingExample [] {
+			new BitVectorBuildingExample(0, new byte[][] {},""),
+			new BitVectorBuildingExample(32, new byte [][] {{0,(byte)0xAF},{3,(byte)0xAF}} , ""),
+			
+					
+			
+	};
+	
+	private static final BitVectorTableExample [] ValidExamples =
+			new BitVectorTableExample [] {
+			new BitVectorTableExample( new int[] {0xAF_0000_AF}, "11110101000000000000000011110101")
+	};
+	
+	@Test
+	void BitVectorBuilderBuildsCorrectly() {
+		for (BitVectorBuildingExample example : ValidExampleBuilders) {
+			example.setAll();
+			System.out.println(( (BitVector.Builder)example.builder).toString());
+			BitVector vector=example.builder.build();
+			assertEquals(example.correspondingString, vector.toString());
+		}
+	}
+	
+	@Test
+	void BitVectorPrivatesConstructorWorks(){
+		for (BitVectorTableExample example : ValidExamples) {
+			assertEquals(example.correspondingString, example.build().toString());
 		}
 		
-		
 	}
-	
-	
 	@Test
-	void bitVectorBuilderBuildsCorrectly() {
-		
-	}
-	
-	@Test
-	void buildingCanBeDoneOnlyOnce(){
-		for (BitVectorExample example : ExampleBuilders) {
-			example.build();
+	void BitVectorBuildingCanBeDoneOnlyOnce(){
+		for (BitVectorBuildingExample example : ValidExampleBuilders) {
+			example.setAll();
+			example.builder.build();
 			assertThrows(NullPointerException.class ,
-					() -> example.build());
+					() -> example.builder.build());
 		}
 	}
 	
@@ -73,8 +117,7 @@ public class BitVectorTest {
 
 
     @Test
-    void constructionThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new BitVector(0));
+    void BitVectorConstructionThrowsException() {
         for (int i = 1; i < 32; ++i) {
             int size = 32 + i;
             assertThrows(IllegalArgumentException.class,
@@ -83,7 +126,7 @@ public class BitVectorTest {
     }
 
     @Test
-    void SizeTest() {
+    void BitVectorSizeTest() {
         Random rng = new Random();
         int cycles = rng.nextInt(100);
         for (int i = 0; i < cycles; ++i) {
