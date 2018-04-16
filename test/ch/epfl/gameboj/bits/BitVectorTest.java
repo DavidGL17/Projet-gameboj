@@ -195,6 +195,24 @@ public class BitVectorTest {
         result = new int[] { 0x00FA0000 };
         res = vector.extractZeroExtended(-16, 32);
         assertEquals(new BitVector(result).toString(), res.toString());
+        
+        res = vector.extractZeroExtended(-16,64);
+        result = new int[] { 0x00FA0000, 0x00AFAF00 };
+        assertEquals(new BitVector(result).toString(), res.toString());
+        
+        res = vector.extractZeroExtended(-16,96);
+        result = new int[] {0x00FA0000, 0x00AFAF00 ,0x0000FA00};
+        assertEquals(new BitVector(result).toString(), res.toString());
+        
+        res = vector.extractZeroExtended(-16,80);
+        result = new int[] { 0x00FA0000, 0x00AFAF00, 0x0000FA00 };
+        assertEquals(new BitVector(result).toString(), res.toString());
+        
+        res = vector.extractZeroExtended(-16,48);
+        result = new int[] { 0x00FA0000, 0x0000AF00 };
+        assertEquals(new BitVector(result).toString(), res.toString());
+        
+        
     }
 
     @Test
