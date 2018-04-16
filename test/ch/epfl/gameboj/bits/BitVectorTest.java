@@ -81,16 +81,16 @@ public class BitVectorTest {
             new BitVectorTableExample(new int[] { 0xAF_0000_AF },
                     "11110101000000000000000011110101") };
 
-//    @Test
-//    void BitVectorBuilderBuildsCorrectly() {
-//        for (BitVectorBuildingExample example : ValidExampleBuilders) {
-//            example.setAll();
-//            System.out
-//                    .println(((BitVector.Builder) example.builder).toString());
-//            BitVector vector = example.builder.build();
-//            assertEquals(example.correspondingString, vector.toString());
-//        }
-//    }
+    @Test
+    void BitVectorBuilderBuildsCorrectly() {
+        for (BitVectorBuildingExample example : ValidExampleBuilders) {
+            example.setAll();
+            System.out
+                    .println(((BitVector.Builder) example.builder).toString());
+            BitVector vector = example.builder.build();
+            assertEquals(example.correspondingString, vector.toString());
+        }
+    }
 
     @Test
     void BitVectorPrivatesConstructorWorks() {
@@ -220,9 +220,11 @@ public class BitVectorTest {
     }
     
     @Test
-    void BitVectorBuilderBuildWorks() {
-        int[] res = new int[] {0xAF00AF00};
-        BitVector.Builder b = new Builder(32);
+    void BitVectorBuilderBuildWorks2() {
+        int[] res = new int[] {0xAF00AF00, 0xFF00FF00};
+        BitVector.Builder b = new Builder(64);
+        b.setByte(0, 0).setByte(1,0xAF).setByte(2, 0).setByte(3, 0xAF).setByte(4, 0).setByte(5, 0xFF).setByte(6, 0).setByte(7, 0xFF);
+        assertEquals(new BitVector(res).toString(), b.build().toString());
     }
     
     
