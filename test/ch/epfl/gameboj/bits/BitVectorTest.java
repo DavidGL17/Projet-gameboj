@@ -230,13 +230,15 @@ public class BitVectorTest {
     @Test
     void extractZeroExtendedWorks() {
         Random rng = new Random();
-        int[] table = new int[rng.nextInt(10)];
+        int size = rng.nextInt(10);
+        int[] table = new int[size == 0?1:size];
         for (int i = 0;i<table.length;++i) {
             table[i] = Bits.clip(32, rng.nextInt());
         }
         BitVector vector = new BitVector(table.clone());
         int start = Bits.clip(6, rng.nextInt());
         int length = 32 * rng.nextInt(5);
+        length = length ==0?32:length;
         BitVector testVector = new BitVector(table);
         int[] result = new int[length];
         for (int i = start;i<length+start;++i) {
@@ -248,13 +250,15 @@ public class BitVectorTest {
     @Test
     void extractWrappedWorks() {
         Random rng = new Random();
-        int[] table = new int[rng.nextInt(10)];
+        int size = rng.nextInt(10);
+        int[] table = new int[size == 0?1:size];
         for (int i = 0;i<table.length;++i) {
             table[i] = Bits.clip(32, rng.nextInt());
         }
         BitVector vector = new BitVector(table.clone());
         int start = Bits.clip(6, rng.nextInt());
         int length = 32 * rng.nextInt(5);
+        length = length ==0?32:length;
         BitVector testVector = new BitVector(table);
         int[] result = new int[length];
         for (int i = start;i<length+start;++i) {
