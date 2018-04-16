@@ -158,12 +158,11 @@ public final class BitVector {
 			}
 		} else {
 			for (int i=0; i<newTable.length ; i++) {
-				int value=0;
-				for (int j=0 ; j<Integer.SIZE ; j++) {
-					value+=(testBit(i*Integer.SIZE+j)?1 :0) << j;
+				switch (ext) {
+				case BYZERO:
+					int value= Bits.extract(table[(start+i)/32] )
+						
 				}
-				newTable[i]= value;
-			}
     		}
 		return newTable;
     }
@@ -209,12 +208,13 @@ public final class BitVector {
          * @param value
          * @return the updated Builder
          */
-        public Builder setByte(int index, byte value) {
+        public Builder setByte(int index, int value) {
+        		Preconditions.checkBits8(value);
             if (table == null) {
                 throw new IllegalStateException();
             }
             Objects.checkIndex(index, table.length);
-            table[index] = value;
+            table[index] = (byte)value;
 
             return this;
         }
