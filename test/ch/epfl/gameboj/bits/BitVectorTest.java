@@ -41,12 +41,12 @@ public class BitVectorTest {
 
     private static class BitVectorBuildingExample {
         final int size;
-        final byte[][] bytes;
+        final int[][] bytes;
         final String correspondingString;
         BitVector.Builder builder = null;
         BitVector vector = null;
 
-        BitVectorBuildingExample(int size, byte[][] bytes, String str) {
+        BitVectorBuildingExample(int size, int[][] bytes, String str) {
             this.size = size;
             this.bytes = bytes;
             correspondingString = str;
@@ -54,7 +54,7 @@ public class BitVectorTest {
 
         BitVector.Builder setAll() {
             builder = new BitVector.Builder(size);
-            for (byte[] line : bytes) {
+            for (int[] line : bytes) {
                 builder.setByte(line[0], line[1]);
             }
             return builder;
@@ -64,18 +64,18 @@ public class BitVectorTest {
 
     private static final BitVectorBuildingExample[] ValidExampleBuilders = new BitVectorBuildingExample[] {
             new BitVectorBuildingExample(32,
-                    new byte[][] { { 0, (byte) 0xAF }, { 3, (byte) 0xAF } },
+                    new int[][] { { 0, 0xAF }, { 3, 0xAF } },
                     "11110101000000000000000011110101"),
 
     };
 
-    private static final BitVectorBuildingExample[] InvalidExampleBuilders = new BitVectorBuildingExample[] {
-            new BitVectorBuildingExample(0, new byte[][] {}, ""),
-            new BitVectorBuildingExample(32,
-                    new byte[][] { { 0, (byte) 0xAF }, { 3, (byte) 0xAF } },
-                    ""),
+   // private static final BitVectorBuildingExample[] InvalidExampleBuilders = new BitVectorBuildingExample[] {
+     //       new BitVectorBuildingExample(0, new byte[][] {}, ""),
+       //     new BitVectorBuildingExample(32,
+         //           new byte[][] { { 0, (byte) 0xAF }, { 3, (byte) 0xAF } },
+           //         ""),
 
-    };
+ //   };
 
     private static final BitVectorTableExample[] ValidExamples = new BitVectorTableExample[] {
             new BitVectorTableExample(new int[] { 0xAF_0000_AF },

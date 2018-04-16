@@ -127,12 +127,12 @@ public final class BitVector {
     }
 
     private int[] extractTable(int start, int size, ExtensionType ext) {
-		int[] newTable = new int[size / 32 + 1];
+		int[] newTable = new int[size / 32 ];
 			int internalShift=Math.floorMod(start,Integer.SIZE);
-			int cellShift=Math.floorDiv(start,Integer.SIZE);
+			int cellShift=Math.floorDiv(start,32);
 			for (int i=0; i<newTable.length ; i++) {
 				int value=Bits.extract(getIntAtIndexOfExtension(cellShift+i,ext),internalShift,Integer.SIZE-internalShift)
-				+Bits.clip(getIntAtIndexOfExtension(cellShift+i+1,ext),internalShift)<<internalShift;
+				| (Bits.clip(internalShift,getIntAtIndexOfExtension(cellShift+i+1,ext))<<(32-internalShift));
 				newTable[i]=value;		
 			}
 		return newTable;
@@ -159,13 +159,13 @@ public final class BitVector {
 	private int getIntAtIndexOfExtension(int index, ExtensionType ext) {
 		switch (ext) {
 		case BYZERO:
-			if (index<0 || index >= size()) {
+			if (index<0 || index >= size()/32) {
 				return 0;
 			} else {
 				return table[index];
 			}
 		case WRAPPED:
-			return Math.floorMod(index,size);
+			return table[Math.floorMod(index,size()/32)];
 		}
 		
 			throw new IllegalStateException("how");
