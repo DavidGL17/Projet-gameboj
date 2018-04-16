@@ -128,38 +128,16 @@ public final class BitVector {
 
     private int[] extractTable(int start, int size, ExtensionType ext) {
 		int[] newTable = new int[size / 32 + 1];
-		if (Math.floorMod(start, 32) == 0) { // Optionnal
-			switch (ext) {
-			case BYZERO:
-				int i = 0;
-				while (i < newTable.length) {
-					while (i + start < 0) {
-						newTable[i] = 0;
-						i++;
-					}
-					while (i + start < this.size) {
-						newTable[i] = table[start + i];
-						i++;
-					}
-					newTable[i] = table[i + start];
-				}
-				break;
-			case WRAPPED:
-				for (int j = 0; j < newTable.length; j++) {
-					newTable[j] = table[Math.floorMod(start + j, this.size)];
-				}
-				break;
-			}
-		} else {
+			int internalShift=Math.floorMod(start,Integer.SIZE);
+			int cellShift=Math.floorDiv(start,Integer.SIZE);
 			for (int i=0; i<newTable.length ; i++) {
-				switch (ext) {
-				case BYZERO:
-					int value= Bits.extract(table[(start+i)/32] )
-						
-				}
-    		}
+				int value=Bits.extract(getIntAtIndexOfExtension(cellShift+i,ext),internalShift,Integer.SIZE-internalShift)
+				+Bits.clip(getIntAtIndexOfExtension(cellShift+i+1,ext),internalShift)<<internalShift;
+				newTable[i]=value;		
+			}
 		return newTable;
     }
+<<<<<<< HEAD
 
     private int bitAtIndexOfExtension(int index, ExtensionType ext) {
         if (index >= 0 && index < size) {
@@ -178,6 +156,42 @@ public final class BitVector {
         }
     }
 
+=======
+	
+	private int getIntAtIndexOfExtension(int index, ExtensionType ext) {
+		switch (ext) {
+		case BYZERO:
+			if (index<0 || index >= size()) {
+				return 0;
+			} else {
+				return table[index];
+			}
+		case WRAPPED:
+			return Math.floorMod(index,size);
+		}
+		
+			throw new IllegalStateException("how");
+	}
+    
+	private int bitAtIndexOfExtension(int index, ExtensionType ext) {
+		if (index >= 0 && index < size) {
+			return testBit(index) ? 1 : 0;
+		} else {
+			switch (ext) {
+			case BYZERO:
+				return 0;
+			case WRAPPED:
+				return testBit(Math.floorMod(index,size)) ? 1 : 0;
+			default:
+				Objects.requireNonNull(ext);
+				throw new IllegalArgumentException(" How ? ");
+			}
+		
+	   }
+   }
+   
+   
+>>>>>>> 4764773ad4de5c7cab1e890a70027b83e7546228
     public final static class Builder {
 
         private byte[] table = null;
