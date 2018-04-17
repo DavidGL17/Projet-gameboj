@@ -1,10 +1,16 @@
 package ch.epfl.gameboj.bits;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
+import javax.swing.event.ListSelectionEvent;
 
 import org.junit.jupiter.api.Test;
 
@@ -180,6 +186,28 @@ public class BitVectorTest {
         v1 = v1.not();
         assertEquals(new BitVector(new int[] { 0x50AF55FF }).toString(),
                 v1.toString());
+    }
+    
+    @Test
+    void equalsWorksWithHashCode() {
+        Random rng = new Random();
+        int[] table = new int[rng.nextInt(10)];
+        for (int i = 0;i<table.length;++i) {
+            table[i] = rng.nextInt();
+        }
+        
+        List<BitVector> vectors = new ArrayList<>();
+        for (int i = 0;i<table.length;++i) {
+            vectors.add(new BitVector(new int[] {table[i]}));
+        }
+        
+        for (BitVector b : vectors ) {
+            for (BitVector b2 : vectors) {
+                if (b.equals(b2)) {
+                    assertTrue(b.hashCode()==b2.hashCode());
+                }
+            }
+        }
     }
 
     @Test
