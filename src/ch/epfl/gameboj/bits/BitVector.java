@@ -43,8 +43,9 @@ public final class BitVector {
      */
     @Override
     public boolean equals(Object arg0) {
-        if (arg0 instanceof int[]) {
-            return Arrays.equals(table, (int[]) arg0);
+        if (arg0 instanceof BitVector) {
+            BitVector arg1 = (BitVector) arg0;
+            return Arrays.equals(table, arg1.table);
         }
         return false;
     }
@@ -66,24 +67,25 @@ public final class BitVector {
      */
     @Override
     public String toString() {
-    		String res = "";
-    		for (int value : table) {
-    			for (int i=0 ; i<Integer.SIZE ; i++) {
-    				res = res + ((Integer) (Bits.test(value,i) ? 1 : 0)).toString() ;
-    			}
-    		}
-    		return res;
+        String res = "";
+        for (int value : table) {
+            for (int i = 0; i < Integer.SIZE; i++) {
+                res = res
+                        + ((Integer) (Bits.test(value, i) ? 1 : 0)).toString();
+            }
+        }
+        return res;
     }
-    //public String toString() {
-      //  String res = "";
-        //final String LEADING_ZEROS = "0000000000000000000000000000000";
-        //for (int i = 0; i < table.length; i++) {
-          // String add=LEADING_ZEROS+Integer.toBinaryString(table[i]);
-           //add=add.substring(add.length()-32,add.length());
-           //res+=add;
-      //  }
-       // return res;
-   // }
+    // public String toString() {
+    // String res = "";
+    // final String LEADING_ZEROS = "0000000000000000000000000000000";
+    // for (int i = 0; i < table.length; i++) {
+    // String add=LEADING_ZEROS+Integer.toBinaryString(table[i]);
+    // add=add.substring(add.length()-32,add.length());
+    // res+=add;
+    // }
+    // return res;
+    // }
 
     public int size() {
         return size;
@@ -125,22 +127,25 @@ public final class BitVector {
     }
 
     public BitVector extractZeroExtended(int start, int size) {
-
         return new BitVector(extractTable(start, size, ExtensionType.BYZERO));
-
     }
 
     public BitVector extractWrapped(int start, int size) {
-
         return new BitVector(extractTable(start, size, ExtensionType.WRAPPED));
+    }
+    
+    //à compléter
+    public BitVector shift(int shiftNumber) {
+        return null;
     }
 
     private int[] extractTable(int start, int size, ExtensionType ext) {
         int[] newTable = new int[size / 32];
         int internalShift = Math.floorMod(start, Integer.SIZE);
         int cellShift = Math.floorDiv(start, 32);
+        int value;
         for (int i = 0; i < newTable.length; i++) {
-            int value = Bits.extract(
+            value = Bits.extract(
                     getIntAtIndexOfExtension(cellShift + i, ext), internalShift,
                     Integer.SIZE - internalShift)
                     | (Bits.clip(internalShift, getIntAtIndexOfExtension(
@@ -148,6 +153,17 @@ public final class BitVector {
             newTable[i] = value;
         }
         return newTable;
+    }
+
+    private int getIntAtIndexOfExtension(int index, ExtensionType ext) {
+        switch (ext) {
+        case BYZERO:
+            return (index < 0 || index >= size() / 32)? 0 : table[index];
+        case WRAPPED:
+            return table[Math.floorMod(index, size() / 32)];
+        }
+
+        throw new IllegalStateException("how");
     }
 
     private int bitAtIndexOfExtension(int index, ExtensionType ext) {
@@ -165,21 +181,6 @@ public final class BitVector {
             }
 
         }
-    }
-
-    private int getIntAtIndexOfExtension(int index, ExtensionType ext) {
-        switch (ext) {
-        case BYZERO:
-            if (index < 0 || index >= size() / 32) {
-                return 0;
-            } else {
-                return table[index];
-            }
-        case WRAPPED:
-            return table[Math.floorMod(index, size() / 32)];
-        }
-
-        throw new IllegalStateException("how");
     }
 
     public final static class Builder {
