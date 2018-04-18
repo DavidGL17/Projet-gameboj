@@ -3,6 +3,9 @@
  */
 package ch.epfl.gameboj.component.lcd;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.BitVector;
 import ch.epfl.gameboj.bits.Bits;
@@ -87,11 +90,38 @@ public final class LcdImageLine {
         return new LcdImageLine(newMSB, newLSB, newOpacity);
     }
 
-    //à faire vendredi
     public void mapColors(int palette) {
-        
+        if (checkAllColorsSame(palette)) {
+            return;
+        }
+        BitVector[] bitsAtColor = new BitVector[] {msb.not().and(lsb.not()), msb.not().and(lsb), msb.and(lsb.not()), msb.and(lsb)};
+        int i = 0;
+        BitVector newMsb = new BitVector(msb.size()), newLsb = new BitVector(lsb.size());
+        for (BitVector colorVector : bitsAtColor) {
+            if (Bits.test(palette, i)) {
+                newLsb = newLsb.or(colorVector);
+            }
+            ++i;
+            if (Bits.test(palette, i)) {
+                newLsb = newMsb.or(colorVector);
+            }
+            ++i;
+        }
+        msb = newMsb;
+        lsb = newLsb;
     }
     
+    /**
+     * @param palette
+     * @return
+     */
+    private boolean checkAllColorsSame(int palette) {
+        boolean result = false;
+        for (int i = 0;i<4;++i) 
+            result &= Bits.extract(palette, 2*i, 2)==i;
+        return result;
+    }
+
     //pas bon, peut être optimisé(utiliser or,and,...), mais aucune idée de comment le faire
     public LcdImageLine below (LcdImageLine that) {
         Builder b = new Builder(size());
@@ -106,6 +136,7 @@ public final class LcdImageLine {
         return b.build();
     }
     
+    //idem
     public LcdImageLine below (LcdImageLine that, BitVector givenOpacity) {
         Builder b = new Builder(size());
         int msbByte = 0,lsbByte = 0; 
@@ -119,7 +150,7 @@ public final class LcdImageLine {
         return b.build();
     }
     
-    
+    //Aucune idée de comment le faire pour le moment
     public LcdImageLine join(LcdImageLine that, int index) {
         Preconditions.checkArgument(that.size()==size()&&index>=0&&index<size());
         //à faire
