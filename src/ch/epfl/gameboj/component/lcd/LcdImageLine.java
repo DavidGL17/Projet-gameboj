@@ -5,15 +5,16 @@ package ch.epfl.gameboj.component.lcd;
 
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.BitVector;
+import ch.epfl.gameboj.bits.Bits;
 
 /**
  * @author David Gonzalez leon (270845)
  *
  */
 public final class LcdImageLine {
-    private final BitVector msb;
-    private final BitVector lsb;
-    private final BitVector opacity;
+    private BitVector msb;
+    private BitVector lsb;
+    private BitVector opacity;
 
     public LcdImageLine(BitVector msb, BitVector lsb, BitVector opacity) {
         Preconditions.checkArgument(
@@ -86,6 +87,45 @@ public final class LcdImageLine {
         return new LcdImageLine(newMSB, newLSB, newOpacity);
     }
 
+    //à faire vendredi
+    public void mapColors(int palette) {
+        
+    }
+    
+    //pas bon, peut être optimisé(utiliser or,and,...), mais aucune idée de comment le faire
+    public LcdImageLine below (LcdImageLine that) {
+        Builder b = new Builder(size());
+        int msbByte = 0,lsbByte = 0; 
+        for (int i = 0;i<size()/8;++i) {
+            for (int j = 0;j<8;++j) {
+                Bits.set(msbByte, j, that.getOpacity().testBit(i*8 +j)?that.getMsb().testBit(i*8 +j):msb.testBit(i*8 +j));
+                Bits.set(lsbByte, j, that.getOpacity().testBit(i*8 +j)?that.getLsb().testBit(i*8 +j):lsb.testBit(i*8 +j));
+            }
+            b.setBytes(i, msbByte, lsbByte);
+        }
+        return b.build();
+    }
+    
+    public LcdImageLine below (LcdImageLine that, BitVector givenOpacity) {
+        Builder b = new Builder(size());
+        int msbByte = 0,lsbByte = 0; 
+        for (int i = 0;i<size()/8;++i) {
+            for (int j = 0;j<8;++j) {
+                Bits.set(msbByte, j, givenOpacity.testBit(i*8 +j)?that.getMsb().testBit(i*8 +j):msb.testBit(i*8 +j));
+                Bits.set(lsbByte, j, givenOpacity.testBit(i*8 +j)?that.getLsb().testBit(i*8 +j):lsb.testBit(i*8 +j));
+            }
+            b.setBytes(i, msbByte, lsbByte);
+        }
+        return b.build();
+    }
+    
+    
+    public LcdImageLine join(LcdImageLine that, int index) {
+        Preconditions.checkArgument(that.size()==size()&&index>=0&&index<size());
+        //à faire
+        return null;
+    }
+    
     public static class Builder {
         private BitVector.Builder msbBuilder;
         private BitVector.Builder lsbBuilder;

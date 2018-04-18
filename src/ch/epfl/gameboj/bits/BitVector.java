@@ -28,11 +28,11 @@ public final class BitVector {
     }
 
     public BitVector(int[] table) {
-        this.table = table; // Ne pas faire une copie conforme !
+        this.table = table.clone(); // Ne pas faire une copie conforme !
         size = table.length << 5;
     }
 
-    private BitVector(BitVector bv) {
+    public BitVector(BitVector bv) {
         this(bv.table);
     }
 
