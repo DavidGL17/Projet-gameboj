@@ -12,6 +12,7 @@ import java.util.Random;
 
 import javax.swing.event.ListSelectionEvent;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.bits.BitVector.Builder;
@@ -219,28 +220,7 @@ public class BitVectorTest {
         BitVector res = vector.extractZeroExtended(-32, 64);
         assertEquals(new BitVector(result).toString(), res.toString());
 
-        // notMultiple of 32
-        result = new int[] { 0x00FA0000 };
-        res = vector.extractZeroExtended(-16, 32);
-        assertEquals(new BitVector(result).toString(), res.toString());
-        
-        res = vector.extractZeroExtended(-16,64);
-        result = new int[] { 0x00FA0000, 0x00AFAF00 };
-        assertEquals(new BitVector(result).toString(), res.toString());
-        
-        res = vector.extractZeroExtended(-16,96);
-        result = new int[] {0x00FA0000, 0x00AFAF00 ,0x0000FA00};
-        assertEquals(new BitVector(result).toString(), res.toString());
-        
-        res = vector.extractZeroExtended(-16,80);
-        result = new int[] { 0x00FA0000, 0x00AFAF00, 0x0000FA00 };
-        assertEquals(new BitVector(result).toString(), res.toString());
-        
-        res = vector.extractZeroExtended(-16,48);
-        result = new int[] { 0x00FA0000, 0x0000AF00 };
-        assertEquals(new BitVector(result).toString(), res.toString());
-        
-        
+      
     }
 
     @Test
@@ -252,10 +232,7 @@ public class BitVectorTest {
         BitVector res = vector.extractWrapped(-32, 64);
         assertEquals(new BitVector(result).toString(), res.toString());
 
-        // notMultiple of 32
-        result = new int[] { 0x00FAFA00 };
-        res = vector.extractWrapped(-16, 32);
-        assertEquals(new BitVector(result).toString(), res.toString());
+       
     }
 
     @Test
@@ -311,6 +288,31 @@ public class BitVectorTest {
             result[i-start] = bitAtIndexOfExtensiontest(i, ExtensionType.WRAPPED, testVector);
         }
         assertEquals(new BitVector(result).toString(), vector.extractWrapped(start, length).toString());
+    }
+    
+    @Test
+    @Ignore void betterToStringWorks() {
+    	 Random rng = new Random();
+         int size = rng.nextInt(10);
+         int[] table = new int[size == 0?1:size];
+         for (int i = 0;i<table.length;++i) {
+             table[i] = Bits.clip(32, rng.nextInt());
+         }
+         BitVector vector = new BitVector(table.clone());
+         assertEquals(vector.toString(), vector.betterToString());    	
+    }
+    
+    
+    @Ignore @Test
+    void betterToStringWorksBasic() {
+    		BitVector vector = new BitVector(new int[] {-1});
+    		assertEquals(vector.toString(), vector.betterToString());
+    		
+    		vector = new BitVector(new int[] {0x0000FFFF});
+    		assertEquals(vector.toString(), vector.betterToString());
+    		
+    		vector = new BitVector(new int[] {0x0000FFFF,0xFFFF0000});
+    		assertEquals(vector.toString(), vector.betterToString());
     }
     
     
