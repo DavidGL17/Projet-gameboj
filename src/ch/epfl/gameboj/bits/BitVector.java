@@ -14,12 +14,10 @@ import ch.epfl.gameboj.Preconditions;
 public final class BitVector {
 
     private final int[] table;
-    private final int size;
 
     public BitVector(int size, boolean initialValue) {
         Preconditions.checkArgument(size >= 0 && (size % 32) == 0);
         table = new int[size / 32];
-        this.size = size;
         Arrays.fill(table, initialValue ? -1 : 0);
     }
 
@@ -29,7 +27,6 @@ public final class BitVector {
 
     public BitVector(int[] table) {
         this.table = table.clone(); // Ne pas faire une copie conforme !
-        size = table.length << 5;
     }
 
     public BitVector(BitVector bv) {
@@ -65,34 +62,40 @@ public final class BitVector {
      * 
      * @see java.lang.Object#toString()
      */
+   // @Override
+   // public String toString() {
+    //    String res = "";
+      //  for (int value : table) {
+        //    for (int i = 0; i < Integer.SIZE; i++) {
+          //      res = res
+          //              + ((Integer) (Bits.test(value, i) ? 1 : 0)).toString();
+          //  }
+        // }
+        // return res;
+   // }
+    
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
-        String res = "";
-        for (int value : table) {
-            for (int i = 0; i < Integer.SIZE; i++) {
-                res = res
-                        + ((Integer) (Bits.test(value, i) ? 1 : 0)).toString();
-            }
-        }
-        return res;
+    String res = "";
+    for (int i = 0; i < table.length; i++) {
+	    StringBuilder add= new StringBuilder("00000000000000000000000000000000");
+	    add=add.append(Integer.toBinaryString(table[i]));
+	    add.reverse();
+	    res=res.concat(add.substring(0,32));
     }
-    // public String toString() {
-    // String res = "";
-    // final String LEADING_ZEROS = "0000000000000000000000000000000";
-    // for (int i = 0; i < table.length; i++) {
-    // String add=LEADING_ZEROS+Integer.toBinaryString(table[i]);
-    // add=add.substring(add.length()-32,add.length());
-    // res+=add;
-    // }
-    // return res;
-    // }
+    return res;
+    }
 
     public int size() {
-        return size;
+        return table.length << 5;
     }
 
     public boolean testBit(int index) {
-        Preconditions.checkArgument(index < size && index >= 0);
+        Preconditions.checkArgument(index < size() && index >= 0);
         return Bits.test(table[index / 32], index % 32);
     }
 
@@ -105,7 +108,7 @@ public final class BitVector {
     }
 
     public BitVector and(BitVector that) {
-        Preconditions.checkArgument(that.size() == size);
+        Preconditions.checkArgument(that.size() == size());
         int[] andTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
             andTable[i] = table[i] & that.table[i];
@@ -114,7 +117,7 @@ public final class BitVector {
     }
 
     public BitVector or(BitVector that) {
-        Preconditions.checkArgument(that.size() == size);
+        Preconditions.checkArgument(that.size() == size());
         int[] orTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
             orTable[i] = table[i] | that.table[i];
@@ -127,19 +130,19 @@ public final class BitVector {
     }
 
     public BitVector extractZeroExtended(int start, int size) {
-        return new BitVector(extractTable(start, size, ExtensionType.BYZERO));
+        return extract(start, size, ExtensionType.BYZERO);
     }
 
     public BitVector extractWrapped(int start, int size) {
-        return new BitVector(extractTable(start, size, ExtensionType.WRAPPED));
+    		return extract(start,size,ExtensionType.WRAPPED);
     }
     
-    //à compléter
-    public BitVector shift(int shiftNumber) {
-        return null;
+    public BitVector shift(int start) {
+        return extractWrapped(-start,size());
     }
 
-    private int[] extractTable(int start, int size, ExtensionType ext) {
+    private BitVector extract(int start, int size, ExtensionType ext) {
+    		Preconditions.checkArgument((size > 0) && (size%32==0));
         int[] newTable = new int[size / 32];
         int internalShift = Math.floorMod(start, Integer.SIZE);
         int cellShift = Math.floorDiv(start, 32);
@@ -152,7 +155,7 @@ public final class BitVector {
                             cellShift + i + 1, ext)) << (32 - internalShift));
             newTable[i] = value;
         }
-        return newTable;
+        return new BitVector(newTable);
     }
 
     private int getIntAtIndexOfExtension(int index, ExtensionType ext) {
@@ -166,23 +169,7 @@ public final class BitVector {
         throw new IllegalStateException("how");
     }
 
-    private int bitAtIndexOfExtension(int index, ExtensionType ext) {
-        if (index >= 0 && index < size) {
-            return testBit(index) ? 1 : 0;
-        } else {
-            switch (ext) {
-            case BYZERO:
-                return 0;
-            case WRAPPED:
-                return testBit(Math.floorMod(index, size)) ? 1 : 0;
-            default:
-                Objects.requireNonNull(ext);
-                throw new IllegalArgumentException(" How ? ");
-            }
-
-        }
-    }
-
+  
     public final static class Builder {
 
         private byte[] table = null;
