@@ -140,6 +140,7 @@ public class BitVectorTest {
         }
     }
 
+    
     @Test
     void testBitWorks() {
         int table = 0xAAAA5555;
@@ -213,11 +214,36 @@ public class BitVectorTest {
 
     @Test
     void extractZeroExtendedWorksBasic() {
-        // Multiple de 32
+    	
         int[] table = new int[] { 0xAF0000FA, 0xFA0000AF };
         int[] result = new int[] { 0, 0xAF0000FA };
         BitVector vector = new BitVector(table);
         BitVector res = vector.extractZeroExtended(-32, 64);
+        assertEquals(new BitVector(result).toString(), res.toString());
+        
+        table = new int[] { 0xAF0000FA, 0xFA0000AF };
+        result = new int[] {0xAF0000FA, 0xFA0000AF };
+        vector = new BitVector(table);
+        res = vector.extractZeroExtended(0, 64);
+        assertEquals(new BitVector(result).toString(), res.toString());
+        
+
+        table = new int[] { 0xAF0EC0FA, 0x10150FEA };
+        result = new int[] {0xC0FA0000, 0x0FEAAF0E };
+        vector = new BitVector(table);
+        res = vector.extractZeroExtended(-16, 64);
+        assertEquals(new BitVector(result).toString(), res.toString());
+
+        table = new int[] { 0xAF0EC0FA, 0x10150FEA };
+        result = new int[] {0xC0FA0000, 0x0FEAAF0E, 0x00001015 };
+        vector = new BitVector(table);
+        res = vector.extractZeroExtended(-16, 96);
+        assertEquals(new BitVector(result).toString(), res.toString());
+
+        table = new int[]  {0xAF0EC0FA, 0x10150FEA };
+        result = new int[] {0x607D0000, 0x87F55787 };
+        vector = new BitVector(table);
+        res = vector.extractZeroExtended(-15, 64);
         assertEquals(new BitVector(result).toString(), res.toString());
 
       
@@ -252,43 +278,50 @@ public class BitVectorTest {
     
     @Test
     void extractZeroExtendedWorks() {
-        Random rng = new Random();
-        int size = rng.nextInt(10);
-        int[] table = new int[size == 0?1:size];
-        for (int i = 0;i<table.length;++i) {
-            table[i] = Bits.clip(32, rng.nextInt());
-        }
-        BitVector vector = new BitVector(table.clone());
-        int start = Bits.clip(6, rng.nextInt());
-        int length = 32 * rng.nextInt(5);
-        length = length ==0?32:length;
-        BitVector testVector = new BitVector(table);
-        int[] result = new int[length];
-        for (int i = start;i<length+start;++i) {
-            result[i-start] = bitAtIndexOfExtensiontest(i, ExtensionType.BYZERO, testVector);
-        }
-        assertEquals(new BitVector(result).toString(), vector.extractZeroExtended(start, length).toString());
+    		Random random = new Random();
+    		for (int i=0 ; i<50 ; i++) {
+    			int size=32*random.nextInt(10);
+    			size = size>0?size:32;
+    			BitVector.Builder builder = new BitVector.Builder(size);
+    			for (int j=0 ; j<size%8 ; j++) {
+    				builder.setByte(j,random.nextInt(8));
+    			}
+    			BitVector vector = builder.build();
+    			int randomStart = (random.nextBoolean()?-1:1)*random.nextInt(10);
+    			int randomSize = 32*(random.nextInt(9));
+    			randomSize = randomSize>0?randomSize : 32;
+    			BitVector extracted= vector.extractZeroExtended(randomStart,randomSize);
+    			
+    			for (int k = 0 ; k<randomSize ; k++) {
+    				assertEquals((bitAtIndexOfExtensiontest(randomStart+k,ExtensionType.BYZERO,vector)==1), extracted.testBit(k));
+    			}
+    		}
     }
     
     @Test
     void extractWrappedWorks() {
-        Random rng = new Random();
-        int size = rng.nextInt(10);
-        int[] table = new int[size == 0?1:size];
-        for (int i = 0;i<table.length;++i) {
-            table[i] = Bits.clip(32, rng.nextInt());
-        }
-        BitVector vector = new BitVector(table.clone());
-        int start = Bits.clip(6, rng.nextInt());
-        int length = 32 * rng.nextInt(5);
-        length = length ==0?32:length;
-        BitVector testVector = new BitVector(table);
-        int[] result = new int[length];
-        for (int i = start;i<length+start;++i) {
-            result[i-start] = bitAtIndexOfExtensiontest(i, ExtensionType.WRAPPED, testVector);
-        }
-        assertEquals(new BitVector(result).toString(), vector.extractWrapped(start, length).toString());
+    		Random random = new Random();
+    		for (int i=0 ; i<50 ; i++) {
+    			int size=32*random.nextInt(10);
+    			size = size>0?size:32;
+    			BitVector.Builder builder = new BitVector.Builder(size);
+    			for (int j=0 ; j<size%8 ; j++) {
+    				builder.setByte(j,random.nextInt(8));
+    			}
+    			BitVector vector = builder.build();
+    			int randomStart = (random.nextBoolean()?-1:1)*random.nextInt(10);
+    			int randomSize = 32*(random.nextInt(9));
+    			randomSize = randomSize>0?randomSize : 32;
+    			BitVector extracted= vector.extractWrapped(randomStart,randomSize);
+    			
+    			for (int k = 0 ; k<randomSize ; k++) {
+    				assertEquals((bitAtIndexOfExtensiontest(randomStart+k,ExtensionType.WRAPPED,vector)==1), extracted.testBit(k));
+    			}
+    		}
     }
+    
+    
+    
     
     @Test
     @Ignore void betterToStringWorks() {

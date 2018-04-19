@@ -15,24 +15,32 @@ import ch.epfl.gameboj.Preconditions;
 public final class BitVector {
 
     private final int[] table;
-
+    
+    /**
+     * Builds a BitVector
+     * @param size - the number of bits in the vector		
+     * @param initialValue - wether the bits' value is one
+     */
     public BitVector(int size, boolean initialValue) {
         Preconditions.checkArgument(size >= 0 && (size % 32) == 0);
         table = new int[size / 32];
         Arrays.fill(table, initialValue ? -1 : 0);
     }
 
+    /**
+     * Builds a BitVector made of 0
+     * @param size - the number of bits in the vector
+     */
     public BitVector(int size) {
         this(size, false);
     }
 
+    
     public BitVector(int[] table) {
-        this.table = table.clone(); // Ne pas faire une copie conforme !
+        this.table = table; // Ne pas faire une copie conforme !
     }
 
-    public BitVector(BitVector bv) {
-        this(bv.table);
-    }
+    
 
     /*
      * (non-Javadoc)
@@ -91,15 +99,33 @@ public final class BitVector {
     return res;
     }
 
+    /**
+     * 
+     * @return the number of bits in the BitVector
+     */
     public int size() {
-        return table.length << 5;
+        return table.length*Integer.SIZE;
     }
+    
+    //Peut être intéressante ? Pas demandée pour le moment
+    // public boolean testBit(Bit bit) {
+    	// 		return testBit(bit.index());
+    //		}
 
+    /**
+     * Checks if a bit is activated
+     * @param index - the index of the bit
+     * @return wether the bit is activated
+     */
     public boolean testBit(int index) {
-        Preconditions.checkArgument(index < size() && index >= 0);
-        return Bits.test(table[index / 32], index % 32);
+        Objects.checkIndex(index,size());
+        return Bits.test(table[Math.floorDiv(index,32)], Math.floorMod(index,32));
     }
 
+    /**
+     * Computes the complementary BitVector
+     * @return complementary BitVector
+     */
     public BitVector not() {
         int[] notTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
@@ -108,6 +134,12 @@ public final class BitVector {
         return new BitVector(notTable);
     }
 
+    /**
+     * Computes the conjunction of two BitVectors
+     * @param that - the BitVector with which we want to compute the 
+     * conjuction
+     * @return conjunction BitVector
+     */
     public BitVector and(BitVector that) {
         Preconditions.checkArgument(that.size() == size());
         int[] andTable = new int[table.length];
@@ -117,6 +149,12 @@ public final class BitVector {
         return new BitVector(andTable);
     }
 
+    /**
+     * Computes the disjunction of two BitVectors
+     * @param that - the BitVector with which we want to compute the 
+     * disjunction
+     * @return disjunction BitVector
+     */
     public BitVector or(BitVector that) {
         Preconditions.checkArgument(that.size() == size());
         int[] orTable = new int[table.length];
@@ -130,14 +168,31 @@ public final class BitVector {
         BYZERO, WRAPPED
     }
 
+    /**
+     * Computes the extraction of the instance using extension by zero
+     * @param start - the index of the first bit in extraction
+     * @param size - the size of the extracted BitVector
+     * @return the extracted BitVector
+     */
     public BitVector extractZeroExtended(int start, int size) {
         return extract(start, size, ExtensionType.BYZERO);
     }
 
+    /**
+     * Computes the extraction of the instance using wrapped extension
+     * @param start - the index of the first bit in extraction
+     * @param size - the size of the extracted BitVector
+     * @return the extracted BitVector
+     */
     public BitVector extractWrapped(int start, int size) {
     		return extract(start,size,ExtensionType.WRAPPED);
     }
     
+    /**
+     * Computes the shift of the instance
+     * @param start - the index of the first bit in extraction
+     * @return the shifted BitVector
+     */
     public BitVector shift(int start) {
         return extractWrapped(-start,size());
     }
