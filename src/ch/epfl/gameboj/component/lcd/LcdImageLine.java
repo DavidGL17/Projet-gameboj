@@ -122,32 +122,37 @@ public final class LcdImageLine {
         return result;
     }
 
-    //pas bon, peut être optimisé(utiliser or,and,...), mais aucune idée de comment le faire
     public LcdImageLine below (LcdImageLine that) {
-        Builder b = new Builder(size());
-        int msbByte = 0,lsbByte = 0; 
-        for (int i = 0;i<size()/8;++i) {
-            for (int j = 0;j<8;++j) {
-                Bits.set(msbByte, j, that.getOpacity().testBit(i*8 +j)?that.getMsb().testBit(i*8 +j):msb.testBit(i*8 +j));
-                Bits.set(lsbByte, j, that.getOpacity().testBit(i*8 +j)?that.getLsb().testBit(i*8 +j):lsb.testBit(i*8 +j));
-            }
-            b.setBytes(i, msbByte, lsbByte);
-        }
-        return b.build();
+        BitVector finalMSB = that.opacity.and(that.msb).or(that.opacity.not().and(msb));
+        BitVector finalLSB = that.opacity.and(that.lsb).or(that.opacity.not().and(lsb));
+        return new LcdImageLine(finalMSB, finalLSB, that.opacity);
+//        Builder b = new Builder(size());
+//        int msbByte = 0,lsbByte = 0; 
+//        for (int i = 0;i<size()/8;++i) {
+//            for (int j = 0;j<8;++j) {
+//                Bits.set(msbByte, j, that.getOpacity().testBit(i*8 +j)?that.getMsb().testBit(i*8 +j):msb.testBit(i*8 +j));
+//                Bits.set(lsbByte, j, that.getOpacity().testBit(i*8 +j)?that.getLsb().testBit(i*8 +j):lsb.testBit(i*8 +j));
+//            }
+//            b.setBytes(i, msbByte, lsbByte);
+//        }
+//        return b.build();
     }
     
-    //idem
     public LcdImageLine below (LcdImageLine that, BitVector givenOpacity) {
-        Builder b = new Builder(size());
-        int msbByte = 0,lsbByte = 0; 
-        for (int i = 0;i<size()/8;++i) {
-            for (int j = 0;j<8;++j) {
-                Bits.set(msbByte, j, givenOpacity.testBit(i*8 +j)?that.getMsb().testBit(i*8 +j):msb.testBit(i*8 +j));
-                Bits.set(lsbByte, j, givenOpacity.testBit(i*8 +j)?that.getLsb().testBit(i*8 +j):lsb.testBit(i*8 +j));
-            }
-            b.setBytes(i, msbByte, lsbByte);
-        }
-        return b.build();
+        BitVector finalMSB = givenOpacity.and(that.msb).or(givenOpacity.not().and(msb));
+        BitVector finalLSB = givenOpacity.and(that.lsb).or(givenOpacity.not().and(lsb));
+        return new LcdImageLine(finalMSB, finalLSB, givenOpacity);
+//        
+//        Builder b = new Builder(size());
+//        int msbByte = 0,lsbByte = 0; 
+//        for (int i = 0;i<size()/8;++i) {
+//            for (int j = 0;j<8;++j) {
+//                Bits.set(msbByte, j, givenOpacity.testBit(i*8 +j)?that.getMsb().testBit(i*8 +j):msb.testBit(i*8 +j));
+//                Bits.set(lsbByte, j, givenOpacity.testBit(i*8 +j)?that.getLsb().testBit(i*8 +j):lsb.testBit(i*8 +j));
+//            }
+//            b.setBytes(i, msbByte, lsbByte);
+//        }
+//        return b.build();
     }
     
     //Aucune idée de comment le faire pour le moment
