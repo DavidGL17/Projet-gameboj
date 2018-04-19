@@ -3,9 +3,6 @@
  */
 package ch.epfl.gameboj.component.lcd;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.BitVector;
 import ch.epfl.gameboj.bits.Bits;

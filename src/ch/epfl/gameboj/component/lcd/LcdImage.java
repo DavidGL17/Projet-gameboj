@@ -3,9 +3,12 @@
  */
 package ch.epfl.gameboj.component.lcd;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import ch.epfl.gameboj.Preconditions;
+import ch.epfl.gameboj.bits.BitVector;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -31,9 +34,9 @@ public final class LcdImage {
     public int hashCode() {
         int res = 0;
         for (LcdImageLine i : lines) {
-            res+=i.hashCode();
+            res += i.hashCode();
         }
-        return res/lines.size();
+        return res / lines.size();
     }
 
     /*
@@ -64,9 +67,33 @@ public final class LcdImage {
     }
 
     public int get(int x, int y) {
-        Preconditions.checkArgument(y <= lines.size() && x <= lines.get(y).size());
+        Preconditions
+                .checkArgument(y <= lines.size() && x <= lines.get(y).size());
         return (lines.get(y).getMsb().testBit(x) ? 1 << 1 : 0)
                 | (lines.get(y).getLsb().testBit(x) ? 1 : 0);
+    }
+
+    public static class Builder {
+        private final LcdImageLine[] lines;
+        private final int width;
+
+        public Builder(int height, int width) {
+            lines = new LcdImageLine[height];
+            Arrays.fill(lines, new LcdImageLine(new BitVector(width),
+                    new BitVector(width), new BitVector(width)));
+            this.width = width;
+        }
+
+        public Builder setLine(LcdImageLine line, int index) {
+            Preconditions.checkArgument(index < lines.length && index >= 0
+                    && Objects.requireNonNull(line).size() == width);
+            lines[index] = line;
+            return this;
+        }
+        
+        public LcdImage build() {
+            return new LcdImage(Arrays.asList(lines.clone()), width, lines.length);
+        }
     }
 
 }
