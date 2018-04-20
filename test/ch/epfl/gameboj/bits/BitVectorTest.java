@@ -187,7 +187,7 @@ public class BitVectorTest {
     @Test
     void equalsWorksWithHashCode() {
         Random rng = new Random();
-        int[] table = new int[rng.nextInt(10)];
+        int[] table = new int[rng.nextInt(20)];
         for (int i = 0; i < table.length; ++i) {
             table[i] = rng.nextInt();
         }

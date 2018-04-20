@@ -80,9 +80,8 @@ public final class LcdImageLine {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof LcdImageLine) {
-            LcdImageLine that = (LcdImageLine) obj;
-            return (lsb.equals(that.getLsb()) && msb.equals(that.getMsb())
-                    && opacity.equals(that.getOpacity()));
+            return (lsb.equals(((LcdImageLine)obj).getLsb()) && msb.equals(((LcdImageLine)obj).getMsb())
+                    && opacity.equals(((LcdImageLine)obj).getOpacity()));
         }
         return false;
     }
