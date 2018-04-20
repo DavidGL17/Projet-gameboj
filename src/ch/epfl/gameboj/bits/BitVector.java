@@ -15,11 +15,14 @@ import ch.epfl.gameboj.Preconditions;
 public final class BitVector {
 
     private final int[] table;
-    
+
     /**
      * Builds a BitVector
-     * @param size - the number of bits in the vector		
-     * @param initialValue - wether the bits' value is one
+     * 
+     * @param size
+     *            - the number of bits in the vector
+     * @param initialValue
+     *            - wether the bits' value is one
      */
     public BitVector(int size, boolean initialValue) {
         Preconditions.checkArgument(size > 0 && (size % 32) == 0);
@@ -29,18 +32,17 @@ public final class BitVector {
 
     /**
      * Builds a BitVector made of 0
-     * @param size - the number of bits in the vector
+     * 
+     * @param size
+     *            - the number of bits in the vector
      */
     public BitVector(int size) {
         this(size, false);
     }
 
-    
     public BitVector(int[] table) {
         this.table = table; // Ne pas faire une copie conforme !
     }
-
-    
 
     /*
      * (non-Javadoc)
@@ -71,32 +73,34 @@ public final class BitVector {
      * 
      * @see java.lang.Object#toString()
      */
-   // @Override
-   // public String toString() {
-    //    String res = "";
-      //  for (int value : table) {
-        //    for (int i = 0; i < Integer.SIZE; i++) {
-          //      res = res
-          //              + ((Integer) (Bits.test(value, i) ? 1 : 0)).toString();
-          //  }
-        // }
-        // return res;
-   // }
-    
+    // @Override
+    // public String toString() {
+    // String res = "";
+    // for (int value : table) {
+    // for (int i = 0; i < Integer.SIZE; i++) {
+    // res = res
+    // + ((Integer) (Bits.test(value, i) ? 1 : 0)).toString();
+    // }
+    // }
+    // return res;
+    // }
+
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-    String res = "";
-    for (int i = 0; i < table.length; i++) {
-	    StringBuilder add= new StringBuilder("00000000000000000000000000000000");
-	    add=add.append(Integer.toBinaryString(table[i]));
-	    add.reverse();
-	    res=res.concat(add.substring(0,32));
-    }
-    return res;
+        String res = "";
+        for (int i = 0; i < table.length; i++) {
+            StringBuilder add = new StringBuilder(
+                    "00000000000000000000000000000000");
+            add = add.append(Integer.toBinaryString(table[i]));
+            add.reverse();
+            res = res.concat(add.substring(0, 32));
+        }
+        return res;
     }
 
     /**
@@ -104,26 +108,30 @@ public final class BitVector {
      * @return the number of bits in the BitVector
      */
     public int size() {
-        return table.length*Integer.SIZE;
+        return table.length * Integer.SIZE;
     }
-    
-    //Peut être intéressante ? Pas demandée pour le moment
+
+    // Peut être intéressante ? Pas demandée pour le moment
     // public boolean testBit(Bit bit) {
-    	// 		return testBit(bit.index());
-    //		}
+    // return testBit(bit.index());
+    // }
 
     /**
      * Checks if a bit is activated
-     * @param index - the index of the bit
+     * 
+     * @param index
+     *            - the index of the bit
      * @return wether the bit is activated
      */
     public boolean testBit(int index) {
-        Objects.checkIndex(index,size());
-        return Bits.test(table[Math.floorDiv(index,32)], Math.floorMod(index,32));
+        Objects.checkIndex(index, size());
+        return Bits.test(table[Math.floorDiv(index, 32)],
+                Math.floorMod(index, 32));
     }
 
     /**
      * Computes the complementary BitVector
+     * 
      * @return complementary BitVector
      */
     public BitVector not() {
@@ -136,8 +144,9 @@ public final class BitVector {
 
     /**
      * Computes the conjunction of two BitVectors
-     * @param that - the BitVector with which we want to compute the 
-     * conjuction
+     * 
+     * @param that
+     *            - the BitVector with which we want to compute the conjuction
      * @return conjunction BitVector
      */
     public BitVector and(BitVector that) {
@@ -151,8 +160,9 @@ public final class BitVector {
 
     /**
      * Computes the disjunction of two BitVectors
-     * @param that - the BitVector with which we want to compute the 
-     * disjunction
+     * 
+     * @param that
+     *            - the BitVector with which we want to compute the disjunction
      * @return disjunction BitVector
      */
     public BitVector or(BitVector that) {
@@ -170,8 +180,11 @@ public final class BitVector {
 
     /**
      * Computes the extraction of the instance using extension by zero
-     * @param start - the index of the first bit in extraction
-     * @param size - the size of the extracted BitVector
+     * 
+     * @param start
+     *            - the index of the first bit in extraction
+     * @param size
+     *            - the size of the extracted BitVector
      * @return the extracted BitVector
      */
     public BitVector extractZeroExtended(int start, int size) {
@@ -180,33 +193,37 @@ public final class BitVector {
 
     /**
      * Computes the extraction of the instance using wrapped extension
-     * @param start - the index of the first bit in extraction
-     * @param size - the size of the extracted BitVector
+     * 
+     * @param start
+     *            - the index of the first bit in extraction
+     * @param size
+     *            - the size of the extracted BitVector
      * @return the extracted BitVector
      */
     public BitVector extractWrapped(int start, int size) {
-    		return extract(start,size,ExtensionType.WRAPPED);
+        return extract(start, size, ExtensionType.WRAPPED);
     }
-    
+
     /**
      * Computes the shift of the instance
-     * @param start - the index of the first bit in extraction
+     * 
+     * @param start
+     *            - the index of the first bit in extraction
      * @return the shifted BitVector
      */
     public BitVector shift(int start) {
-        return extractWrapped(-start,size());
+        return extractWrapped(-start, size());
     }
 
     private BitVector extract(int start, int size, ExtensionType ext) {
-    		Preconditions.checkArgument((size > 0) && (size%32==0));
+        Preconditions.checkArgument((size > 0) && (size % 32 == 0));
         int[] newTable = new int[size / 32];
         int internalShift = Math.floorMod(start, Integer.SIZE);
         int cellShift = Math.floorDiv(start, 32);
         int value;
         for (int i = 0; i < newTable.length; i++) {
-            value = Bits.extract(
-                    getIntAtIndexOfExtension(cellShift + i, ext), internalShift,
-                    Integer.SIZE - internalShift)
+            value = Bits.extract(getIntAtIndexOfExtension(cellShift + i, ext),
+                    internalShift, Integer.SIZE - internalShift)
                     | (Bits.clip(internalShift, getIntAtIndexOfExtension(
                             cellShift + i + 1, ext)) << (32 - internalShift));
             newTable[i] = value;
@@ -217,7 +234,7 @@ public final class BitVector {
     private int getIntAtIndexOfExtension(int index, ExtensionType ext) {
         switch (ext) {
         case BYZERO:
-            return (index < 0 || index >= size() / 32)? 0 : table[index];
+            return (index < 0 || index >= size() / 32) ? 0 : table[index];
         case WRAPPED:
             return table[Math.floorMod(index, size() / 32)];
         }
@@ -225,7 +242,6 @@ public final class BitVector {
         throw new IllegalStateException("how");
     }
 
-  
     public final static class Builder {
 
         private byte[] table = null;
