@@ -18,8 +18,19 @@ public final class LcdImage {
     private final List<LcdImageLine> lines;
     private final int width, height;
 
+    /**
+     * Builds a LcdImage
+     * 
+     * @param lines,
+     *            a list of lines
+     * @param width,
+     *            the width of the image
+     * @param height,
+     *            the height of the image
+     */
     public LcdImage(List<LcdImageLine> lines, int width, int height) {
-        Preconditions.checkArgument(height == lines.size());
+        Preconditions
+                .checkArgument(height == Objects.requireNonNull(lines).size());
         this.lines = lines;
         this.width = width;
         this.height = height;
@@ -53,19 +64,26 @@ public final class LcdImage {
     }
 
     /**
-     * @return the width
+     * @return the width of the image
      */
     public int getWidth() {
         return width;
     }
 
     /**
-     * @return the height
+     * @return the height of the image
      */
     public int getHeight() {
         return height;
     }
 
+    /**
+     * Gets the pixel at the given index(x,y)
+     * 
+     * @param x
+     * @param y
+     * @return the pixel at that index
+     */
     public int get(int x, int y) {
         Preconditions
                 .checkArgument(y <= lines.size() && x <= lines.get(y).size());
@@ -77,6 +95,14 @@ public final class LcdImage {
         private final LcdImageLine[] lines;
         private final int width;
 
+        /**
+         * Builds a LcdImage builder
+         * 
+         * @param height,
+         *            the height of the builder
+         * @param width,
+         *            the width of the builder
+         */
         public Builder(int height, int width) {
             lines = new LcdImageLine[height];
             Arrays.fill(lines, new LcdImageLine(new BitVector(width),
@@ -84,15 +110,26 @@ public final class LcdImage {
             this.width = width;
         }
 
+        /**
+         * Sets a line in the builder
+         * 
+         * @param line
+         * @param index
+         * @return
+         */
         public Builder setLine(LcdImageLine line, int index) {
             Preconditions.checkArgument(index < lines.length && index >= 0
                     && Objects.requireNonNull(line).size() == width);
             lines[index] = line;
             return this;
         }
-        
+
+        /**
+         * @return a new LcdImage
+         */
         public LcdImage build() {
-            return new LcdImage(Arrays.asList(lines.clone()), width, lines.length);
+            return new LcdImage(Arrays.asList(lines.clone()), width,
+                    lines.length);
         }
     }
 

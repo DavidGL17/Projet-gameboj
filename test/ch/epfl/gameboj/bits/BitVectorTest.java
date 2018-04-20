@@ -13,6 +13,7 @@ import java.util.Random;
 import javax.swing.event.ListSelectionEvent;
 
 import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.bits.BitVector.Builder;
@@ -323,30 +324,32 @@ public class BitVectorTest {
     
     
     
-    @Test
-    @Ignore void betterToStringWorks() {
-    	 Random rng = new Random();
-         int size = rng.nextInt(10);
-         int[] table = new int[size == 0?1:size];
-         for (int i = 0;i<table.length;++i) {
-             table[i] = Bits.clip(32, rng.nextInt());
-         }
-         BitVector vector = new BitVector(table.clone());
-         assertEquals(vector.toString(), vector.betterToString());    	
-    }
-    
-    
-    @Ignore @Test
-    void betterToStringWorksBasic() {
-    		BitVector vector = new BitVector(new int[] {-1});
-    		assertEquals(vector.toString(), vector.betterToString());
-    		
-    		vector = new BitVector(new int[] {0x0000FFFF});
-    		assertEquals(vector.toString(), vector.betterToString());
-    		
-    		vector = new BitVector(new int[] {0x0000FFFF,0xFFFF0000});
-    		assertEquals(vector.toString(), vector.betterToString());
-    }
+//    @Test
+//    @Disabled 
+//    void betterToStringWorks() {
+//    	 Random rng = new Random();
+//         int size = rng.nextInt(10);
+//         int[] table = new int[size == 0?1:size];
+//         for (int i = 0;i<table.length;++i) {
+//             table[i] = Bits.clip(32, rng.nextInt());
+//         }
+//         BitVector vector = new BitVector(table.clone());
+//         assertEquals(vector.toString(), vector.betterToString());    	
+//    }
+//    
+//    
+//    @Test
+//    @Disabled 
+//    void betterToStringWorksBasic() {
+//    		BitVector vector = new BitVector(new int[] {-1});
+//    		assertEquals(vector.toString(), vector.betterToString());
+//    		
+//    		vector = new BitVector(new int[] {0x0000FFFF});
+//    		assertEquals(vector.toString(), vector.betterToString());
+//    		
+//    		vector = new BitVector(new int[] {0x0000FFFF,0xFFFF0000});
+//    		assertEquals(vector.toString(), vector.betterToString());
+//    }
     
     
     private int bitAtIndexOfExtensiontest(int index, ExtensionType ext, BitVector vector) {
