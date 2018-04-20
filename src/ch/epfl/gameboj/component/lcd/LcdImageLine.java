@@ -209,9 +209,11 @@ public final class LcdImageLine {
 
     // Aucune idée de comment le faire pour le moment
     /**
-     * @param that
-     * @param index
-     * @return
+     * Computes the jointure of the first LcdImageLine up to index and thw
+     * second LcdImageline
+     * @param that - the second LcdImageLine
+     * @param index - the index
+     * @return the jointure
      */
     public LcdImageLine join(LcdImageLine that, int index) {
         Preconditions.checkArgument(
@@ -236,6 +238,10 @@ public final class LcdImageLine {
         return new LcdImageLine(newMsb,newLsb,newOpacity);
     }
 
+    /**
+     * Allows the build per byte of a LcdImageLine
+     *
+     */
     public static class Builder {
         private BitVector.Builder msbBuilder;
         private BitVector.Builder lsbBuilder;
