@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.bits.BitVector;
 import ch.epfl.gameboj.bits.Bits;
+import ch.epfl.gameboj.component.lcd.LcdImageLine.Builder;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -126,6 +127,17 @@ class LcdImageLineTest {
             b.setBytes(i, msbByte, lsbByte);
         }
         assertTrue(b.build().equals(vector.below(that)));
+    }
+
+    void BuilderTest() {
+        int[] vectorsInt = new int[] { 0xffaadd22, 0xffaaaa00 };
+        LcdImageLine.Builder b = new Builder(32);
+        for (int i = 0;i<4;++i) {
+            b.setBytes(i, Bits.extract(vectorsInt[0], 8*i, 8), Bits.extract(vectorsInt[1], 8*i, 8));
+        }
+        BitVector msb = new BitVector(new int[] {vectorsInt[0]});
+        BitVector lsb = new BitVector(new int[] {vectorsInt[1]});
+        assertEquals(new LcdImageLine(msb, lsb, msb.or(lsb)), b.build());
     }
 
 }
