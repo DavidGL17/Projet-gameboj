@@ -162,11 +162,7 @@ public final class LcdImageLine {
      * @return
      */
     public LcdImageLine below(LcdImageLine that) {
-        BitVector finalMSB = that.opacity.and(that.msb)
-                .or(that.opacity.not().and(msb));
-        BitVector finalLSB = that.opacity.and(that.lsb)
-                .or(that.opacity.not().and(lsb));
-        return new LcdImageLine(finalMSB, finalLSB, that.opacity);
+        return below(that,that.opacity);
         // Builder b = new Builder(size());
         // int msbByte = 0,lsbByte = 0;
         // for (int i = 0;i<size()/8;++i) {
@@ -219,8 +215,24 @@ public final class LcdImageLine {
     public LcdImageLine join(LcdImageLine that, int index) {
         Preconditions.checkArgument(
                 that.size() == size() && index >= 0 && index < size());
-        // à faire
-        return null;
+        BitVector.Builder builder = new BitVector.Builder(size());
+        int i=0;
+        while (index>8) {
+        		builder.setByte(i,0xFF);
+        		index=-8;
+         	i++;
+        }
+        builder.setByte(i,Bits.clip(index,-1))	;
+        BitVector mask=builder.build();
+        
+        BitVector newMsb = ( mask.and(this.msb) ).or( 
+        		(mask.not()).and(that.msb) );
+        BitVector newLsb = ( mask.and(this.lsb) ).or( 
+        		(mask.not()).and(that.lsb) );
+        BitVector newOpacity = ( mask.and(this.opacity) ).or( 
+        		(mask.not()).and(that.opacity) );
+        
+        return new LcdImageLine(newMsb,newLsb,newOpacity);
     }
 
     public static class Builder {
@@ -262,8 +274,10 @@ public final class LcdImageLine {
          * @return a new LcdImageLine
          */
         public LcdImageLine build() {
-            return new LcdImageLine(msbBuilder.build(), lsbBuilder.build(),
-                    opacityBuilder.build());
+        		BitVector msb=msbBuilder.build();
+        		BitVector lsb=lsbBuilder.build();
+            return new LcdImageLine(msb, lsb, msb.or(lsb)
+                    );
         }
     }
 
