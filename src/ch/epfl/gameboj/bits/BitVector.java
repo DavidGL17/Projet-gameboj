@@ -52,8 +52,7 @@ public final class BitVector {
     @Override
     public boolean equals(Object arg0) {
         if (arg0 instanceof BitVector) {
-            BitVector arg1 = (BitVector) arg0;
-            return Arrays.equals(table, arg1.table);
+            return Arrays.equals(table, ((BitVector)arg0).table);
         }
         return false;
     }
