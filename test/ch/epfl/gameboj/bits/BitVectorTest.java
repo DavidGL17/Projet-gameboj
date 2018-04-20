@@ -23,95 +23,106 @@ import ch.epfl.gameboj.bits.BitVector.ExtensionType;
 
 public class BitVectorTest {
 
-    private static class BitVectorTableExample {
-        final int[] table;
-        BitVector vector;
-        final String correspondingString;
-
-        BitVectorTableExample(int[] table, String correspondingString) {
-            this.table = table;
-            vector = new BitVector(table);
-            this.correspondingString = correspondingString;
-        }
-
-        BitVector build() {
-            vector = new BitVector(table);
-            return vector;
-        }
-
-    }
-
-    private static class BitVectorBuildingExample {
-        final int size;
-        final int[][] bytes;
-        final String correspondingString;
-        BitVector.Builder builder = null;
-
-        BitVectorBuildingExample(int size, int[][] bytes, String str) {
-            this.size = size;
-            this.bytes = bytes;
-            correspondingString = str;
-        }
-
-        BitVector.Builder setAll() {
-            builder = new BitVector.Builder(size);
-            for (int[] line : bytes) {
-                builder.setByte(line[0], line[1]);
-            }
-            return builder;
-        }
-
-    }
-
-    private static final BitVectorBuildingExample[] ValidExampleBuilders = new BitVectorBuildingExample[] {
-            new BitVectorBuildingExample(32,
-                    new int[][] { { 0, 0xAF }, { 3, 0xAF } },
-                    "11110101000000000000000011110101"),
-
-    };
-
-    // private static final BitVectorBuildingExample[] InvalidExampleBuilders =
-    // new BitVectorBuildingExample[] {
-    // new BitVectorBuildingExample(0, new byte[][] {}, ""),
-    // new BitVectorBuildingExample(32,
-    // new byte[][] { { 0, (byte) 0xAF }, { 3, (byte) 0xAF } },
-    // ""),
-
-    // };
-
-    private static final BitVectorTableExample[] ValidExamples = new BitVectorTableExample[] {
-            new BitVectorTableExample(new int[] { 0xAF_0000_AF },
-                    "11110101000000000000000011110101") };
-
-    @Test
-    void BitVectorBuilderBuildsCorrectly() {
-        for (BitVectorBuildingExample example : ValidExampleBuilders) {
-            example.setAll();
-            System.out
-            .println(((BitVector.Builder) example.builder).toString());
-            BitVector vector = example.builder.build();
-            assertEquals(example.correspondingString, vector.toString());
-        }
-    }
-
-    @Test
-    void BitVectorPrivatesConstructorWorks() {
-        for (BitVectorTableExample example : ValidExamples) {
-            assertEquals(example.correspondingString,
-                    example.build().toString());
-        }
-
-    }
-
-    @Test
-    void BitVectorBuildingCanBeDoneOnlyOnce() {
-        for (BitVectorBuildingExample example : ValidExampleBuilders) {
-            example.setAll();
-            example.builder.build();
-            assertThrows(NullPointerException.class,
-                    () -> example.builder.build());
-        }
-    }
+	
+	private static BitVector BitVectorInstantiation(int[] table) {
+		BitVector.Builder builder =new BitVector.Builder(table.length*32);
+		int weight=0;
+		for (int i:table) {
+			for (int j=0 ; j<4;j++) {
+				builder.setByte(weight,Bits.extract(i,8*j,8));
+				weight++;
+			}
+		}
+		return builder.build();
+	}
+	
+	
+//	private static class BitVectorTableExample {
+//		final int[] table;
+//		BitVector vector;
+//		final String correspondingString;
+//
+//		BitVectorTableExample(int[] table, String correspondingString) {
+//			this.table = table;
+//			vector = new BitVector(table);
+//			this.correspondingString = correspondingString;
+//		}
+//
+//		BitVector build() {
+//			vector = new BitVector(table);
+//			return vector;
+//		}
+//
+//	}
+//
+//	private static class BitVectorBuildingExample {
+//		final int size;
+//		final int[][] bytes;
+//		final String correspondingString;
+//		BitVector.Builder builder = null;
+//
+//		BitVectorBuildingExample(int size, int[][] bytes, String str) {
+//			this.size = size;
+//			this.bytes = bytes;
+//			correspondingString = str;
+//		}
+//
+//		BitVector.Builder setAll() {
+//			builder = new BitVector.Builder(size);
+//			for (int[] line : bytes) {
+//				builder.setByte(line[0], line[1]);
+//			}
+//			return builder;
+//		}
+//
+//	}
+//
+//	private static final BitVectorBuildingExample[] ValidExampleBuilders = new BitVectorBuildingExample[] {
+//			new BitVectorBuildingExample(32, new int[][] { { 0, 0xAF }, { 3, 0xAF } },
+//					"11110101000000000000000011110101"),
+//
+//	};
+//
+//	// private static final BitVectorBuildingExample[] InvalidExampleBuilders =
+//	// new BitVectorBuildingExample[] {
+//	// new BitVectorBuildingExample(0, new byte[][] {}, ""),
+//	// new BitVectorBuildingExample(32,
+//	// new byte[][] { { 0, (byte) 0xAF }, { 3, (byte) 0xAF } },
+//	// ""),
+//
+//	// };
+//
+//	private static final BitVectorTableExample[] ValidExamples = new BitVectorTableExample[] {
+//			new BitVectorTableExample(new int[] { 0xAF_0000_AF }, "11110101000000000000000011110101") };
+//
+//	@Test
+//	void BitVectorBuilderBuildsCorrectly() {
+//		for (BitVectorBuildingExample example : ValidExampleBuilders) {
+//			example.setAll();
+//			System.out.println(((BitVector.Builder) example.builder).toString());
+//			BitVector vector = example.builder.build();
+//			assertEquals(example.correspondingString, vector.toString());
+//		}
+//	}
+//
+//    @Test
+//    void BitVectorPrivatesConstructorWorks() {
+//        for (BitVectorTableExample example : ValidExamples) {
+//            assertEquals(example.correspondingString,
+//                    example.build().toString());
+//        }
+//
+//    }
+//
+//    @Test
+//    void BitVectorBuildingCanBeDoneOnlyOnce() {
+//        for (BitVectorBuildingExample example : ValidExampleBuilders) {
+//            example.setAll();
+//            example.builder.build();
+//            assertThrows(NullPointerException.class,
+//                    () -> example.builder.build());
+//        }
+//    }
 
     @Test
     void BitVectorConstructionThrowsException() {
@@ -294,6 +305,31 @@ public class BitVectorTest {
             }
         }
     }
+    
+    @Test
+    void shiftWorks() {
+    	 Random random = new Random();
+         for (int i = 0; i < 50; i++) {
+             int size = 32 * random.nextInt(10);
+             size = size > 0 ? size : 32;
+             BitVector.Builder builder = new BitVector.Builder(size);
+             for (int j = 0; j < size % 8; j++) {
+                 builder.setByte(j, random.nextInt(8));
+             }
+             BitVector vector = builder.build();
+             int randomStart = (random.nextBoolean() ? -1 : 1)
+                     * random.nextInt(10);
+             BitVector shifted = vector.shift(randomStart);
+
+             for (int k = 0; k < shifted.size(); k++) {
+                 assertEquals(
+                         (bitAtIndexOfExtensiontest(-randomStart + k,
+                                 ExtensionType.BYZERO, vector) == 1),
+                         shifted.testBit(k));
+             }
+         }
+    		
+    }
 
     @Test
     void extractWrappedWorks() {
@@ -322,6 +358,36 @@ public class BitVectorTest {
         }
     }
 
+    @Test
+    void shiftWorksBasic(){
+
+        int[] table = new int[] { 0xAF0000FA, 0xFA0000AF };
+        int[] result = new int[] {0xAF0000FA, 0xFA0000AF };
+        BitVector vector = new BitVector(table);
+        BitVector res = vector.shift(0);
+        assertEquals(new BitVector(result).toString(), res.toString());
+
+        table = new int[] { 0xAF0000FA, 0xFA0000AF };
+        result = new int[] { 0, 0xAF0000FA };
+        vector = new BitVector(table);
+        res = vector.shift(32);
+        assertEquals(new BitVector(result).toString(), res.toString());
+
+        table = new int[] { 0xAF0EC0FA, 0x10150FEA };
+        result = new int[] {0xC0FA0000, 0x0FEAAF0E };
+        vector = new BitVector(table);
+        res = vector.shift(16);
+        assertEquals(new BitVector(result).toString(), res.toString());
+
+       
+        table = new int[] { 0xAF0EC0FA, 0x10150FEA };
+        result = new int[] { 0x607D0000, 0x87F55787 };
+        vector = new BitVector(table);
+        res = vector.shift(15);
+        assertEquals(new BitVector(result).toString(), res.toString());
+
+    }
+    
     // @Test
     // @Disabled
     // void betterToStringWorks() {
