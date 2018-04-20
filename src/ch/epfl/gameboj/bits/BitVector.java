@@ -41,7 +41,7 @@ public final class BitVector {
     }
 
     public BitVector(int[] table) {
-        this.table = table; // Ne pas faire une copie conforme !
+        this.table = table; 
     }
 
     /*
@@ -211,7 +211,7 @@ public final class BitVector {
      * @return the shifted BitVector
      */
     public BitVector shift(int start) {
-        return extractWrapped(-start, size());
+        return extractZeroExtended(-start, size());
     }
 
     private BitVector extract(int start, int size, ExtensionType ext) {
