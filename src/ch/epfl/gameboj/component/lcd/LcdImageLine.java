@@ -246,7 +246,6 @@ public final class LcdImageLine {
     public static class Builder {
         private BitVector.Builder msbBuilder;
         private BitVector.Builder lsbBuilder;
-        private BitVector.Builder opacityBuilder;
 
         /**
          * Builds a LcdImageLine builder
@@ -257,7 +256,6 @@ public final class LcdImageLine {
         public Builder(int size) {
             msbBuilder = new BitVector.Builder(size);
             lsbBuilder = new BitVector.Builder(size);
-            opacityBuilder = new BitVector.Builder(size);
         }
 
         /**
@@ -272,7 +270,6 @@ public final class LcdImageLine {
         public Builder setBytes(int index, int msbBytes, int lsbBytes) {
             msbBuilder.setByte(index, msbBytes);
             lsbBuilder.setByte(index, lsbBytes);
-            opacityBuilder.setByte(index, msbBytes | lsbBytes);
             return this;
         }
 
