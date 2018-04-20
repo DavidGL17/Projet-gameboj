@@ -6,6 +6,8 @@ package ch.epfl.gameboj.component.lcd;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
@@ -40,6 +42,31 @@ class LcdImageLineTest {
         assertEquals(new BitVector(new int[] { 0xDFA37DEF }), test.getLsb());
         assertEquals(new BitVector(new int[] { 0xFF123672 }),
                 test.getOpacity());
+    }
+
+    @Test
+    void EqualsAndHashCodeWork() {
+        Random rng = new Random();
+        int[] table = new int[rng.nextInt(10) * 3];
+        for (int i = 0; i < table.length; ++i) {
+            table[i] = rng.nextInt();
+        }
+
+        List<LcdImageLine> lines = new ArrayList<>();
+        for (int i = 0; i < table.length / 3; ++i) {
+            lines.add(
+                    new LcdImageLine(new BitVector(new int[] { table[3 * i] }),
+                            new BitVector(new int[] { table[3 * i + 1] }),
+                            new BitVector(new int[] { table[3 * i + 2] })));
+        }
+
+        for (LcdImageLine l : lines) {
+            for (LcdImageLine l2 : lines) {
+                if (l.equals(l2)) {
+                    assertTrue(l.hashCode() == l2.hashCode());
+                }
+            }
+        }
     }
 
     @Test
@@ -90,7 +117,7 @@ class LcdImageLineTest {
             b.setBytes(i, msbByte, lsbByte);
         }
         assertTrue(b.build().equals(vector.below(that)));
-
     }
-
+    
+    
 }
