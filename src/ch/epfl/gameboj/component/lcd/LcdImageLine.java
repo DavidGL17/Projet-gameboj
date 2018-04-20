@@ -133,7 +133,7 @@ public final class LcdImageLine {
             }
             ++i;
             if (Bits.test(palette, i)) {
-                newLsb = newMsb.or(colorVector);
+                newMsb = newMsb.or(colorVector);
             }
             ++i;
         }
@@ -147,7 +147,7 @@ public final class LcdImageLine {
      * @return true if it doesn't, false otherwise
      */
     private boolean checkAllColorsSame(int palette) {
-        boolean result = false;
+        boolean result = true;
         for (int i = 0; i < 4; ++i)
             result &= Bits.extract(palette, 2 * i, 2) == i;
         return result;

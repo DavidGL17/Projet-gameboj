@@ -65,7 +65,7 @@ class LcdImageLineTest {
             for (LcdImageLine l2 : lines) {
                 if (l.equals(l2)) {
                     System.out.println("hey");
-                    assertTrue(l.hashCode() == l2.hashCode());
+                    assertEquals(l.hashCode(), l2.hashCode());
                 }
             }
         }
@@ -92,6 +92,17 @@ class LcdImageLineTest {
         assertEquals(new LcdImageLine(new BitVector(new int[] { 0x00FFFF00 }),
                 new BitVector(new int[] { 0x00FF00FF }),
                 new BitVector(new int[] { 0x00000000 })), changedLine);
+    }
+
+    @Test
+    void MapColorsDoesNothingIfColorsSame() {
+        LcdImageLine line = new LcdImageLine(
+                new BitVector(new int[] { 0xFFFF0000 }),
+                new BitVector(new int[] { 0xFF00FF00 }),
+                new BitVector(new int[] { 0x00000000 }));
+        int palette = 0xE4;
+        LcdImageLine changedLine = line.mapColors(palette);
+        assertEquals(line, changedLine);
     }
 
     @Test
@@ -132,11 +143,12 @@ class LcdImageLineTest {
     void BuilderTest() {
         int[] vectorsInt = new int[] { 0xffaadd22, 0xffaaaa00 };
         LcdImageLine.Builder b = new Builder(32);
-        for (int i = 0;i<4;++i) {
-            b.setBytes(i, Bits.extract(vectorsInt[0], 8*i, 8), Bits.extract(vectorsInt[1], 8*i, 8));
+        for (int i = 0; i < 4; ++i) {
+            b.setBytes(i, Bits.extract(vectorsInt[0], 8 * i, 8),
+                    Bits.extract(vectorsInt[1], 8 * i, 8));
         }
-        BitVector msb = new BitVector(new int[] {vectorsInt[0]});
-        BitVector lsb = new BitVector(new int[] {vectorsInt[1]});
+        BitVector msb = new BitVector(new int[] { vectorsInt[0] });
+        BitVector lsb = new BitVector(new int[] { vectorsInt[1] });
         assertEquals(new LcdImageLine(msb, lsb, msb.or(lsb)), b.build());
     }
 
