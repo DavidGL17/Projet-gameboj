@@ -119,9 +119,9 @@ public final class LcdImageLine {
      * 
      * @param palette
      */
-    public void mapColors(int palette) {
+    public LcdImageLine mapColors(int palette) {
         if (checkAllColorsSame(palette)) {
-            return;
+            return new LcdImageLine(msb, lsb, opacity);
         }
         BitVector[] bitsAtColor = new BitVector[] { msb.not().and(lsb.not()),
                 msb.not().and(lsb), msb.and(lsb.not()), msb.and(lsb) };
@@ -138,8 +138,7 @@ public final class LcdImageLine {
             }
             ++i;
         }
-        msb = newMsb;
-        lsb = newLsb;
+        return new LcdImageLine(newMsb, newLsb, opacity);
     }
 
     /**
