@@ -3,6 +3,8 @@
  */
 package ch.epfl.gameboj.component.lcd;
 
+import java.util.Objects;
+
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.BitVector;
 import ch.epfl.gameboj.bits.Bits;
@@ -69,7 +71,7 @@ public final class LcdImageLine {
      */
     @Override
     public int hashCode() {
-        return msb.hashCode() + lsb.hashCode() + opacity.hashCode();
+        return Objects.hash(msb,lsb,opacity);
     }
 
     /*

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj.component.lcd;
 
 import java.util.Arrays;
@@ -43,11 +40,7 @@ public final class LcdImage {
      */
     @Override
     public int hashCode() {
-        int res = 0;
-        for (LcdImageLine i : lines) {
-            res += i.hashCode();
-        }
-        return res / lines.size();
+        return Objects.hash(lines,height,width);
     }
 
     /*
