@@ -24,7 +24,7 @@ import ch.epfl.gameboj.bits.BitVector.ExtensionType;
 public class BitVectorTest {
 
 	
-	private static BitVector BitVectorInstantiation(int[] table) {
+	public static BitVector BitVectorInstantiation(int[] table) {
 		BitVector.Builder builder =new BitVector.Builder(table.length*32);
 		int weight=0;
 		for (int i:table) {
@@ -35,6 +35,54 @@ public class BitVectorTest {
 		}
 		return builder.build();
 	}
+	
+	public static BitVector randomBitVectorInstantiation() {
+		Random random = new Random();
+		int size=Bits.clip(26,random.nextInt())<<5;
+		size = size>0 ? size : 32;
+		BitVector.Builder builder= new BitVector.Builder(size);
+		int i=0;
+		while (size>0) {
+			builder.setByte(i,Bits.clip(8,random.nextInt()));
+			i++;
+			size=-8;
+		}
+		return builder.build();
+	}
+	
+	public static BitVector randomBitVectorInstantiation(int size) {
+		Random random = new Random();
+		BitVector.Builder builder= new BitVector.Builder(size);
+		int i=0;
+		while (size>0) {
+			builder.setByte(i,Bits.clip(8,random.nextInt()));
+			i++;
+			size=-8;
+		}
+		return builder.build();
+	}
+	
+	public static int[] randomBitTable() {
+		Random random = new Random();
+		int size=Bits.clip(26,random.nextInt())<<5;
+		size = size>0 ? size : 32;
+		int[] table = new int[size/32];
+		for (int i=0 ; i<table.length; i++) {
+			table[i]=random.nextInt();
+		}
+		return table;
+	}
+	
+	public static int[] randomBitTable(int size) {
+		Random random = new Random();
+		int[] table = new int[size/32];
+		for (int i=0 ; i<table.length; i++) {
+			table[i]=random.nextInt();
+		}
+		return table;
+	}
+	
+	
 	
 	
 //	private static class BitVectorTableExample {
@@ -155,7 +203,7 @@ public class BitVectorTest {
         // b.setByte(2, (byte) table[2]);
         // b.setByte(3, (byte) table[3]);
         // BitVector vector = b.build();
-        BitVector vector = new BitVector(new int[] { table });
+        BitVector vector = BitVectorInstantiation(new int[] { table });
         for (int j = 0; j < 32; ++j) {
             assertEquals(Bits.test(table, j), vector.testBit(j));
         }
@@ -163,35 +211,35 @@ public class BitVectorTest {
 
     @Test
     void AndOrThrowException() {
-        BitVector v1 = new BitVector(new int[] { 0xAF0000AF });
-        BitVector v2 = new BitVector(new int[] { 0xAFFFFF50, 0xAFFFFF50 });
+        BitVector v1 = BitVectorInstantiation(new int[] { 0xAF0000AF });
+        BitVector v2 = BitVectorInstantiation(new int[] { 0xAFFFFF50, 0xAFFFFF50 });
         assertThrows(IllegalArgumentException.class, () -> v1.and(v2));
         assertThrows(IllegalArgumentException.class, () -> v1.or(v2));
     }
 
     @Test
     void AndWorks() {
-        BitVector v1 = new BitVector(new int[] { 0xAF0000AF });
-        BitVector v2 = new BitVector(new int[] { 0xAFFFFF50 });
+        BitVector v1 = BitVectorInstantiation(new int[] { 0xAF0000AF });
+        BitVector v2 = BitVectorInstantiation(new int[] { 0xAFFFFF50 });
         BitVector res = v1.and(v2);
-        assertEquals(new BitVector(new int[] { 0xAF000000 }).toString(),
+        assertEquals(BitVectorInstantiation(new int[] { 0xAF000000 }).toString(),
                 res.toString());
     }
 
     @Test
     void OrWorks() {
-        BitVector v1 = new BitVector(new int[] { 0xAF0000AF });
-        BitVector v2 = new BitVector(new int[] { 0x00F00F50 });
+        BitVector v1 = BitVectorInstantiation(new int[] { 0xAF0000AF });
+        BitVector v2 = BitVectorInstantiation(new int[] { 0x00F00F50 });
         BitVector res = v1.or(v2);
-        assertEquals(new BitVector(new int[] { 0xAFF00FFF }).toString(),
+        assertEquals( BitVectorInstantiation(new int[] { 0xAFF00FFF }).toString(),
                 res.toString());
     }
 
     @Test
     void notWorks() {
-        BitVector v1 = new BitVector(new int[] { 0xAF50AA00 });
+        BitVector v1 = BitVectorInstantiation(new int[] { 0xAF50AA00 });
         v1 = v1.not();
-        assertEquals(new BitVector(new int[] { 0x50AF55FF }).toString(),
+        assertEquals(BitVectorInstantiation(new int[] { 0x50AF55FF }).toString(),
                 v1.toString());
     }
 
@@ -205,7 +253,7 @@ public class BitVectorTest {
 
         List<BitVector> vectors = new ArrayList<>();
         for (int i = 0; i < table.length; ++i) {
-            vectors.add(new BitVector(new int[] { table[i] }));
+            vectors.add(BitVectorInstantiation(new int[] { table[i] }));
         }
 
         for (BitVector b : vectors) {
@@ -222,33 +270,33 @@ public class BitVectorTest {
 
         int[] table = new int[] { 0xAF0000FA, 0xFA0000AF };
         int[] result = new int[] { 0, 0xAF0000FA };
-        BitVector vector = new BitVector(table);
+        BitVector vector = BitVectorInstantiation(table);
         BitVector res = vector.extractZeroExtended(-32, 64);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
         table = new int[] { 0xAF0000FA, 0xFA0000AF };
         result = new int[] { 0xAF0000FA, 0xFA0000AF };
-        vector = new BitVector(table);
+        vector = BitVectorInstantiation(table);
         res = vector.extractZeroExtended(0, 64);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
         table = new int[] { 0xAF0EC0FA, 0x10150FEA };
         result = new int[] { 0xC0FA0000, 0x0FEAAF0E };
-        vector = new BitVector(table);
+        vector = BitVectorInstantiation(table);
         res = vector.extractZeroExtended(-16, 64);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
         table = new int[] { 0xAF0EC0FA, 0x10150FEA };
         result = new int[] { 0xC0FA0000, 0x0FEAAF0E, 0x00001015 };
-        vector = new BitVector(table);
+        vector = BitVectorInstantiation(table);
         res = vector.extractZeroExtended(-16, 96);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
         table = new int[] { 0xAF0EC0FA, 0x10150FEA };
         result = new int[] { 0x607D0000, 0x87F55787 };
-        vector = new BitVector(table);
+        vector = BitVectorInstantiation(table);
         res = vector.extractZeroExtended(-15, 64);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
     }
 
@@ -257,14 +305,14 @@ public class BitVectorTest {
         // Multiple de 32
         int[] table = new int[] { 0xAF0000FA, 0xFA0000AF };
         int[] result = new int[] { 0xFA0000AF, 0xAF0000FA };
-        BitVector vector = new BitVector(table);
+        BitVector vector = BitVectorInstantiation(table);
         BitVector res = vector.extractWrapped(-32, 64);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
     }
 
     @Test
-    void BuilderThrowsExceptionAtCreation() {
+    void BitVectorBuilderBuilderConstructorThrowsException() {
         assertThrows(IllegalArgumentException.class, () -> new Builder(0));
         assertThrows(IllegalArgumentException.class, () -> new Builder(-1));
         assertThrows(IllegalArgumentException.class, () -> new Builder(21));
@@ -276,20 +324,14 @@ public class BitVectorTest {
         BitVector.Builder b = new Builder(64);
         b.setByte(0, 0).setByte(1, 0xAF).setByte(2, 0).setByte(3, 0xAF)
         .setByte(4, 0).setByte(5, 0xFF).setByte(6, 0).setByte(7, 0xFF);
-        assertEquals(new BitVector(res).toString(), b.build().toString());
+        assertEquals(BitVectorInstantiation(res).toString(), b.build().toString());
     }
 
     @Test
     void extractZeroExtendedWorks() {
         Random random = new Random();
         for (int i = 0; i < 50; i++) {
-            int size = 32 * random.nextInt(10);
-            size = size > 0 ? size : 32;
-            BitVector.Builder builder = new BitVector.Builder(size);
-            for (int j = 0; j < size % 8; j++) {
-                builder.setByte(j, random.nextInt(8));
-            }
-            BitVector vector = builder.build();
+        		BitVector vector = randomBitVectorInstantiation();
             int randomStart = (random.nextBoolean() ? -1 : 1)
                     * random.nextInt(10);
             int randomSize = 32 * (random.nextInt(9));
@@ -309,14 +351,8 @@ public class BitVectorTest {
     @Test
     void shiftWorks() {
     	 Random random = new Random();
-         for (int i = 0; i < 50; i++) {
-             int size = 32 * random.nextInt(10);
-             size = size > 0 ? size : 32;
-             BitVector.Builder builder = new BitVector.Builder(size);
-             for (int j = 0; j < size % 8; j++) {
-                 builder.setByte(j, random.nextInt(8));
-             }
-             BitVector vector = builder.build();
+         for (int i = 0; i < 20; i++) {
+        	 BitVector vector = randomBitVectorInstantiation();
              int randomStart = (random.nextBoolean() ? -1 : 1)
                      * random.nextInt(10);
              BitVector shifted = vector.shift(randomStart);
@@ -335,13 +371,7 @@ public class BitVectorTest {
     void extractWrappedWorks() {
         Random random = new Random();
         for (int i = 0; i < 50; i++) {
-            int size = 32 * random.nextInt(10);
-            size = size > 0 ? size : 32;
-            BitVector.Builder builder = new BitVector.Builder(size);
-            for (int j = 0; j < size % 8; j++) {
-                builder.setByte(j, random.nextInt(8));
-            }
-            BitVector vector = builder.build();
+            BitVector vector = randomBitVectorInstantiation();
             int randomStart = (random.nextBoolean() ? -1 : 1)
                     * random.nextInt(10);
             int randomSize = 32 * (random.nextInt(9));
@@ -363,28 +393,28 @@ public class BitVectorTest {
 
         int[] table = new int[] { 0xAF0000FA, 0xFA0000AF };
         int[] result = new int[] {0xAF0000FA, 0xFA0000AF };
-        BitVector vector = new BitVector(table);
+        BitVector vector = BitVectorInstantiation(table);
         BitVector res = vector.shift(0);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
         table = new int[] { 0xAF0000FA, 0xFA0000AF };
         result = new int[] { 0, 0xAF0000FA };
-        vector = new BitVector(table);
+        vector = BitVectorInstantiation(table);
         res = vector.shift(32);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
         table = new int[] { 0xAF0EC0FA, 0x10150FEA };
         result = new int[] {0xC0FA0000, 0x0FEAAF0E };
-        vector = new BitVector(table);
+        vector = BitVectorInstantiation(table);
         res = vector.shift(16);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
        
         table = new int[] { 0xAF0EC0FA, 0x10150FEA };
         result = new int[] { 0x607D0000, 0x87F55787 };
-        vector = new BitVector(table);
+        vector = BitVectorInstantiation(table);
         res = vector.shift(15);
-        assertEquals(new BitVector(result).toString(), res.toString());
+        assertEquals(BitVectorInstantiation(result).toString(), res.toString());
 
     }
     

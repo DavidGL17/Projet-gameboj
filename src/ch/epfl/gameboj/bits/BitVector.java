@@ -40,7 +40,7 @@ public final class BitVector {
         this(size, false);
     }
 
-    public BitVector(int[] table) {
+    private BitVector(int[] table) {
         this.table = table; 
     }
 

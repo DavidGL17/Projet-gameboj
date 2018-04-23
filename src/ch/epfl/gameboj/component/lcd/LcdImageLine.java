@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj.component.lcd;
 
 import java.util.Objects;
@@ -11,6 +8,7 @@ import ch.epfl.gameboj.bits.Bits;
 
 /**
  * @author David Gonzalez leon (270845)
+ * @author Melvin Malonga-Matouba (288405)
  *
  */
 public final class LcdImageLine {
@@ -93,10 +91,8 @@ public final class LcdImageLine {
      * 
      * @param shiftNumber
      */
-    public void shift(int shiftNumber) {
-        msb.shift(shiftNumber);
-        lsb.shift(shiftNumber);
-        opacity.shift(shiftNumber);
+    public LcdImageLine shift(int shiftNumber) {
+        return new LcdImageLine(msb.shift(shiftNumber),lsb.shift(shiftNumber),opacity.shift(shiftNumber));
     }
 
     /**
