@@ -40,7 +40,7 @@ public final class LcdImage {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(lines,height,width);
+        return Objects.hash(lines, height, width);
     }
 
     /*
@@ -79,7 +79,7 @@ public final class LcdImage {
      */
     public int get(int x, int y) {
         Preconditions
-                .checkArgument(y <= lines.size() && x <= lines.get(y).size());
+                .checkArgument(y <= lines.size() && x <= lines.get(0).size());
         return (lines.get(y).getMsb().testBit(x) ? 1 << 1 : 0)
                 | (lines.get(y).getLsb().testBit(x) ? 1 : 0);
     }
@@ -96,7 +96,7 @@ public final class LcdImage {
          * @param width,
          *            the width of the builder
          */
-        public Builder(int height, int width) {
+        public Builder(int width, int height) {
             lines = new LcdImageLine[height];
             Arrays.fill(lines, new LcdImageLine(new BitVector(width),
                     new BitVector(width), new BitVector(width)));
