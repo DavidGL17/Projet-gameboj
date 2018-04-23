@@ -76,13 +76,12 @@ class LcdImageLineTest {
     /*
      * requirement : BitVector.equals(BitVector that) works
      */
-    void gettersWorks() {
-	    	Random rng = new Random();
-	    	for (int i=0 ; i<50 ; i++) {
+    void gettersWork() {
+	    	for (int i=0 ; i<10 ; i++) {
 	    	
 	    		BitVector vector1 = BitVectorTest.randomBitVectorInstantiation();
-	    		BitVector vector2 = BitVectorTest.randomBitVectorInstantiation();
-	    		BitVector vector3 = BitVectorTest.randomBitVectorInstantiation();
+	    		BitVector vector2 = BitVectorTest.randomBitVectorInstantiation(vector1.size());
+	    		BitVector vector3 = BitVectorTest.randomBitVectorInstantiation(vector1.size());
 	    		LcdImageLine test2 = new LcdImageLine(
 	    				vector1,
 	    				vector2,
@@ -91,16 +90,16 @@ class LcdImageLineTest {
 	    		assertEquals(vector2, test2.getLsb());
 	    		assertEquals(vector3, test2.getOpacity());
 	    		
-	    		int [] table1 = BitVectorTest.randomBitTable();
-	    		int [] table2 = BitVectorTest.randomBitTable(table1.length*32);
-	    		int [] table3 = BitVectorTest.randomBitTable(table1.length*32);
-	    		LcdImageLine test1 = new LcdImageLine(
-	    				BitVectorTest.BitVectorInstantiation(table1),
-	    				BitVectorTest.BitVectorInstantiation(table2),
-	    				BitVectorTest.BitVectorInstantiation(table3));
-	    		assertEquals(BitVectorTest.BitVectorInstantiation(table1),test1.getMsb());
-	    		assertEquals(BitVectorTest.BitVectorInstantiation(table2),test1.getLsb());
-	    		assertEquals(BitVectorTest.BitVectorInstantiation(table3),test1.getOpacity());
+//	    		int [] table1 = BitVectorTest.randomBitTable();
+//	    		int [] table2 = BitVectorTest.randomBitTable(table1.length*32);
+//	    		int [] table3 = BitVectorTest.randomBitTable(table1.length*32);
+//	    		LcdImageLine test1 = new LcdImageLine(
+//	    				BitVectorTest.BitVectorInstantiation(table1),
+//	    				BitVectorTest.BitVectorInstantiation(table2),
+//	    				BitVectorTest.BitVectorInstantiation(table3));
+//	    		assertEquals(BitVectorTest.BitVectorInstantiation(table1),test1.getMsb());
+//	    		assertEquals(BitVectorTest.BitVectorInstantiation(table2),test1.getLsb());
+//	    		assertEquals(BitVectorTest.BitVectorInstantiation(table3),test1.getOpacity());
 	    		
 	    	}
 	    	
@@ -153,7 +152,21 @@ class LcdImageLineTest {
 
     @Test
     void extractWrappedWorks() {
-        // toDo
+    		Random random= new Random();
+    	 
+        BitVector msb=BitVectorTest.randomBitVectorInstantiation();
+        BitVector lsb=BitVectorTest.randomBitVectorInstantiation(msb.size());
+        BitVector opacity=BitVectorTest.randomBitVectorInstantiation(msb.size());
+        
+        LcdImageLine test = new LcdImageLine(msb,lsb,opacity);
+        
+        int start= (random.nextBoolean() ? 1: -1 )*random.nextInt(15);
+        int size=32*random.nextInt(11);
+        LcdImageLine extracted = test.extractWrapped(start,size);
+        assertEquals(msb.extractWrapped(start,size),extracted.getMsb());
+        assertEquals(lsb.extractWrapped(start,size),extracted.getLsb());
+        assertEquals(opacity.extractWrapped(start,size),extracted.getOpacity());
+
     }
 
     @Test
@@ -180,41 +193,106 @@ class LcdImageLineTest {
         assertEquals(line, changedLine);
     }
 
+//    @Test
+//    void Below1Works() {
+//        Random rng = new Random();
+//        LcdImageLine vector = new LcdImageLine(
+//                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
+//                        rng.nextInt(), rng.nextInt() }),
+//                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
+//                        rng.nextInt(), rng.nextInt() }),
+//                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
+//                        rng.nextInt(), rng.nextInt() }));
+//        LcdImageLine that = new LcdImageLine(
+//                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
+//                        rng.nextInt(), rng.nextInt() }),
+//                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
+//                        rng.nextInt(), rng.nextInt() }),
+//                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
+//                        rng.nextInt(), rng.nextInt() }));
+//        LcdImageLine.Builder b = new LcdImageLine.Builder(vector.size());
+//        for (int i = 0; i < vector.size() / 8; ++i) {
+//            int msbByte = 0, lsbByte = 0;
+//            for (int j = 0; j < 8; ++j) {
+//                Bits.set(msbByte, j,
+//                        that.getOpacity().testBit(i * 8 + j)
+//                                ? that.getMsb().testBit(i * 8 + j)
+//                                : vector.getMsb().testBit(i * 8 + j));
+//                Bits.set(lsbByte, j,
+//                        that.getOpacity().testBit(i * 8 + j)
+//                                ? that.getLsb().testBit(i * 8 + j)
+//                                : vector.getLsb().testBit(i * 8 + j));
+//            }
+//            b.setBytes(i, msbByte, lsbByte);
+//        }
+//        assertTrue(b.build().equals(vector.below(that)));
+//    }
+//    
     @Test
-    void Bellow1Works() {
-        Random rng = new Random();
-        LcdImageLine vector = new LcdImageLine(
-                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
-                        rng.nextInt(), rng.nextInt() }),
-                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
-                        rng.nextInt(), rng.nextInt() }),
-                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
-                        rng.nextInt(), rng.nextInt() }));
-        LcdImageLine that = new LcdImageLine(
-                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
-                        rng.nextInt(), rng.nextInt() }),
-                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
-                        rng.nextInt(), rng.nextInt() }),
-                BitVectorTest.BitVectorInstantiation(new int[] { rng.nextInt(), rng.nextInt(),
-                        rng.nextInt(), rng.nextInt() }));
-        LcdImageLine.Builder b = new LcdImageLine.Builder(vector.size());
-        for (int i = 0; i < vector.size() / 8; ++i) {
-            int msbByte = 0, lsbByte = 0;
-            for (int j = 0; j < 8; ++j) {
-                Bits.set(msbByte, j,
-                        that.getOpacity().testBit(i * 8 + j)
-                                ? that.getMsb().testBit(i * 8 + j)
-                                : vector.getMsb().testBit(i * 8 + j));
-                Bits.set(lsbByte, j,
-                        that.getOpacity().testBit(i * 8 + j)
-                                ? that.getLsb().testBit(i * 8 + j)
-                                : vector.getLsb().testBit(i * 8 + j));
-            }
-            b.setBytes(i, msbByte, lsbByte);
-        }
-        assertTrue(b.build().equals(vector.below(that)));
+    void belowWorks() {
+    		for (int i=0 ; i<20 ; i++) {
+	    		BitVector msb1 =  BitVectorTest.randomBitVectorInstantiation();
+	    		BitVector lsb1 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+	    		
+	    		BitVector msb2 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+	    		BitVector lsb2 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+	    		
+	    		BitVector opacity2 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+	    		
+	    		LcdImageLine below = new LcdImageLine(msb1,lsb1,
+	    				BitVectorTest.randomBitVectorInstantiation(msb1.size()));
+	    		LcdImageLine that = new LcdImageLine(msb2,lsb2,opacity2);
+	    		
+	    		LcdImageLine computed = below.below(that);
+	    		
+	    		for (int j=0 ; j<computed.size() ; j++) {
+	    			if (opacity2.testBit(j)) {
+	    				assertEquals(msb2.testBit(j),computed.getMsb().testBit(j));
+	    			} else {
+	    				assertEquals(msb1.testBit(j),computed.getMsb().testBit(j));
+	    			}
+    				
+	    		}
+    		}
+    		
     }
 
+    @Test
+    void joinWorks( ) {
+    		for (int i=0 ; i<20 ; i++) {
+	    		Random random = new Random();
+	    	
+		    	BitVector msb1 =  BitVectorTest.randomBitVectorInstantiation();
+			BitVector lsb1 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+			BitVector opacity1 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+			
+			BitVector msb2 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+			BitVector lsb2 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+			BitVector opacity2 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
+			
+			int index = random.nextInt(msb1.size());
+			
+			LcdImageLine test= (new LcdImageLine(msb1,lsb1,opacity1)).join(
+					new LcdImageLine(msb2,lsb2,opacity2),index);
+			
+			int check=0;
+			while (check<msb1.size()) {
+				while(check<index) {
+					assertEquals(msb1.testBit(check),test.getMsb().testBit(check));
+					assertEquals(lsb1.testBit(check),test.getLsb().testBit(check));
+					assertEquals(opacity1.testBit(check),test.getOpacity().testBit(check));
+					check++;
+				}
+				assertEquals(msb2.testBit(check),test.getMsb().testBit(check));
+				assertEquals(lsb2.testBit(check),test.getLsb().testBit(check));
+				assertEquals(opacity2.testBit(check),test.getOpacity().testBit(check));
+				check++;
+			}
+    		}
+			
+    }
+    
+    @Test
     void BuilderTest() {
         int[] vectorsInt = new int[] { 0xffaadd22, 0xffaaaa00 };
         LcdImageLine.Builder b = new Builder(32);
@@ -226,5 +304,7 @@ class LcdImageLineTest {
         BitVector lsb = BitVectorTest.BitVectorInstantiation(new int[] { vectorsInt[1] });
         assertEquals(new LcdImageLine(msb, lsb, msb.or(lsb)), b.build());
     }
+    
+    
 
 }

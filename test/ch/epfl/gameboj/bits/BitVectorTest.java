@@ -23,6 +23,7 @@ import ch.epfl.gameboj.bits.BitVector.ExtensionType;
 
 public class BitVectorTest {
 
+	final static int VECTOR_SIZE_BOUND=32*11;
 	
 	public static BitVector BitVectorInstantiation(int[] table) {
 		BitVector.Builder builder =new BitVector.Builder(table.length*32);
@@ -38,7 +39,7 @@ public class BitVectorTest {
 	
 	public static BitVector randomBitVectorInstantiation() {
 		Random random = new Random();
-		int size=Bits.clip(26,random.nextInt())<<5;
+		int size=random.nextInt(VECTOR_SIZE_BOUND/32)*32;
 		size = size>0 ? size : 32;
 		BitVector.Builder builder= new BitVector.Builder(size);
 		int i=0;
@@ -334,7 +335,7 @@ public class BitVectorTest {
         		BitVector vector = randomBitVectorInstantiation();
             int randomStart = (random.nextBoolean() ? -1 : 1)
                     * random.nextInt(10);
-            int randomSize = 32 * (random.nextInt(9));
+            int randomSize = 32 * (random.nextInt(5));
             randomSize = randomSize > 0 ? randomSize : 32;
             BitVector extracted = vector.extractZeroExtended(randomStart,
                     randomSize);
@@ -351,7 +352,7 @@ public class BitVectorTest {
     @Test
     void shiftWorks() {
     	 Random random = new Random();
-         for (int i = 0; i < 20; i++) {
+         for (int i = 0; i < 5; i++) {
         	 BitVector vector = randomBitVectorInstantiation();
              int randomStart = (random.nextBoolean() ? -1 : 1)
                      * random.nextInt(10);

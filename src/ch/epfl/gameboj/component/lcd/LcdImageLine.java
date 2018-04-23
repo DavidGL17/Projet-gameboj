@@ -219,7 +219,7 @@ public final class LcdImageLine {
         int i=0;
         while (index>8) {
         		builder.setByte(i,0xFF);
-        		index=-8;
+        		index-=8;
          	i++;
         }
         builder.setByte(i,Bits.clip(index,-1))	;

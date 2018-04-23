@@ -92,7 +92,8 @@ public final class Bits{
 	public static int clip(int size, int bits)  {
 		
 		if ((size<0)||(size>32)){
-			throw new IllegalArgumentException("!"); //Est-ce bien cette exception à lancer ? dans le sujet IllegalArgumentException(!) On utilise pas checkIndex car il lance OutOfBoundsExeption
+			System.out.print(size);
+			throw new IllegalArgumentException(); 
 		}
 		
 		int mask=0;
