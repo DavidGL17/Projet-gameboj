@@ -4,6 +4,7 @@
 package ch.epfl.gameboj.component.lcd;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,10 +49,10 @@ public final class LcdController implements Clocked, Component {
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
         videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
-        List<LcdImageLine> lines = new ArrayList<>();
-        Collections.fill(lines, new LcdImageLine(new BitVector(LCD_WIDTH),
+        LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
+        Arrays.fill(lines, new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH)));
-        defaultImage = new LcdImage(lines, LCD_WIDTH, LCD_HEIGHT);
+        defaultImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH, LCD_HEIGHT);
     }
 
     /*
@@ -179,6 +180,8 @@ public final class LcdController implements Clocked, Component {
         return defaultImage;
     }
 
+    /// Manages the current mode of the LCD controller
+
     private void setMode(int mode) {
         int statValue = regs.get(Reg.STAT);
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
@@ -193,11 +196,19 @@ public final class LcdController implements Clocked, Component {
         }
     }
 
+    private int getMode() {
+        int statValue = regs.get(Reg.STAT);
+        return (Bits.test(statValue, 1) ? 1 << 1 : 0)
+                | (Bits.test(statValue, 0) ? 1 : 0);
+    }
+
+    /// Manages the Bits in Stat that throw exceptions if they are on
+
     private void checkIfLYEqualsLYC() {
         int statValue = regs.get(Reg.STAT);
-        regs.set(Reg.STAT,
-                Bits.set(statValue, 2, regs.get(Reg.LYC) == regs.get(Reg.LY)));
-        if (Bits.test(statValue, 6)) {
+        boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
+        regs.set(Reg.STAT, Bits.set(statValue, 2, equal));
+        if (equal && Bits.test(statValue, 6)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
         }
     }

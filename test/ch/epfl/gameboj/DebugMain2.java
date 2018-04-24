@@ -5,6 +5,7 @@ package ch.epfl.gameboj;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
@@ -34,29 +35,33 @@ public class DebugMain2 {
             0xA9_A9_A9, 0x00_00_00 };
 
     private static void test(String arg1, String arg2) {
-        File romFile = new File(arg1);
-        long cycles = Long.parseLong(arg2);
+        try {
+            File romFile = new File(arg1);
+            long cycles = Long.parseLong(arg2);
 
-        GameBoy gb = new GameBoy(Cartridge.ofFile(romFile));
-        gb.runUntil(cycles);
+            GameBoy gb = new GameBoy(Cartridge.ofFile(romFile));
+            gb.runUntil(cycles);
 
-        System.out.println("+--------------------+");
-        for (int y = 0; y < 18; ++y) {
-            System.out.print("|");
-            for (int x = 0; x < 20; ++x) {
-                char c = (char) gb.bus().read(0x9800 + 32 * y + x);
-                System.out.print(Character.isISOControl(c) ? " " : c);
+            System.out.println("+--------------------+");
+            for (int y = 0; y < 18; ++y) {
+                System.out.print("|");
+                for (int x = 0; x < 20; ++x) {
+                    char c = (char) gb.bus().read(0x9800 + 32 * y + x);
+                    System.out.print(Character.isISOControl(c) ? " " : c);
+                }
+                System.out.println("|");
             }
-            System.out.println("|");
-        }
-        System.out.println("+--------------------+");
+            System.out.println("+--------------------+");
 
-        LcdImage li = gb.lcdController().currentImage();
-        BufferedImage i = new BufferedImage(LcdController.LCD_WIDTH, LcdController.LCD_HEIGHT,
-                BufferedImage.TYPE_INT_RGB);
-        for (int y = 0; y < LcdController.LCD_HEIGHT; ++y)
-            for (int x = 0; x < LcdController.LCD_WIDTH; ++x)
-                i.setRGB(x, y, COLOR_MAP[li.get(x, y)]);
-        ImageIO.write(i, "png", new File("gb.png"));
+            LcdImage li = gb.lcdController().currentImage();
+            BufferedImage i = new BufferedImage(LcdController.LCD_WIDTH,
+                    LcdController.LCD_HEIGHT, BufferedImage.TYPE_INT_RGB);
+            for (int y = 0; y < LcdController.LCD_HEIGHT; ++y)
+                for (int x = 0; x < LcdController.LCD_WIDTH; ++x)
+                    i.setRGB(x, y, COLOR_MAP[li.get(x, y)]);
+            ImageIO.write(i, "png", new File("gb.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
