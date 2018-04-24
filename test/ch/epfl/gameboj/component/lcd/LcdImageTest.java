@@ -48,7 +48,7 @@ class LcdImageTest {
     @Test
     void getWorksforRandom() {
         Random rng = new Random();
-        int[][] lines = new int[rng.nextInt(20) * 2][rng.nextInt(5)];
+        int[][] lines = new int[(rng.nextInt(19)+1) * 2][rng.nextInt(5)+1];
         for (int i = 0; i < lines.length; ++i) {
             for (int j = 0; j < lines[i].length; ++j) {
                 lines[i][j] = rng.nextInt();
@@ -77,7 +77,7 @@ class LcdImageTest {
     @Test
     void BuilderWorks() {
         Random rng = new Random();
-        int[][] lines = new int[rng.nextInt(20) * 2][rng.nextInt(5)];
+        int[][] lines = new int[(rng.nextInt(20)+1) * 2][rng.nextInt(5)+1];
         for (int i = 0; i < lines.length; ++i) {
             for (int j = 0; j < lines[i].length; ++j) {
                 lines[i][j] = rng.nextInt();

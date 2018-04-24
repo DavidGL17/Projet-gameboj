@@ -5,6 +5,7 @@ import java.util.Objects;
 import ch.epfl.gameboj.component.Timer;
 import ch.epfl.gameboj.component.cartridge.Cartridge;
 import ch.epfl.gameboj.component.cpu.Cpu;
+import ch.epfl.gameboj.component.lcd.LcdController;
 import ch.epfl.gameboj.component.memory.BootRomController;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
@@ -22,6 +23,8 @@ public final class GameBoy {
     private final Cpu cpu;
     private final Timer timer;
     private final BootRomController bootRomController;
+    private final LcdController lcdController;
+
     private long currentCycle = 0;
 
     /**
@@ -37,12 +40,14 @@ public final class GameBoy {
         timer = new Timer(cpu);
         bootRomController = new BootRomController(
                 Objects.requireNonNull(cartridge));
+        lcdController = new LcdController(cpu);
 
         workRam.attachTo(bus);
         echoRam.attachTo(bus);
         cpu.attachTo(bus);
         timer.attachTo(bus);
         bootRomController.attachTo(bus);
+        lcdController.attachTo(bus);
     }
 
     /**
@@ -71,6 +76,15 @@ public final class GameBoy {
     public Timer timer() {
         return timer;
     }
+    
+    /**
+     * Returns the gameBoy's LcdController
+     * 
+     * @return lcdController the gameBoy's LcdController
+     */
+    public LcdController lcdController() {
+        return lcdController;
+    }
 
     /**
      * Runs all the gameboy's elements implementing the interface clocked
@@ -86,6 +100,7 @@ public final class GameBoy {
         Preconditions.checkArgument(cycle >= currentCycle);
         while (currentCycle < cycle) {
             timer.cycle(currentCycle);
+            lcdController.cycle(currentCycle);
             cpu.cycle(currentCycle);
             ++currentCycle;
         }

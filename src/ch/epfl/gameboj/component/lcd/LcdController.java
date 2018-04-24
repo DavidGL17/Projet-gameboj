@@ -1,8 +1,6 @@
 package ch.epfl.gameboj.component.lcd;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Preconditions;
@@ -14,6 +12,8 @@ import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Cpu;
+import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
+import ch.epfl.gameboj.component.lcd.LcdImage.Builder;
 import ch.epfl.gameboj.component.memory.Ram;
 
 /**
@@ -24,15 +24,7 @@ import ch.epfl.gameboj.component.memory.Ram;
 public final class LcdController implements Clocked, Component {
 
     private enum Reg implements Register {
-        LCDC(0xFF40), STAT(0xFF41), SCY(0xFF42), SCX(0xFF43), LY(0xFF44), LYC(
-                0xFF45), DMA(0xFF46), BGP(0xFF47), OBP0(
-                        0xFF48), OBP1(0xFF49), WY(0xFF4A), WX(0xFF4B);
-
-        public final int regAddress;
-
-        private Reg(int regAddress) {
-            this.regAddress = regAddress;
-        }
+        LCDC, STAT, SCY, SCX, LY, LYC, DMA, BGP, OBP0, OBP1, WY, WX;
     }
     
     private enum LCDCBit implements Bit {
@@ -61,7 +53,8 @@ public final class LcdController implements Clocked, Component {
     public final static int LCD_HEIGHT = 140;
 
     private final Cpu cpu;
-    private LcdImage defaultImage;
+    private LcdImage currentImage;
+    private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH, LCD_HEIGHT);
     private final Ram videoRam;
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
     private long lcdOnCycle;
@@ -70,10 +63,11 @@ public final class LcdController implements Clocked, Component {
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
         videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
-        List<LcdImageLine> lines = new ArrayList<>();
-        Collections.fill(lines, new LcdImageLine(new BitVector(LCD_WIDTH),
+        LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
+        Arrays.fill(lines, new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH)));
-        defaultImage = new LcdImage(lines, LCD_WIDTH, LCD_HEIGHT);
+        currentImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
+                LCD_HEIGHT);
     }
 
     /*
@@ -89,34 +83,7 @@ public final class LcdController implements Clocked, Component {
         }
         if (address >= AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
-            switch (address - AddressMap.REGS_LCDC_START) {
-            case 0:
-                return regs.get(Reg.LCDC);
-            case 1:
-                return regs.get(Reg.STAT);
-            case 2:
-                return regs.get(Reg.SCY);
-            case 3:
-                return regs.get(Reg.SCX);
-            case 4:
-                return regs.get(Reg.LY);
-            case 5:
-                return regs.get(Reg.LYC);
-            case 6:
-                return regs.get(Reg.DMA);
-            case 7:
-                return regs.get(Reg.BGP);
-            case 8:
-                return regs.get(Reg.OBP0);
-            case 9:
-                return regs.get(Reg.OBP1);
-            case 10:
-                return regs.get(Reg.WY);
-            case 11:
-                return regs.get(Reg.WX);
-            default:
-                break;
-            }
+            return regs.get(Reg.values()[address - AddressMap.REGS_LCDC_START]);
         }
         return NO_DATA;
     }
@@ -129,30 +96,35 @@ public final class LcdController implements Clocked, Component {
     @Override
     public void write(int address, int data) {
         Preconditions.checkBits8(data);
-        if (Preconditions.checkBits16(address) >= AddressMap.VIDEO_RAM_START&& address < AddressMap.VIDEO_RAM_END) {
+        if (Preconditions.checkBits16(address) >= AddressMap.VIDEO_RAM_START
+                && address < AddressMap.VIDEO_RAM_END) {
             videoRam.write(address - AddressMap.VIDEO_RAM_START, data);
         }
         if (address >= AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
             switch (address - AddressMap.REGS_LCDC_START) {
             case 0:
+                if (Bits.test(data, 7)) {
+                    regs.set(Reg.LY, 0);
+                    setMode(0);
+                    nextNonIdleCycle = Long.MAX_VALUE;
+                }
+                regs.set(Reg.LCDC, data);
                 break;
             case 1:
-                break;
-            case 2:
-
-                break;
-            case 3:
+                regs.set(Reg.STAT, data & 0xF8);
                 break;
             case 4:
+                regs.set(Reg.LY, data);
+                checkIfLYEqualsLYC();
+                break;
             case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 10:
-            case 11:
+                regs.set(Reg.LYC, data);
+                checkIfLYEqualsLYC();
+                break;
             default:
+                regs.set(Reg.values()[address - AddressMap.REGS_LCDC_START],
+                        data);
                 break;
             }
         }
@@ -165,7 +137,7 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public void cycle(long cycle) {
-    		if (Bits.test(regs.get(Reg.LCDC),LCDCBit.LCD_STATUS)) {
+    		if (regs.testBit(Reg.LCDC,LCDCBit.LCD_STATUS)) {
     			
 	    		if (nextNonIdleCycle==Long.MAX_VALUE) {
 	    			lcdOnCycle=cycle;
@@ -175,17 +147,73 @@ public final class LcdController implements Clocked, Component {
 	    		if (cycle>=nextNonIdleCycle) {
 	    			reallyCycle(cycle);
 	    		}
+    		} else {
+    			regs.setBit(Reg.STAT,STAT.MODE0,false);
+    			regs.setBit(Reg.STAT,STAT.MODE1,false);
+    			regs.set(Reg.LY,0);
     		}
 
     }
     
     public void reallyCycle(long cycle) {
+    		switch (Bits.clip(2,regs.get(Reg.STAT))){
+    		case 00 :
+    			//mode 0
+    			break;
+    		case 01:
+    			//mode 1
+    			break;
+    		case 10:
+    			//mode 2
+    			break;
+    		case 11 :
+    			//mode 3
+    			break;
+    		};
     		//TODO
     }
 
     // todo
     public LcdImage currentImage() {
-        return defaultImage;
+        return currentImage;
     }
 
+    /// Manages the current mode of the LCD controller
+
+    private void setMode(int mode) {
+        int statValue = regs.get(Reg.STAT);
+        regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
+                1, Bits.test(mode, 1)));
+        if (mode != 3) {
+            if (checkStatBit(mode + 3)) {
+                cpu.requestInterrupt(Interrupt.LCD_STAT);
+            }
+        }
+        if (mode == 1) {
+            cpu.requestInterrupt(Interrupt.VBLANK);
+        }
+    }
+
+    private int getMode() {
+        int statValue = regs.get(Reg.STAT);
+        return (Bits.test(statValue, 1) ? 1 << 1 : 0)
+                | (Bits.test(statValue, 0) ? 1 : 0);
+    }
+
+    /// Manages the Bits in Stat that throw exceptions if they are on
+
+    private void checkIfLYEqualsLYC() {
+        int statValue = regs.get(Reg.STAT);
+        boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
+        regs.set(Reg.STAT, Bits.set(statValue, 2, equal));
+        if (equal && Bits.test(statValue, 6)) {
+            cpu.requestInterrupt(Interrupt.LCD_STAT);
+        }
+    }
+
+    private boolean checkStatBit(int index) {
+        return Bits.test(regs.get(Reg.STAT), index);
+    }
+    
+    ///Checks 
 }
