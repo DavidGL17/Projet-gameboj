@@ -9,6 +9,7 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.bits.BitVector;
+import ch.epfl.gameboj.bits.BitVectorTest;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.lcd.LcdImage.Builder;
 
@@ -33,9 +34,9 @@ class LcdImageTest {
     void getWorksBasic() {
         int[] lines = new int[] { 0x000F0000, 0xFFF0FFFF };
         List<LcdImageLine> linesList = new ArrayList<>();
-        linesList.add(new LcdImageLine(new BitVector(new int[] { 0x000F0000 }),
-                new BitVector(new int[] { 0xFFF0FFFF }),
-                new BitVector(new int[] { 0x00000000 })));
+        linesList.add(new LcdImageLine(BitVectorTest.BitVectorInstantiation(new int[] { 0x000F0000 }),
+                BitVectorTest.BitVectorInstantiation(new int[] { 0xFFF0FFFF }),
+                BitVectorTest.BitVectorInstantiation(new int[] { 0x00000000 })));
         LcdImage image = new LcdImage(linesList, 32, 1);
         for (int i = 0; i < 32; ++i) {
             int expected = (Bits.test(lines[0], i) ? 1 << 1 : 0)
@@ -47,7 +48,7 @@ class LcdImageTest {
     @Test
     void getWorksforRandom() {
         Random rng = new Random();
-        int[][] lines = new int[rng.nextInt(20) * 2][rng.nextInt(5)];
+        int[][] lines = new int[(rng.nextInt(19)+1) * 2][rng.nextInt(5)+1];
         for (int i = 0; i < lines.length; ++i) {
             for (int j = 0; j < lines[i].length; ++j) {
                 lines[i][j] = rng.nextInt();
@@ -55,8 +56,8 @@ class LcdImageTest {
         }
         List<LcdImageLine> linesList = new ArrayList<>();
         for (int i = 0; i < lines.length / 2; ++i) {
-            BitVector msb = new BitVector(lines[2 * i]);
-            BitVector lsb = new BitVector(lines[2 * i + 1]);
+            BitVector msb = BitVectorTest.BitVectorInstantiation(lines[2 * i]);
+            BitVector lsb = BitVectorTest.BitVectorInstantiation(lines[2 * i + 1]);
             linesList.add(new LcdImageLine(msb, lsb, msb.or(lsb)));
         }
 
@@ -76,7 +77,7 @@ class LcdImageTest {
     @Test
     void BuilderWorks() {
         Random rng = new Random();
-        int[][] lines = new int[rng.nextInt(20) * 2][rng.nextInt(5)];
+        int[][] lines = new int[(rng.nextInt(20)+1) * 2][rng.nextInt(5)+1];
         for (int i = 0; i < lines.length; ++i) {
             for (int j = 0; j < lines[i].length; ++j) {
                 lines[i][j] = rng.nextInt();
@@ -84,8 +85,8 @@ class LcdImageTest {
         }
         List<LcdImageLine> linesList = new ArrayList<>();
         for (int i = 0; i < lines.length / 2; ++i) {
-            BitVector msb = new BitVector(lines[2 * i]);
-            BitVector lsb = new BitVector(lines[2 * i + 1]);
+            BitVector msb = BitVectorTest.BitVectorInstantiation(lines[2 * i]);
+            BitVector lsb = BitVectorTest.BitVectorInstantiation(lines[2 * i + 1]);
             linesList.add(new LcdImageLine(msb, lsb, msb.or(lsb)));
         }
 
