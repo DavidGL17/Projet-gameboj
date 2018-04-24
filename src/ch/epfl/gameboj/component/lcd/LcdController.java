@@ -27,15 +27,7 @@ import ch.epfl.gameboj.component.memory.Ram;
 public final class LcdController implements Clocked, Component {
 
     private enum Reg implements Register {
-        LCDC(0xFF40), STAT(0xFF41), SCY(0xFF42), SCX(0xFF43), LY(0xFF44), LYC(
-                0xFF45), DMA(0xFF46), BGP(0xFF47), OBP0(
-                        0xFF48), OBP1(0xFF49), WY(0xFF4A), WX(0xFF4B);
-
-        public final int regAddress;
-
-        private Reg(int regAddress) {
-            this.regAddress = regAddress;
-        }
+        LCDC, STAT, SCY, SCX, LY, LYC, DMA, BGP, OBP0, OBP1, WY, WX;
     }
 
     public final static int LCD_WIDTH = 160;
@@ -52,7 +44,8 @@ public final class LcdController implements Clocked, Component {
         LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
         Arrays.fill(lines, new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH)));
-        defaultImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH, LCD_HEIGHT);
+        defaultImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
+                LCD_HEIGHT);
     }
 
     /*
@@ -68,34 +61,7 @@ public final class LcdController implements Clocked, Component {
         }
         if (address >= AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
-            switch (address - AddressMap.REGS_LCDC_START) {
-            case 0:
-                return regs.get(Reg.LCDC);
-            case 1:
-                return regs.get(Reg.STAT);
-            case 2:
-                return regs.get(Reg.SCY);
-            case 3:
-                return regs.get(Reg.SCX);
-            case 4:
-                return regs.get(Reg.LY);
-            case 5:
-                return regs.get(Reg.LYC);
-            case 6:
-                return regs.get(Reg.DMA);
-            case 7:
-                return regs.get(Reg.BGP);
-            case 8:
-                return regs.get(Reg.OBP0);
-            case 9:
-                return regs.get(Reg.OBP1);
-            case 10:
-                return regs.get(Reg.WY);
-            case 11:
-                return regs.get(Reg.WX);
-            default:
-                break;
-            }
+            return regs.get(Reg.values()[address - AddressMap.REGS_LCDC_START]);
         }
         return NO_DATA;
     }
@@ -126,12 +92,6 @@ public final class LcdController implements Clocked, Component {
             case 1:
                 regs.set(Reg.STAT, data & 0xF8);
                 break;
-            case 2:
-                regs.set(Reg.SCY, data);
-                break;
-            case 3:
-                regs.set(Reg.SCX, data);
-                break;
             case 4:
                 regs.set(Reg.LY, data);
                 checkIfLYEqualsLYC();
@@ -140,25 +100,9 @@ public final class LcdController implements Clocked, Component {
                 regs.set(Reg.LYC, data);
                 checkIfLYEqualsLYC();
                 break;
-            case 6:
-                regs.set(Reg.DMA, data);
-                break;
-            case 7:
-                regs.set(Reg.BGP, data);
-                break;
-            case 8:
-                regs.set(Reg.OBP0, data);
-                break;
-            case 9:
-                regs.set(Reg.OBP1, data);
-                break;
-            case 10:
-                regs.set(Reg.WY, data);
-                break;
-            case 11:
-                regs.set(Reg.WX, data);
-                break;
             default:
+                regs.set(Reg.values()[address - AddressMap.REGS_LCDC_START],
+                        data);
                 break;
             }
         }
