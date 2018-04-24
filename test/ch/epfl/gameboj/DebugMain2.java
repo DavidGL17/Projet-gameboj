@@ -9,6 +9,7 @@ import java.io.File;
 import javax.imageio.ImageIO;
 
 import ch.epfl.gameboj.component.cartridge.Cartridge;
+import ch.epfl.gameboj.component.lcd.LcdController;
 import ch.epfl.gameboj.component.lcd.LcdImage;
 
 /**
@@ -16,15 +17,15 @@ import ch.epfl.gameboj.component.lcd.LcdImage;
  *
  */
 public class DebugMain2 {
-    private static String[] testsFailed = new String[] {};
-    private static String[] testsPassed = new String[] { "01-special.gb",
+    private static String[] testsFailed = new String[] { "01-special.gb",
             "02-interrupts.gb", "03-op sp,hl.gb", "04-op r,imm.gb",
             "05-op rp.gb", "06-ld r,r.gb", "07-jr,jp,call,ret,rst.gb",
             "08-misc instrs.gb", "09-op r,r.gb", "10-bit ops.gb",
-            "11-op a,(hl).gb", "instr_timing.gb", };
+            "11-op a,(hl).gb", "instr_timing.gb" };
+    private static String[] testsPassed = new String[] {};
 
     public static void main(String[] args) {
-        for (String test : testsPassed) {
+        for (String test : testsFailed) {
             test(test, "30000000");
         }
     }
@@ -51,10 +52,10 @@ public class DebugMain2 {
         System.out.println("+--------------------+");
 
         LcdImage li = gb.lcdController().currentImage();
-        BufferedImage i = new BufferedImage(li.width(), li.height(),
+        BufferedImage i = new BufferedImage(LcdController.LCD_WIDTH, LcdController.LCD_HEIGHT,
                 BufferedImage.TYPE_INT_RGB);
-        for (int y = 0; y < li.height(); ++y)
-            for (int x = 0; x < li.width(); ++x)
+        for (int y = 0; y < LcdController.LCD_HEIGHT; ++y)
+            for (int x = 0; x < LcdController.LCD_WIDTH; ++x)
                 i.setRGB(x, y, COLOR_MAP[li.get(x, y)]);
         ImageIO.write(i, "png", new File("gb.png"));
     }

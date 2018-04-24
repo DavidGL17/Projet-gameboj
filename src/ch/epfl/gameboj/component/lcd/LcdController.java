@@ -12,9 +12,11 @@ import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.bits.BitVector;
+import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Cpu;
+import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 import ch.epfl.gameboj.component.memory.Ram;
 
 /**
@@ -105,29 +107,56 @@ public final class LcdController implements Clocked, Component {
     @Override
     public void write(int address, int data) {
         Preconditions.checkBits8(data);
-        if (Preconditions.checkBits16(address) >= AddressMap.VIDEO_RAM_START&& address < AddressMap.VIDEO_RAM_END) {
+        if (Preconditions.checkBits16(address) >= AddressMap.VIDEO_RAM_START
+                && address < AddressMap.VIDEO_RAM_END) {
             videoRam.write(address - AddressMap.VIDEO_RAM_START, data);
         }
         if (address >= AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
             switch (address - AddressMap.REGS_LCDC_START) {
             case 0:
+                if (Bits.test(data, 7)) {
+                    regs.set(Reg.LY, 0);
+                    setMode(0);
+                    nextNonIdleCycle = Long.MAX_VALUE;
+                }
+                regs.set(Reg.LCDC, data);
                 break;
             case 1:
+                regs.set(Reg.STAT, data & 0xF8);
                 break;
             case 2:
-
+                regs.set(Reg.SCY, data);
                 break;
             case 3:
+                regs.set(Reg.SCX, data);
                 break;
             case 4:
+                regs.set(Reg.LY, data);
+                checkIfLYEqualsLYC();
+                break;
             case 5:
+                regs.set(Reg.LYC, data);
+                checkIfLYEqualsLYC();
+                break;
             case 6:
+                regs.set(Reg.DMA, data);
+                break;
             case 7:
+                regs.set(Reg.BGP, data);
+                break;
             case 8:
+                regs.set(Reg.OBP0, data);
+                break;
             case 9:
+                regs.set(Reg.OBP1, data);
+                break;
             case 10:
+                regs.set(Reg.WY, data);
+                break;
             case 11:
+                regs.set(Reg.WX, data);
+                break;
             default:
                 break;
             }
@@ -150,4 +179,30 @@ public final class LcdController implements Clocked, Component {
         return defaultImage;
     }
 
+    private void setMode(int mode) {
+        int statValue = regs.get(Reg.STAT);
+        regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
+                1, Bits.test(mode, 1)));
+        if (mode != 3) {
+            if (checkStatBit(mode + 3)) {
+                cpu.requestInterrupt(Interrupt.LCD_STAT);
+            }
+        }
+        if (mode == 1) {
+            cpu.requestInterrupt(Interrupt.VBLANK);
+        }
+    }
+
+    private void checkIfLYEqualsLYC() {
+        int statValue = regs.get(Reg.STAT);
+        regs.set(Reg.STAT,
+                Bits.set(statValue, 2, regs.get(Reg.LYC) == regs.get(Reg.LY)));
+        if (Bits.test(statValue, 6)) {
+            cpu.requestInterrupt(Interrupt.LCD_STAT);
+        }
+    }
+
+    private boolean checkStatBit(int index) {
+        return Bits.test(regs.get(Reg.STAT), index);
+    }
 }
