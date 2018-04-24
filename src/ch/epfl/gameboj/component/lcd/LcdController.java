@@ -3,10 +3,7 @@
  */
 package ch.epfl.gameboj.component.lcd;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Preconditions;
@@ -18,6 +15,7 @@ import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
+import ch.epfl.gameboj.component.lcd.LcdImage.Builder;
 import ch.epfl.gameboj.component.memory.Ram;
 
 /**
@@ -34,7 +32,8 @@ public final class LcdController implements Clocked, Component {
     public final static int LCD_HEIGHT = 140;
 
     private final Cpu cpu;
-    private LcdImage defaultImage;
+    private LcdImage currentImage;
+    private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH, LCD_HEIGHT);
     private final Ram videoRam;
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
 
@@ -44,7 +43,7 @@ public final class LcdController implements Clocked, Component {
         LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
         Arrays.fill(lines, new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH)));
-        defaultImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
+        currentImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
                 LCD_HEIGHT);
     }
 
@@ -121,7 +120,7 @@ public final class LcdController implements Clocked, Component {
 
     // todo
     public LcdImage currentImage() {
-        return defaultImage;
+        return currentImage;
     }
 
     /// Manages the current mode of the LCD controller
@@ -160,4 +159,6 @@ public final class LcdController implements Clocked, Component {
     private boolean checkStatBit(int index) {
         return Bits.test(regs.get(Reg.STAT), index);
     }
+    
+    ///Checks 
 }
