@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj.component.lcd;
 
 import java.util.ArrayList;
@@ -11,7 +8,9 @@ import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
+import ch.epfl.gameboj.bits.Bit;
 import ch.epfl.gameboj.bits.BitVector;
+import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Cpu;
@@ -19,6 +18,7 @@ import ch.epfl.gameboj.component.memory.Ram;
 
 /**
  * @author David Gonzalez leon (270845)
+ * @author Melvin Malonga-Matouba (288405)
  *
  */
 public final class LcdController implements Clocked, Component {
@@ -34,6 +34,28 @@ public final class LcdController implements Clocked, Component {
             this.regAddress = regAddress;
         }
     }
+    
+    private enum LCDCBit implements Bit {
+    		BG,
+    		OBJ,
+    		OBJ_SIZE,
+    		BG_AREA,
+    		TILE_SOURCE,
+    		WIN,
+    		WIN_AREA,
+    		LCD_STATUS
+    }
+    
+    private enum STAT implements Bit {
+    		MODE0,
+    		MODE1,
+    		LYC_EQ_LY,
+    		INT_MODE0,
+    		INT_MODE1,
+    		INT_MODE2,
+    		INT_LYC,
+    		UNUSED
+    }
 
     public final static int LCD_WIDTH = 160;
     public final static int LCD_HEIGHT = 140;
@@ -42,6 +64,8 @@ public final class LcdController implements Clocked, Component {
     private LcdImage defaultImage;
     private final Ram videoRam;
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
+    private long lcdOnCycle;
+    private long nextNonIdleCycle;
 
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
@@ -141,8 +165,22 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public void cycle(long cycle) {
-        // TODO Auto-generated method stub
+    		if (Bits.test(regs.get(Reg.LCDC),LCDCBit.LCD_STATUS)) {
+    			
+	    		if (nextNonIdleCycle==Long.MAX_VALUE) {
+	    			lcdOnCycle=cycle;
+	    			
+	    		}
+	        
+	    		if (cycle>=nextNonIdleCycle) {
+	    			reallyCycle(cycle);
+	    		}
+    		}
 
+    }
+    
+    public void reallyCycle(long cycle) {
+    		//TODO
     }
 
     // todo
