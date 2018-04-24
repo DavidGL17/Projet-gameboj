@@ -181,6 +181,9 @@ public final class LcdController implements Clocked, Component {
     /// Manages the current mode of the LCD controller
 
     private void setMode(int mode) {
+    	// if /Bits.clip(2,regs.get(Reg.STAT)!=mod) {  
+    	// Non ? Si le mode ne change pas, pas de traitement spécifique en particulier
+    	// pas de levée systématique de l'interruption pour mode1
         int statValue = regs.get(Reg.STAT);
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
