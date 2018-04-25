@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj.component.cpu;
 
 import java.util.Arrays;

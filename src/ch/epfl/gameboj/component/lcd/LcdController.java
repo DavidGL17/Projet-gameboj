@@ -104,8 +104,8 @@ public final class LcdController implements Clocked, Component {
         }
         if (address >= AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
-            switch (address - AddressMap.REGS_LCDC_START) {
-            case 0:
+            switch (address) {
+            case 0xFF40:
                 if (Bits.test(data, 7)) {
                     regs.set(Reg.LY, 0);
                     setMode(0);
@@ -113,14 +113,14 @@ public final class LcdController implements Clocked, Component {
                 }
                 regs.set(Reg.LCDC, data);
                 break;
-            case 1:
+            case 0xFF41:
                 regs.set(Reg.STAT, data & 0xF8);
                 break;
-            case 4:
+            case 0xFF44:
                 regs.set(Reg.LY, data);
                 checkIfLYEqualsLYC();
                 break;
-            case 5:
+            case 0xFF45:
                 regs.set(Reg.LYC, data);
                 checkIfLYEqualsLYC();
                 break;
