@@ -114,7 +114,7 @@ public final class LcdController implements Clocked, Component {
                 regs.set(Reg.LCDC, data);
                 break;
             case 0xFF41:
-                regs.set(Reg.STAT, data & 0xF8);
+                regs.set(Reg.STAT, data & 0xF8 | regs.get(Reg.STAT) & 0x07);
                 break;
             case 0xFF44:
                 regs.set(Reg.LY, data);
