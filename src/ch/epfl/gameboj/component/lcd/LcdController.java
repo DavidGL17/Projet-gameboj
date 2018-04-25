@@ -51,10 +51,12 @@ public final class LcdController implements Clocked, Component {
 
     public final static int LCD_WIDTH = 160;
     public final static int LCD_HEIGHT = 140;
+    public final static int LINE_CYCLES = 20+43+51;
 
     private final Cpu cpu;
     private LcdImage currentImage;
     private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH, LCD_HEIGHT);
+    private LcdImageLine currentlyBuiltLine; //Pour passer du mode 0 au mode 2
     private final Ram videoRam;
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
     private long lcdOnCycle;
@@ -136,38 +138,86 @@ public final class LcdController implements Clocked, Component {
      * @see ch.epfl.gameboj.component.Clocked#cycle(long)
      */
     @Override
-    public void cycle(long cycle) {
+    public void cycle(long cycle) { 
+    	//Detecte si le cycle doit être vide pour permettre que l'émulation soit correcte
+    	//Effectue le changement de mode adéquat	: cela permet de rendre la méthode
+    	//reallyCycle très "impérative", diminuer le nombre de branchements conditionnels/check
+    		int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
+		int drawnLines =(int) ((cycle-lcdOnCycle)/LINE_CYCLES%(LCD_HEIGHT+10));
     		if (regs.testBit(Reg.LCDC,LCDCBit.LCD_STATUS)) {
     			
 	    		if (nextNonIdleCycle==Long.MAX_VALUE) {
 	    			lcdOnCycle=cycle;
-	    			
+	    			nextNonIdleCycle=cycle;
+	    			reallyCycle(cycle);
 	    		}
 	        
 	    		if (cycle>=nextNonIdleCycle) {
+	    			switch (getMode()) {
+	    			case 0:
+	    				setMode(2);
+	    				break;
+	    			case 1:
+	    				if (cycle >= drawnImages*LINE_CYCLES*(LCD_HEIGHT+10) + drawnLines*LINE_CYCLES) {
+	    					setMode(0);
+	    				} else {
+	    					new IllegalArgumentException("error in computation of drawnLines/drawnImages"); // Provisoire
+	    				}
+	    				break;
+	    			case 2: 
+	    				setMode(3);
+	    				break;
+	    			case 3: 
+	    				if (drawnLines==LCD_HEIGHT) { //if image is complete
+	    					setMode(1);
+	    				} else if (drawnLines<LCD_HEIGHT) {
+	    					setMode(0);
+	    				} else {
+	    					new IllegalArgumentException("error in computation of drawnLines"); // Provisoire
+	    				}
+	    				break;
+	    			}
 	    			reallyCycle(cycle);
 	    		}
     		} else {
-    			regs.setBit(Reg.STAT,STAT.MODE0,false);
-    			regs.setBit(Reg.STAT,STAT.MODE1,false);
+    			setMode(0);
     			regs.set(Reg.LY,0);
     		}
 
     }
     
     public void reallyCycle(long cycle) {
-    		switch (Bits.clip(2,regs.get(Reg.STAT))){
-    		case 00 :
+    		
+    		int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
+    		int drawnLines =(int) ((cycle-lcdOnCycle)/LINE_CYCLES%(LCD_HEIGHT+10));
+    		switch (getMode()){
+    		case 0 :
     			//mode 0
+//    			Accès mémoire tuiles de backGround et construction ligne
+//    			currentlyBuiltLine=
+    			
+//    			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+drawnLines*LINE_CYCLES+20;
+    			
     			break;
-    		case 01:
-    			//mode 1
+    		case 1:
+    			currentImage=nextImageBuilder.build();
+    			nextImageBuilder= new LcdImage.Builder(LCD_WIDTH,LCD_HEIGHT);
+    			nextNonIdleCycle=(drawnImages+1)*LINE_CYCLES*(LCD_HEIGHT+10);
     			break;
-    		case 10:
+    		case 2:
     			//mode 2
+//    			Accès mémoire tuiles de sprite/background
+//    			LcdImageLine spriteLine=
+//    			currentlyBuiltLine = currentlyBuiltLine.below(spriteLine);
+//    			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+drawnLines*LINE_CYCLES+20+43;
     			break;
-    		case 11 :
+    		case 3 :
     			//mode 3
+//    			Ajouter la ligne batie au builderImage
+//    			Réinitialiser le "Builder" de ligne
+//    			nextImageBuilder.setLine(drawnLines,currentlyBuiltLine);
+//    			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+(drawnLines+1)*LINE_CYCLES;
+    			
     			break;
     		};
     		//TODO
@@ -192,7 +242,7 @@ public final class LcdController implements Clocked, Component {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
             }
         }
-        if (mode == 1) {
+        if (getMode() != 1 && mode == 1) {
             cpu.requestInterrupt(Interrupt.VBLANK);
         }
     }
