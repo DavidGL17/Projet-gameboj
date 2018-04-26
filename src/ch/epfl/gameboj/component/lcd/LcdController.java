@@ -217,11 +217,19 @@ public final class LcdController implements Clocked, Component {
     		//TODO
     }
 
-    // todo
+    /**
+     * Returns the last image drawn by the LcdController
+     * 
+     * @return currentImage a LcdImage
+     */
     public LcdImage currentImage() {
         return currentImage;
     }
 
+    private void computeLine(int index) {
+        
+    }
+    
     /// Manages the current mode of the LCD controller
 
     private void setMode(int mode) {
