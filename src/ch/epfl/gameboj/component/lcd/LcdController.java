@@ -38,7 +38,7 @@ public final class LcdController implements Clocked, Component {
     		LCD_STATUS
     }
     
-    private enum STAT implements Bit {
+    private enum STATBit implements Bit {
     		MODE0,
     		MODE1,
     		LYC_EQ_LY,
@@ -139,50 +139,50 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public void cycle(long cycle) { 
-    	//Detecte si le cycle doit être vide pour permettre que l'émulation soit correcte
-    	//Effectue le changement de mode adéquat	: cela permet de rendre la méthode
-    	//reallyCycle très "impérative", diminuer le nombre de branchements conditionnels/check
-    		int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
-		int drawnLines =(int) ((cycle-lcdOnCycle)/LINE_CYCLES%(LCD_HEIGHT+10));
-    		if (regs.testBit(Reg.LCDC,LCDCBit.LCD_STATUS)) {
-    			
-	    		if (nextNonIdleCycle==Long.MAX_VALUE) {
-	    			lcdOnCycle=cycle;
-	    			nextNonIdleCycle=cycle;
-	    			reallyCycle(cycle);
-	    		}
-	        
-	    		if (cycle>=nextNonIdleCycle) {
-	    			switch (getMode()) {
-	    			case 0:
-	    				setMode(2);
-	    				break;
-	    			case 1:
-	    				if (cycle >= drawnImages*LINE_CYCLES*(LCD_HEIGHT+10) + drawnLines*LINE_CYCLES) {
-	    					setMode(0);
-	    				} else {
-	    					new IllegalArgumentException("error in computation of drawnLines/drawnImages"); // Provisoire
-	    				}
-	    				break;
-	    			case 2: 
-	    				setMode(3);
-	    				break;
-	    			case 3: 
-	    				if (drawnLines==LCD_HEIGHT) { //if image is complete
-	    					setMode(1);
-	    				} else if (drawnLines<LCD_HEIGHT) {
-	    					setMode(0);
-	    				} else {
-	    					new IllegalArgumentException("error in computation of drawnLines"); // Provisoire
-	    				}
-	    				break;
-	    			}
-	    			reallyCycle(cycle);
-	    		}
-    		} else {
-    			setMode(0);
-    			regs.set(Reg.LY,0);
-    		}
+        //Detecte si le cycle doit être vide pour permettre que l'émulation soit correcte
+        //Effectue le changement de mode adéquat	: cela permet de rendre la méthode
+        //reallyCycle très "impérative", diminuer le nombre de branchements conditionnels/check
+        int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
+        int drawnLines =(int) ((cycle-lcdOnCycle)/LINE_CYCLES%(LCD_HEIGHT+10));
+        if (regs.testBit(Reg.LCDC,LCDCBit.LCD_STATUS)) {
+
+            if (nextNonIdleCycle==Long.MAX_VALUE) {
+                lcdOnCycle=cycle;
+                nextNonIdleCycle=cycle;
+                reallyCycle(cycle);
+            }
+
+            if (cycle>=nextNonIdleCycle) {
+                switch (getMode()) {
+                case 0:
+                    setMode(2);
+                    break;
+                case 1:
+                    if (cycle >= drawnImages*LINE_CYCLES*(LCD_HEIGHT+10) + drawnLines*LINE_CYCLES) {
+                        setMode(0);
+                    } else {
+                        new IllegalArgumentException("error in computation of drawnLines/drawnImages"); // Provisoire
+                    }
+                    break;
+                case 2: 
+                    setMode(3);
+                    break;
+                case 3: 
+                    if (drawnLines==LCD_HEIGHT) { //if image is complete
+                        setMode(1);
+                    } else if (drawnLines<LCD_HEIGHT) {
+                        setMode(0);
+                    } else {
+                        new IllegalArgumentException("error in computation of drawnLines"); // Provisoire
+                    }
+                    break;
+                }
+                reallyCycle(cycle);
+            }
+        } else {
+            setMode(0);
+            regs.set(Reg.LY,0);
+        }
 
     }
     
@@ -233,7 +233,8 @@ public final class LcdController implements Clocked, Component {
     private void setMode(int mode) {
     	// if /Bits.clip(2,regs.get(Reg.STAT)!=mod) {  
     	// Non ? Si le mode ne change pas, pas de traitement spécifique en particulier
-    	// pas de levée systématique de l'interruption pour mode1
+    	// pas de levée systématique de l'interruption pour mode1 
+        //Oui effectivement. mais de toute façon je pensais enlever cette méthode, à moins que tu ne l'ai mise quelque part d'autre
         int statValue = regs.get(Reg.STAT);
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
@@ -249,8 +250,8 @@ public final class LcdController implements Clocked, Component {
 
     private int getMode() {
         int statValue = regs.get(Reg.STAT);
-        return (Bits.test(statValue, 1) ? 1 << 1 : 0)
-                | (Bits.test(statValue, 0) ? 1 : 0);
+        return (Bits.test(statValue, STATBit.MODE1) ? 1 << 1 : 0)
+                | (Bits.test(statValue, STATBit.MODE0) ? 1 : 0);
     }
 
     /// Manages the Bits in Stat that throw exceptions if they are on
@@ -258,8 +259,8 @@ public final class LcdController implements Clocked, Component {
     private void checkIfLYEqualsLYC() {
         int statValue = regs.get(Reg.STAT);
         boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
-        regs.set(Reg.STAT, Bits.set(statValue, 2, equal));
-        if (equal && Bits.test(statValue, 6)) {
+        regs.set(Reg.STAT, Bits.set(statValue, STATBit.LYC_EQ_LY.ordinal(), equal));
+        if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
         }
     }
