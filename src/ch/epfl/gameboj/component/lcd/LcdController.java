@@ -141,11 +141,10 @@ public final class LcdController implements Clocked, Component {
     @Override
     public void cycle(long cycle) { 
     	//Detecte si le cycle doit être vide pour permettre que l'émulation soit correcte
-    	//Effectue le changement de mode adéquat	: cela permet de rendre la méthode
+    	//Effectue le changement de mode adéquat : cela permet de rendre la méthode
     	//reallyCycle très "impérative", diminuer le nombre de branchements conditionnels/check
     	int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
     	if (regs.testBit(Reg.LCDC,LCDCBit.LCD_STATUS)) {
-    			
     		if (nextNonIdleCycle==Long.MAX_VALUE) {
 	    		lcdOnCycle=cycle;
 	    		nextNonIdleCycle=cycle;
@@ -159,19 +158,20 @@ public final class LcdController implements Clocked, Component {
 	    			setMode(3);
 	    			break;
 	    		case 1:
-	    			if (regs.get(Reg.LY)==LCD_HEIGHT+10)
-	    			setMode(2);
+	    			if (regs.get(Reg.LY)==LCD_HEIGHT+9) {
+	    				setMode(2);
+	    				regs.set(Reg.LY,0);
+	        			checkIfLYEqualsLYC();
+	    			}
 	    			break;
 	    		case 3: 
 	    			setMode(0);
 	    			break;
 	    		case 0: 
 	    			if (regs.get(Reg.LY)==LCD_HEIGHT) { //if image is complete
-	    				setMode(2);
-	    				regs.set(Reg.LY,0);
-	    				checkIfLYEqualsLYC();
+	    				setMode(1);
 	    			} else if (regs.get(Reg.LY)<LCD_HEIGHT) {
-	    				setMode(0);
+	    				setMode(2);
 	    			} 
 	    			break;
 	    		}
@@ -200,6 +200,8 @@ public final class LcdController implements Clocked, Component {
     			
     			break;
     		case 1:
+    			regs.set(Reg.LY,regs.get(Reg.LY)+1);
+    			checkIfLYEqualsLYC();
     			currentImage=nextImageBuilder.build();
     			nextImageBuilder= new LcdImage.Builder(LCD_WIDTH,LCD_HEIGHT);
     			nextNonIdleCycle=(drawnImages+1)*LINE_CYCLES*(LCD_HEIGHT+10);
@@ -213,8 +215,6 @@ public final class LcdController implements Clocked, Component {
     			break;
     		case 0 :
     			//mode 3
-    			regs.set(Reg.LY,regs.get(Reg.LY)+1);
-    			checkIfLYEqualsLYC();
 //    			Ajouter la ligne batie au builderImage
 //    			Réinitialiser le "Builder" de ligne
 //    			nextImageBuilder.setLine(regs.get(Reg.LY),currentlyBuiltLine);
