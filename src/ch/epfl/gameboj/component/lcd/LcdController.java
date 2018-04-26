@@ -56,7 +56,7 @@ public final class LcdController implements Clocked, Component {
     private final Cpu cpu;
     private LcdImage currentImage;
     private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH, LCD_HEIGHT);
-    private LcdImageLine currentlyBuiltLine; //Pour passer du mode 0 au mode 2
+    private LcdImageLine currentlyBuiltLine; //Pour sauver du mode 0 au mode 2
     private final Ram videoRam;
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
     private long lcdOnCycle;
@@ -148,20 +148,18 @@ public final class LcdController implements Clocked, Component {
 	    		if (nextNonIdleCycle==Long.MAX_VALUE) {
 	    			lcdOnCycle=cycle;
 	    			nextNonIdleCycle=cycle;
+	    			setMode(0);
 	    			reallyCycle(cycle);
 	    		}
 	        
 	    		if (cycle>=nextNonIdleCycle) {
+	    			reallyCycle(cycle);
 	    			switch (getMode()) {
 	    			case 0:
 	    				setMode(2);
 	    				break;
 	    			case 1:
-	    				if (cycle >= drawnImages*LINE_CYCLES*(LCD_HEIGHT+10) + regs.get(Reg.LY)*LINE_CYCLES) {
-	    					setMode(0);
-	    				} else {
-	    					new IllegalArgumentException("error in computation of drawnLines/drawnImages"); // Provisoire
-	    				}
+	    				setMode(0);
 	    				break;
 	    			case 2: 
 	    				setMode(3);
@@ -171,12 +169,9 @@ public final class LcdController implements Clocked, Component {
 	    					setMode(1);
 	    				} else if (regs.get(Reg.LY)<LCD_HEIGHT) {
 	    					setMode(0);
-	    				} else {
-	    					new IllegalArgumentException("error in computation of regs.get(Reg.LY)"); // Provisoire
-	    				}
+	    				} 
 	    				break;
 	    			}
-	    			reallyCycle(cycle);
 	    		}
     		} else {
     			setMode(0);
@@ -191,9 +186,10 @@ public final class LcdController implements Clocked, Component {
     		switch (getMode()){
     		case 0 :
     			//mode 0
+//    			regs.set(REG_LY,regs.set(REG_LY)+1)	
 //    			Accès mémoire tuiles de backGround et construction ligne
+//    			currentlyBuiltLine=new LcdImageLine( ;
 //    			currentlyBuiltLine=
-    			
 //    			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20;
     			
     			break;
@@ -208,7 +204,6 @@ public final class LcdController implements Clocked, Component {
 //    			LcdImageLine spriteLine=
 //    			currentlyBuiltLine = currentlyBuiltLine.below(spriteLine);
 //    			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20+43;
-//    			regs.set(Reg.LY,(regs.get(Reg.LY)==153)?0:regs.get(Reg.LY)+1);
     			break;
     		case 3 :
     			//mode 3
