@@ -24,7 +24,7 @@ public class DebugMain2 {
             "05-op rp.gb", "06-ld r,r.gb", "07-jr,jp,call,ret,rst.gb",
             "08-misc instrs.gb", "09-op r,r.gb", "10-bit ops.gb",
             "11-op a,(hl).gb", "instr_timing.gb"};
-    private static String[] testsFailedPhase2 = new String[] {"07-jr,jp,call,ret,rst.gb"};
+    private static String[] testsFailedPhase2 = new String[] {"07-jr,jp,call,ret,rst.gb", "flappyboy.gb", "Tetris.gb"};
 
     public static void main(String[] args) {
         for (String test : testsFailedPhase2) {
@@ -60,7 +60,7 @@ public class DebugMain2 {
             for (int y = 0; y < LcdController.LCD_HEIGHT; ++y)
                 for (int x = 0; x < LcdController.LCD_WIDTH; ++x)
                     i.setRGB(x, y, COLOR_MAP[li.get(x, y)]);
-            ImageIO.write(i, "png", new File("gb.png"));
+            ImageIO.write(i, "png", new File(arg1+".png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
