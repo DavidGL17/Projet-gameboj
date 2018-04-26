@@ -187,7 +187,7 @@ public final class LcdController implements Clocked, Component {
     }
     
     public void reallyCycle(long cycle) {
-    		
+    		//Peut être mettre les deux variables ci dssous en argument, vu qu'on les calcule déjà dans cycle?
     		int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
     		int drawnLines =(int) ((cycle-lcdOnCycle)/LINE_CYCLES%(LCD_HEIGHT+10));
     		switch (getMode()){
