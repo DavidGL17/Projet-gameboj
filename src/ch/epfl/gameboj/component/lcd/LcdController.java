@@ -140,16 +140,13 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public void cycle(long cycle) { 
-    	//Detecte si le cycle doit être vide pour permettre que l'émulation soit correcte
-    	//Effectue le changement de mode adéquat : cela permet de rendre la méthode
-    	//reallyCycle très "impérative", diminuer le nombre de branchements conditionnels/check
     	int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
     	if (regs.testBit(Reg.LCDC,LCDCBit.LCD_STATUS)) {
     		if (nextNonIdleCycle==Long.MAX_VALUE) {
 	    		lcdOnCycle=cycle;
 	    		nextNonIdleCycle=cycle;
 	    		setMode(0);
-	   			reallyCycle(cycle);
+	   			reallyCycle(cycle,drawnImages);
 	   		}
 	        
 	   		if (cycle>=nextNonIdleCycle) {
@@ -162,6 +159,7 @@ public final class LcdController implements Clocked, Component {
 	    				setMode(2);
 	    				regs.set(Reg.LY,0);
 	        			checkIfLYEqualsLYC();
+	        			regs.set(Reg.LY,-1);
 	    			}
 	    			break;
 	    		case 3: 
@@ -175,7 +173,7 @@ public final class LcdController implements Clocked, Component {
 	    			} 
 	    			break;
 	    		}
-	    		reallyCycle(cycle);
+	    		reallyCycle(cycle,drawnImages);
 	    	}
     	} else {
     		setMode(0);
@@ -185,15 +183,15 @@ public final class LcdController implements Clocked, Component {
 
     }
     
-    public void reallyCycle(long cycle) {
+    public void reallyCycle(long cycle, int drawnImages) {
     		//Peut être mettre les deux variables ci dssous en argument, vu qu'on les calcule déjà dans cycle?
-    		int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
     		switch (getMode()){
     		case 0 :
-    		    //mode 0
+    		    //mode 0 //Completed
     		    nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+(regs.get(Reg.LY)+1)*LINE_CYCLES;
     		    break;
     		case 1:
+    			//mode 1 //Completed
     		    regs.set(Reg.LY,regs.get(Reg.LY)+1);
     		    checkIfLYEqualsLYC();
     		    currentImage=nextImageBuilder.build();
@@ -201,17 +199,14 @@ public final class LcdController implements Clocked, Component {
     		    nextNonIdleCycle=(drawnImages+1)*LINE_CYCLES*(LCD_HEIGHT+10);
     		    break;
     		case 2 :
-    			//mode 2
+    			//mode 2 // Completed
     			regs.set(Reg.LY,regs.get(Reg.LY)+1);
     			checkIfLYEqualsLYC();
-//    			Accès mémoire tuiles de backGround et construction ligne
-//    			currentlyBuiltLine=new LcdImageLine( ;
-//    			currentlyBuiltLine=
     			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20;
     			
     			break;
     		case 3:
-    			//mode 3
+    			//mode 3 //Ajouter sprite
 //    			Accès mémoire tuiles de sprite/background
                 nextImageBuilder.setLine(computeLine(regs.get(Reg.LY)),regs.get(Reg.LY));
     			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20+43;
