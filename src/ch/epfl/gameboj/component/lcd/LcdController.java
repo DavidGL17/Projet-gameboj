@@ -115,6 +115,7 @@ public final class LcdController implements Clocked, Component {
                 break;
             case 0xFF41:
                 regs.set(Reg.STAT, data & 0xF8 | regs.get(Reg.STAT) & 0x07);
+                checkIfLYEqualsLYC();
                 break;
             case 0xFF44:
                 regs.set(Reg.LY, data);
@@ -227,8 +228,16 @@ public final class LcdController implements Clocked, Component {
     }
 
     private void computeLine(int index) {
-        
+        LcdImageLine.Builder line = new LcdImageLine.Builder(LCD_WIDTH);
+        for (int i = 0;i<LCD_WIDTH/8;++i) {
+            int msb = read(AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)?1:0]+2*i);
+            int lsb = read(AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)?1:0]+2*i + 1);
+            line.setBytes(i, Bits.reverse8(msb), Bits.reverse8(lsb));
+        }
+        nextImageBuilder.setLine(line.build(), index);
     }
+    
+    
     
     /// Manages the current mode of the LCD controller
 
