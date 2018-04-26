@@ -170,7 +170,7 @@ public final class LcdController implements Clocked, Component {
 	    			setMode(0);
 	    			break;
 	    		case 0: 
-	    			if (regs.get(Reg.LY)==LCD_HEIGHT) { //if image is complete
+	    			if (regs.get(Reg.LY)==LCD_HEIGHT-1) { //if image is complete
 	    				setMode(1);
 	    			} else if (regs.get(Reg.LY)<LCD_HEIGHT) {
 	    				setMode(2);
@@ -214,7 +214,6 @@ public final class LcdController implements Clocked, Component {
     		case 3:
     			//mode 3 //Ajouter sprite
 //    			Accès mémoire tuiles de sprite/background
-    			System.out.println(regs.get(Reg.LY));
                 nextImageBuilder.setLine(computeLine(regs.get(Reg.LY)),regs.get(Reg.LY));
     			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20+43;
     			firstLineDrawn=true;
@@ -257,10 +256,7 @@ public final class LcdController implements Clocked, Component {
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
         
-        if (previousMode != mode) {
-        		if (mode==1)
-        			cpu.requestInterrupt(Interrupt.VBLANK);
-        		}
+       
         if (mode != 3) {
             if (checkStatBit(mode + 3)) {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
