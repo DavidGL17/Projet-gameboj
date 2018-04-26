@@ -18,15 +18,16 @@ import ch.epfl.gameboj.component.lcd.LcdImage;
  *
  */
 public class DebugMain2 {
-    private static String[] testsFailed = new String[] { "01-special.gb",
+    private static String[] testsFailedPhase1 = new String[] {  };
+    private static String[] testsPassedPhase1 = new String[] {"01-special.gb",
             "02-interrupts.gb", "03-op sp,hl.gb", "04-op r,imm.gb",
             "05-op rp.gb", "06-ld r,r.gb", "07-jr,jp,call,ret,rst.gb",
             "08-misc instrs.gb", "09-op r,r.gb", "10-bit ops.gb",
-            "11-op a,(hl).gb", "instr_timing.gb" };
-    private static String[] testsPassed = new String[] {};
+            "11-op a,(hl).gb", "instr_timing.gb"};
+    private static String[] testsFailedPhase2 = new String[] {"07-jr,jp,call,ret,rst.gb"};
 
     public static void main(String[] args) {
-        for (String test : testsFailed) {
+        for (String test : testsFailedPhase2) {
             test(test, "30000000");
         }
     }
