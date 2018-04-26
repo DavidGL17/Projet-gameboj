@@ -1,6 +1,7 @@
 package ch.epfl.gameboj.component.lcd;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +16,38 @@ import ch.epfl.gameboj.component.lcd.LcdImage.Builder;
 
 /**
  * @author David Gonzalez leon (270845)
- *
+ * @author Melvin Malonga-Matouba (288405)
  */
 class LcdImageTest {
+	
+	/**
+	 * Returns a 0 image of the appointed dimension
+	 * @param height
+	 * @param width
+	 * @return
+	 */
+	private static List<LcdImageLine> LcdImageListBuilding(int height, int width){
+		LcdImageLine line = new LcdImageLine(new BitVector(width),new BitVector(width),new BitVector(width));
+		List<LcdImageLine> res = new ArrayList<>();
+		int i=0;
+		while (i<height) {
+			res.add(line);
+		}
+		return res;
+	}
+	
+	@Test
+	void ConstructorThrowsException() {
+		Random random = new Random();
+		assertThrows(NullPointerException.class, 
+				() -> new LcdImage(null,random.nextInt(),random.nextInt()));
+		int height = random.nextInt();
+		int effectiveHeight = random.nextInt() ;
+		if (height != effectiveHeight) {
+			assertThrows(IllegalArgumentException.class, 
+					() -> new LcdImage(LcdImageListBuilding(effectiveHeight,3),height,3));
+		}
+	}
 
     @Test
     void WidthAndHeightWork() {
@@ -29,6 +59,7 @@ class LcdImageTest {
         assertEquals(32, image.getWidth());
         assertEquals(10, image.getHeight());
     }
+    
 
     @Test
     void getWorksBasic() {
