@@ -60,6 +60,8 @@ public final class LcdController implements Clocked, Component {
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
     private long lcdOnCycle;
     private long nextNonIdleCycle;
+    
+    private boolean firstLineDrawn=false;
 
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
@@ -145,7 +147,9 @@ public final class LcdController implements Clocked, Component {
     		if (nextNonIdleCycle==Long.MAX_VALUE) {
 	    		lcdOnCycle=cycle;
 	    		nextNonIdleCycle=cycle;
-	    		setMode(0);
+	    		setMode(2);
+	    		regs.set(Reg.LY,0);
+	    		checkIfLYEqualsLYC();
 	   			reallyCycle(cycle,drawnImages);
 	   		}
 	        
@@ -156,10 +160,10 @@ public final class LcdController implements Clocked, Component {
 	    			break;
 	    		case 1:
 	    			if (regs.get(Reg.LY)==LCD_HEIGHT+9) {
+	    				firstLineDrawn=false;
 	    				setMode(2);
 	    				regs.set(Reg.LY,0);
 	        			checkIfLYEqualsLYC();
-	        			regs.set(Reg.LY,-1);
 	    			}
 	    			break;
 	    		case 3: 
@@ -200,7 +204,9 @@ public final class LcdController implements Clocked, Component {
     		    break;
     		case 2 :
     			//mode 2 // Completed
-    			regs.set(Reg.LY,regs.get(Reg.LY)+1);
+    			if (firstLineDrawn) { //if vient de commencer une image
+    				regs.set(Reg.LY,regs.get(Reg.LY)+1);
+    			}
     			checkIfLYEqualsLYC();
     			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20;
     			
@@ -208,8 +214,10 @@ public final class LcdController implements Clocked, Component {
     		case 3:
     			//mode 3 //Ajouter sprite
 //    			Accès mémoire tuiles de sprite/background
+    			System.out.println(regs.get(Reg.LY));
                 nextImageBuilder.setLine(computeLine(regs.get(Reg.LY)),regs.get(Reg.LY));
     			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20+43;
+    			firstLineDrawn=true;
     			break;
     		};
     		//TODO
