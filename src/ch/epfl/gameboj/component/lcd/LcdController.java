@@ -247,16 +247,12 @@ public final class LcdController implements Clocked, Component {
     /// Manages the current mode of the LCD controller
 
     private void setMode(int mode) {
-    	// if /Bits.clip(2,regs.get(Reg.STAT)!=mod) {  
-    	// Non ? Si le mode ne change pas, pas de traitement spécifique en particulier
-    	// pas de levée systématique de l'interruption pour mode1 
-        //Oui effectivement. mais de toute façon je pensais enlever cette méthode, à moins que tu ne l'ai mise quelque part d'autre
         int statValue = regs.get(Reg.STAT);
         int previousMode = Bits.clip(2,statValue);
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
-        
-       
+        if (previousMode != 1 && mode==1)
+        	cpu.requestInterrupt(Interrupt.VBLANK);
         if (mode != 3) {
             if (checkStatBit(mode + 3)) {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
@@ -276,7 +272,7 @@ public final class LcdController implements Clocked, Component {
     private void checkIfLYEqualsLYC() {
         int statValue = regs.get(Reg.STAT);
         boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
-        regs.set(Reg.STAT, Bits.set(statValue, STATBit.LYC_EQ_LY.ordinal(), equal));
+        regs.set(Reg.STAT, Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
         if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
         }
@@ -288,5 +284,4 @@ public final class LcdController implements Clocked, Component {
     
     	
     
-    ///Checks 
 }
