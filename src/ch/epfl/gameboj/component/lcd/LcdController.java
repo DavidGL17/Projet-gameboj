@@ -187,8 +187,10 @@ public final class LcdController implements Clocked, Component {
             // mode 1 //Completed
             regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             checkIfLYEqualsLYC();
-            currentImage = nextImageBuilder.build();
-            nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
+            if (regs.get(Reg.LY)==144) {
+            	currentImage = nextImageBuilder.build();
+            	nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
+            }
             nextNonIdleCycle = (drawnImages + 1) * LINE_CYCLES
                     * (LCD_HEIGHT + 10);
             break;
@@ -228,15 +230,22 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine computeLine(int index) {
         LcdImageLine.Builder line = new LcdImageLine.Builder(LCD_WIDTH);
         for (int i = 0; i < LCD_WIDTH / 8; ++i) {
-            int tileAddress = read(
+            int tileIndex = read(
                     AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC,
                             LCDCBit.BG_AREA) ? 1 : 0] + i + (index % 8) * 20);
-            int lsbBg = read(AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC,
-                    LCDCBit.TILE_SOURCE) ? 1 : 0] + tileAddress
-                    + (index % 8) * 2);
-            int msbBg = read(AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC,
-                    LCDCBit.TILE_SOURCE) ? 1 : 0] + tileAddress
-                    + (index % 8) * 2 + 1);
+            int tileAddress;
+            
+            if (tileIndex >0x7F) {
+            	tileAddress = 0x8800 + tileIndex;
+            } else {
+            	if (regs.testBit(Reg.LCDC,LCDCBit.TILE_SOURCE)){
+            		tileAddress =  0x8000 + tileIndex ;
+            	} else {
+            		tileAddress = 0x9000 + tileIndex;
+            	}
+            }
+            int lsbBg = read( tileAddress + (index % 8) * 2);
+            int msbBg = read( tileAddress + (index % 8) * 2) + 1;
             line.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
         }
         return line.build();
