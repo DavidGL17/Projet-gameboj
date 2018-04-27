@@ -37,7 +37,8 @@ public final class LcdController implements Clocked, Component {
 
     public final static int LCD_WIDTH = 160;
     public final static int LCD_HEIGHT = 144;
-    public final static int LINE_CYCLES = 20 + 43 + 51;
+    private final static int BG_SIZE = 256;
+    private final static int LINE_CYCLES = 20 + 43 + 51;
 
     private final Cpu cpu;
     private LcdImage currentImage;
@@ -232,8 +233,8 @@ public final class LcdController implements Clocked, Component {
         for (int i = 0; i < LCD_WIDTH / 8; ++i) {
             int tileIndex = read(
                     AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC,
-                            LCDCBit.BG_AREA) ? 1 : 0] + i + (index % 8) * 20);
-            int tileAddress;
+                            LCDCBit.BG_AREA) ? 1 : 0] + i + (index / 8) * 32);
+            int tileAddress =0;
             
             if (tileIndex >0x7F) {
             	tileAddress = 0x8800 + tileIndex;
