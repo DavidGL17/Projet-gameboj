@@ -229,14 +229,14 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine computeLine(int line) {
-        LcdImageLine bgLine = computeBgLine(line+regs.get(Reg.SCY));
+        LcdImageLine bgLine = computeBgLine(Math.floorMod(line+regs.get(Reg.SCY),256));
         bgLine = bgLine.extractWrapped(regs.get(Reg.SCX), LCD_WIDTH);
         return bgLine;
     }
     
     private LcdImageLine computeBgLine(int index) {
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(BG_SIZE);
-        for (int i = 0; i < BG_SIZE / 8; ++i) {
+        for (int i = 0; i < BG_SIZE / 8; i++) {
             int tileIndex = read(
                     AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC,
                             LCDCBit.BG_AREA) ? 1 : 0] + i + (index / 8) * 32);
@@ -251,7 +251,7 @@ public final class LcdController implements Clocked, Component {
             	}
             }
             int lsbBg = read( tileAddress + (index % 8) * 2);
-            int msbBg = read( tileAddress + (index % 8) * 2) + 1;
+            int msbBg = read( tileAddress + (index % 8) * 2 + 1);
             lineBuilder.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
         }
         return lineBuilder.build();
