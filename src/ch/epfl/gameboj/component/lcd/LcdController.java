@@ -141,8 +141,13 @@ public final class LcdController implements Clocked, Component {
 
             if (cycle >= nextNonIdleCycle) {
                 switch (getMode()) {
-                case 2:
-                    setMode(3);
+                case 0:
+                    if (regs.get(Reg.LY) == LCD_HEIGHT - 1) { // if image is
+                        // complete
+                        setMode(1);
+                    } else if (regs.get(Reg.LY) < LCD_HEIGHT) {
+                        setMode(2);
+                    }
                     break;
                 case 1:
                     if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
@@ -152,16 +157,11 @@ public final class LcdController implements Clocked, Component {
                         checkIfLYEqualsLYC();
                     }
                     break;
+                case 2:
+                    setMode(3);
+                    break;
                 case 3:
                     setMode(0);
-                    break;
-                case 0:
-                    if (regs.get(Reg.LY) == LCD_HEIGHT - 1) { // if image is
-                                                              // complete
-                        setMode(1);
-                    } else if (regs.get(Reg.LY) < LCD_HEIGHT) {
-                        setMode(2);
-                    }
                     break;
                 }
                 reallyCycle(cycle, drawnImages);
