@@ -26,42 +26,29 @@ public final class LcdController implements Clocked, Component {
     private enum Reg implements Register {
         LCDC, STAT, SCY, SCX, LY, LYC, DMA, BGP, OBP0, OBP1, WY, WX;
     }
-    
+
     private enum LCDCBit implements Bit {
-    		BG,
-    		OBJ,
-    		OBJ_SIZE,
-    		BG_AREA,
-    		TILE_SOURCE,
-    		WIN,
-    		WIN_AREA,
-    		LCD_STATUS
+        BG, OBJ, OBJ_SIZE, BG_AREA, TILE_SOURCE, WIN, WIN_AREA, LCD_STATUS
     }
-    
+
     private enum STATBit implements Bit {
-    		MODE0,
-    		MODE1,
-    		LYC_EQ_LY,
-    		INT_MODE0,
-    		INT_MODE1,
-    		INT_MODE2,
-    		INT_LYC,
-    		UNUSED
+        MODE0, MODE1, LYC_EQ_LY, INT_MODE0, INT_MODE1, INT_MODE2, INT_LYC, UNUSED
     }
 
     public final static int LCD_WIDTH = 160;
     public final static int LCD_HEIGHT = 144;
-    public final static int LINE_CYCLES = 20+43+51;
+    public final static int LINE_CYCLES = 20 + 43 + 51;
 
     private final Cpu cpu;
     private LcdImage currentImage;
-    private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH, LCD_HEIGHT);
+    private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH,
+            LCD_HEIGHT);
     private final Ram videoRam;
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
     private long lcdOnCycle;
     private long nextNonIdleCycle;
-    
-    private boolean firstLineDrawn=false;
+
+    private boolean firstLineDrawn = false;
 
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
@@ -120,8 +107,6 @@ public final class LcdController implements Clocked, Component {
                 checkIfLYEqualsLYC();
                 break;
             case 0xFF44:
-                regs.set(Reg.LY, data);
-                checkIfLYEqualsLYC();
                 break;
             case 0xFF45:
                 regs.set(Reg.LYC, data);
@@ -141,85 +126,94 @@ public final class LcdController implements Clocked, Component {
      * @see ch.epfl.gameboj.component.Clocked#cycle(long)
      */
     @Override
-    public void cycle(long cycle) { 
-    	int drawnImages=(int) ((cycle-lcdOnCycle)/LINE_CYCLES/(LCD_HEIGHT+10));
-    	if (regs.testBit(Reg.LCDC,LCDCBit.LCD_STATUS)) {
-    		if (nextNonIdleCycle==Long.MAX_VALUE) {
-	    		lcdOnCycle=cycle;
-	    		nextNonIdleCycle=cycle;
-	    		setMode(2);
-	    		regs.set(Reg.LY,0);
-	    		checkIfLYEqualsLYC();
-	   			reallyCycle(cycle,drawnImages);
-	   		}
-	        
-	   		if (cycle>=nextNonIdleCycle) {
-	    		switch (getMode()) {
-	    		case 2:
-	    			setMode(3);
-	    			break;
-	    		case 1:
-	    			if (regs.get(Reg.LY)==LCD_HEIGHT+9) {
-	    				firstLineDrawn=false;
-	    				setMode(2);
-	    				regs.set(Reg.LY,0);
-	        			checkIfLYEqualsLYC();
-	    			}
-	    			break;
-	    		case 3: 
-	    			setMode(0);
-	    			break;
-	    		case 0: 
-	    			if (regs.get(Reg.LY)==LCD_HEIGHT-1) { //if image is complete
-	    				setMode(1);
-	    			} else if (regs.get(Reg.LY)<LCD_HEIGHT) {
-	    				setMode(2);
-	    			} 
-	    			break;
-	    		}
-	    		reallyCycle(cycle,drawnImages);
-	    	}
-    	} else {
-    		setMode(0);
-    		regs.set(Reg.LY,0);
-    		checkIfLYEqualsLYC();
-    	}
+    public void cycle(long cycle) {
+        int drawnImages = (int) ((cycle - lcdOnCycle) / LINE_CYCLES
+                / (LCD_HEIGHT + 10));
+        if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)) {
+            if (nextNonIdleCycle == Long.MAX_VALUE) {
+                lcdOnCycle = cycle;
+                nextNonIdleCycle = cycle;
+                setMode(2);
+                regs.set(Reg.LY, 0);
+                checkIfLYEqualsLYC();
+                reallyCycle(cycle, drawnImages);
+            }
+
+            if (cycle >= nextNonIdleCycle) {
+                switch (getMode()) {
+                case 2:
+                    setMode(3);
+                    break;
+                case 1:
+                    if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
+                        firstLineDrawn = false;
+                        setMode(2);
+                        regs.set(Reg.LY, 0);
+                        checkIfLYEqualsLYC();
+                    }
+                    break;
+                case 3:
+                    setMode(0);
+                    break;
+                case 0:
+                    if (regs.get(Reg.LY) == LCD_HEIGHT - 1) { // if image is
+                                                              // complete
+                        setMode(1);
+                    } else if (regs.get(Reg.LY) < LCD_HEIGHT) {
+                        setMode(2);
+                    }
+                    break;
+                }
+                reallyCycle(cycle, drawnImages);
+            }
+        } else {
+            setMode(0);
+            regs.set(Reg.LY, 0);
+            checkIfLYEqualsLYC();
+        }
 
     }
-    
+
     public void reallyCycle(long cycle, int drawnImages) {
-    		//Peut être mettre les deux variables ci dssous en argument, vu qu'on les calcule déjà dans cycle?
-    		switch (getMode()){
-    		case 0 :
-    		    //mode 0 //Completed
-    		    nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+(regs.get(Reg.LY)+1)*LINE_CYCLES;
-    		    break;
-    		case 1:
-    			//mode 1 //Completed
-    		    regs.set(Reg.LY,regs.get(Reg.LY)+1);
-    		    checkIfLYEqualsLYC();
-    		    currentImage=nextImageBuilder.build();
-    		    nextImageBuilder= new LcdImage.Builder(LCD_WIDTH,LCD_HEIGHT);
-    		    nextNonIdleCycle=(drawnImages+1)*LINE_CYCLES*(LCD_HEIGHT+10);
-    		    break;
-    		case 2 :
-    			//mode 2 // Completed
-    			if (firstLineDrawn) { //if vient de commencer une image
-    				regs.set(Reg.LY,regs.get(Reg.LY)+1);
-    			}
-    			checkIfLYEqualsLYC();
-    			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20;
-    			
-    			break;
-    		case 3:
-    			//mode 3 //Ajouter sprite
-//    			Accès mémoire tuiles de sprite/background
-                nextImageBuilder.setLine(computeLine(regs.get(Reg.LY)),regs.get(Reg.LY));
-    			nextNonIdleCycle=(drawnImages)*LINE_CYCLES*(LCD_HEIGHT+10)+regs.get(Reg.LY)*LINE_CYCLES+20+43;
-    			firstLineDrawn=true;
-    			break;
-    		};
-    		//TODO
+        // Peut être mettre les deux variables ci dssous en argument, vu qu'on
+        // les calcule déjà dans cycle?
+        switch (getMode()) {
+        case 0:
+            // mode 0 //Completed
+            nextNonIdleCycle = (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+                    + (regs.get(Reg.LY) + 1) * LINE_CYCLES;
+            break;
+        case 1:
+            // mode 1 //Completed
+            regs.set(Reg.LY, regs.get(Reg.LY) + 1);
+            checkIfLYEqualsLYC();
+            currentImage = nextImageBuilder.build();
+            nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
+            nextNonIdleCycle = (drawnImages + 1) * LINE_CYCLES
+                    * (LCD_HEIGHT + 10);
+            break;
+        case 2:
+            // mode 2 // Completed
+            if (firstLineDrawn) { // if vient de commencer une image
+                regs.set(Reg.LY, regs.get(Reg.LY) + 1);
+            }
+            checkIfLYEqualsLYC();
+            nextNonIdleCycle = (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+                    + regs.get(Reg.LY) * LINE_CYCLES + 20;
+
+            break;
+        case 3:
+            // mode 3 //Ajouter sprite
+            // Accès mémoire tuiles de sprite/background
+            nextImageBuilder.setLine(computeLine(regs.get(Reg.LY)),
+                    regs.get(Reg.LY));
+            nextNonIdleCycle = (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+                    + regs.get(Reg.LY) * LINE_CYCLES + 20 + 43;
+            firstLineDrawn = true;
+            break;
+        }
+        ;
+        // TODO
     }
 
     /**
@@ -233,32 +227,36 @@ public final class LcdController implements Clocked, Component {
 
     private LcdImageLine computeLine(int index) {
         LcdImageLine.Builder line = new LcdImageLine.Builder(LCD_WIDTH);
-        for (int i = 0;i<LCD_WIDTH/8;++i) {
-            int tileAddress = read(AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC, LCDCBit.BG_AREA)?1:0]+i+(index%8)*20);
-            int lsbBg = read(AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)?1:0]+tileAddress+(index%8)*2);
-            int msbBg = read(AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)?1:0]+tileAddress+(index%8)*2 +1);
+        for (int i = 0; i < LCD_WIDTH / 8; ++i) {
+            int tileAddress = read(
+                    AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC,
+                            LCDCBit.BG_AREA) ? 1 : 0] + i + (index % 8) * 20);
+            int lsbBg = read(AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC,
+                    LCDCBit.TILE_SOURCE) ? 1 : 0] + tileAddress
+                    + (index % 8) * 2);
+            int msbBg = read(AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC,
+                    LCDCBit.TILE_SOURCE) ? 1 : 0] + tileAddress
+                    + (index % 8) * 2 + 1);
             line.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
         }
         return line.build();
     }
-    
-    
-    
+
     /// Manages the current mode of the LCD controller
 
     private void setMode(int mode) {
         int statValue = regs.get(Reg.STAT);
-        int previousMode = Bits.clip(2,statValue);
+        int previousMode = Bits.clip(2, statValue);
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
-        if (previousMode != 1 && mode==1)
-        	cpu.requestInterrupt(Interrupt.VBLANK);
+        if (previousMode != 1 && mode == 1)
+            cpu.requestInterrupt(Interrupt.VBLANK);
         if (mode != 3) {
             if (checkStatBit(mode + 3)) {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
             }
         }
-        
+
     }
 
     private int getMode() {
@@ -272,7 +270,8 @@ public final class LcdController implements Clocked, Component {
     private void checkIfLYEqualsLYC() {
         int statValue = regs.get(Reg.STAT);
         boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
-        regs.set(Reg.STAT, Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
+        regs.set(Reg.STAT,
+                Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
         if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
         }
@@ -281,7 +280,5 @@ public final class LcdController implements Clocked, Component {
     private boolean checkStatBit(int index) {
         return Bits.test(regs.get(Reg.STAT), index);
     }
-    
-    	
-    
+
 }
