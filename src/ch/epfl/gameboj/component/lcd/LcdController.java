@@ -175,7 +175,7 @@ public final class LcdController implements Clocked, Component {
 
     }
 
-    public void reallyCycle(long cycle, int drawnImages) {
+    private void reallyCycle(long cycle, int drawnImages) {
         // Peut être mettre les deux variables ci dssous en argument, vu qu'on
         // les calcule déjà dans cycle?
         switch (getMode()) {
@@ -228,14 +228,19 @@ public final class LcdController implements Clocked, Component {
         return currentImage;
     }
 
-    private LcdImageLine computeLine(int index) {
-        LcdImageLine.Builder line = new LcdImageLine.Builder(LCD_WIDTH);
-        for (int i = 0; i < LCD_WIDTH / 8; ++i) {
+    private LcdImageLine computeLine(int line) {
+        LcdImageLine bgLine = computeBgLine(line+regs.get(Reg.SCY));
+        bgLine = bgLine.extractWrapped(regs.get(Reg.SCX), LCD_WIDTH);
+        return bgLine;
+    }
+    
+    private LcdImageLine computeBgLine(int index) {
+        LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(BG_SIZE);
+        for (int i = 0; i < BG_SIZE / 8; ++i) {
             int tileIndex = read(
                     AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC,
                             LCDCBit.BG_AREA) ? 1 : 0] + i + (index / 8) * 32);
             int tileAddress =0;
-            
             if (tileIndex >0x7F) {
             	tileAddress = 0x8800 + tileIndex;
             } else {
@@ -247,9 +252,9 @@ public final class LcdController implements Clocked, Component {
             }
             int lsbBg = read( tileAddress + (index % 8) * 2);
             int msbBg = read( tileAddress + (index % 8) * 2) + 1;
-            line.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
+            lineBuilder.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
         }
-        return line.build();
+        return lineBuilder.build();
     }
 
     /// Manages the current mode of the LCD controller
