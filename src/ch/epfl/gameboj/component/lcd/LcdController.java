@@ -236,11 +236,11 @@ public final class LcdController implements Clocked, Component {
     
     private LcdImageLine computeBgLine(int index) {
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(BG_SIZE);
-        for (int i = 0; i < BG_SIZE / 8; i++) {
+        for (int i = 0; i < BG_SIZE / 8; ++i) {
             int tileIndex = read(
                     AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC,
                             LCDCBit.BG_AREA) ? 1 : 0] + i + (index / 8) * 32);
-            int tileAddress =0;
+            int tileAddress = 0;
             if (tileIndex >0x7F) {
             	tileAddress = 0x8800 + tileIndex;
             } else {
@@ -250,9 +250,9 @@ public final class LcdController implements Clocked, Component {
             		tileAddress = 0x9000 + tileIndex;
             	}
             }
-            int lsbBg = read( tileAddress + (index % 8) * 2);
-            int msbBg = read( tileAddress + (index % 8) * 2 + 1);
-            lineBuilder.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
+            int lsbBg = read( tileAddress + Math.floorMod(index , 8) * 16  );
+            int msbBg = read( tileAddress + Math.floorMod(index , 8) * 16 + 1);
+            lineBuilder.setBytes(i, msbBg, lsbBg);
         }
         return lineBuilder.build();
     }
