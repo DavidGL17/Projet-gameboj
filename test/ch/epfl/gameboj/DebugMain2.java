@@ -37,9 +37,9 @@ public class DebugMain2 {
             0xA9_A9_A9, 0x00_00_00 };
 
     public static void main(String[] args) {
-        for (String test : testsFailedPhase2) {
+        for (String test : allTests) {
 //            test1(test, "30000000");
-             test2(test, "30000000");
+            test2(test, "30000000");
         }
     }
 
@@ -62,13 +62,13 @@ public class DebugMain2 {
             }
             System.out.println("+--------------------+");
 
-            LcdImage li = gb.lcdController().currentImage();
-            BufferedImage i = new BufferedImage(LcdController.LCD_WIDTH,
-                    LcdController.LCD_HEIGHT, BufferedImage.TYPE_INT_RGB);
-            for (int y = 0; y < LcdController.LCD_HEIGHT; ++y)
-                for (int x = 0; x < LcdController.LCD_WIDTH; ++x)
-                    i.setRGB(x, y, COLOR_MAP[li.get(x, y)]);
-            ImageIO.write(i, "png", new File("gb.png"));
+//            LcdImage li = gb.lcdController().currentImage();
+//            BufferedImage i = new BufferedImage(LcdController.LCD_WIDTH,
+//                    LcdController.LCD_HEIGHT, BufferedImage.TYPE_INT_RGB);
+//            for (int y = 0; y < LcdController.LCD_HEIGHT; ++y)
+//                for (int x = 0; x < LcdController.LCD_WIDTH; ++x)
+//                    i.setRGB(x, y, COLOR_MAP[li.get(x, y)]);
+//            ImageIO.write(i, "png", new File("gb.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
