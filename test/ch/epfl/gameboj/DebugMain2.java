@@ -37,7 +37,7 @@ public class DebugMain2 {
             0xA9_A9_A9, 0x00_00_00 };
 
     public static void main(String[] args) {
-        for (String test : allTests) {
+        for (String test : testsFailedPhase2) {
 //            test1(test, "30000000");
             test2(test, "30000000");
         }
