@@ -182,7 +182,7 @@ public final class LcdController implements Clocked, Component {
         switch (getMode()) {
         case 0:
             // mode 0 //Completed
-            nextNonIdleCycle = (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+            nextNonIdleCycle= lcdOnCycle + (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + (regs.get(Reg.LY) + 1) * LINE_CYCLES;
             break;
         case 1:
@@ -192,10 +192,10 @@ public final class LcdController implements Clocked, Component {
             if (regs.get(Reg.LY)==LCD_HEIGHT+9) {
             	currentImage = nextImageBuilder.build();
             	nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
-            	nextNonIdleCycle = (drawnImages + 1) * LINE_CYCLES
+            	nextNonIdleCycle= lcdOnCycle +(drawnImages + 1) * LINE_CYCLES
                         * (LCD_HEIGHT + 10);
             } else {
-            	nextNonIdleCycle =  (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+            	nextNonIdleCycle= lcdOnCycle + (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
             			+ (regs.get(Reg.LY) + 1) * LINE_CYCLES;
             }
             break;
@@ -205,7 +205,7 @@ public final class LcdController implements Clocked, Component {
                 regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             }
             checkIfLYEqualsLYC();
-            nextNonIdleCycle = (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+            nextNonIdleCycle= lcdOnCycle +(drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + regs.get(Reg.LY) * LINE_CYCLES + 20;
 
             break;
@@ -214,7 +214,7 @@ public final class LcdController implements Clocked, Component {
             // Accès mémoire tuiles de sprite/background
             nextImageBuilder.setLine(computeLine(regs.get(Reg.LY)),
                     regs.get(Reg.LY));
-            nextNonIdleCycle = (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+            nextNonIdleCycle= lcdOnCycle +(drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + regs.get(Reg.LY) * LINE_CYCLES + 20 + 43;
             firstLineDrawn = true;
             break;
