@@ -39,6 +39,7 @@ public final class LcdController implements Clocked, Component {
     public final static int LCD_HEIGHT = 144;
     private final static int BG_SIZE = 256;
     private final static int LINE_CYCLES = 20 + 43 + 51;
+    private boolean test=false; //Temporaire
 
     private final Cpu cpu;
     private LcdImage currentImage;
@@ -191,9 +192,12 @@ public final class LcdController implements Clocked, Component {
             if (regs.get(Reg.LY)==144) {
             	currentImage = nextImageBuilder.build();
             	nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
+            	nextNonIdleCycle = (drawnImages + 1) * LINE_CYCLES
+                        * (LCD_HEIGHT + 10);
             }
-            nextNonIdleCycle = (drawnImages + 1) * LINE_CYCLES
-                    * (LCD_HEIGHT + 10);
+            nextNonIdleCycle =  (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+                    + (regs.get(Reg.LY) + 1) * LINE_CYCLES;
+            
             break;
         case 2:
             // mode 2 // Completed
@@ -229,8 +233,9 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine computeLine(int line) {
-        LcdImageLine bgLine = computeBgLine(Math.floorMod(line+regs.get(Reg.SCY),256));
+        LcdImageLine bgLine = computeBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
         bgLine = bgLine.extractWrapped(regs.get(Reg.SCX), LCD_WIDTH);
+        test=true;
         return bgLine;
     }
     
@@ -239,7 +244,7 @@ public final class LcdController implements Clocked, Component {
         for (int i = 0; i < BG_SIZE / 8; ++i) {
             int tileIndex = read(
                     AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC,
-                            LCDCBit.BG_AREA) ? 1 : 0] + i + (index / 8) * 32);
+                            LCDCBit.BG_AREA) ? 1 : 0] + Math.floorDiv(index , 8) * 32 + i);
             int tileAddress = 0;
             if (tileIndex >0x7F) {
             	tileAddress = 0x8800 + tileIndex;
@@ -250,9 +255,12 @@ public final class LcdController implements Clocked, Component {
             		tileAddress = 0x9000 + tileIndex;
             	}
             }
-            int lsbBg = read( tileAddress + Math.floorMod(index , 8) * 16  );
-            int msbBg = read( tileAddress + Math.floorMod(index , 8) * 16 + 1);
+            int lsbBg = read( tileAddress + Math.floorMod(index , 8) * 2  );
+            int msbBg = read( tileAddress + Math.floorMod(index , 8) * 2 + 1);
             lineBuilder.setBytes(i, msbBg, lsbBg);
+            if (index==0) {
+            	System.out.println(lsbBg + "  " + msbBg + " " + tileIndex);
+            }
         }
         return lineBuilder.build();
     }
