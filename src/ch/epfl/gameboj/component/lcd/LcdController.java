@@ -189,14 +189,15 @@ public final class LcdController implements Clocked, Component {
             // mode 1 //Completed
             regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             checkIfLYEqualsLYC();
-            if (regs.get(Reg.LY)==144) {
+            if (regs.get(Reg.LY)==LCD_HEIGHT+9) {
             	currentImage = nextImageBuilder.build();
             	nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
             	nextNonIdleCycle = (drawnImages + 1) * LINE_CYCLES
                         * (LCD_HEIGHT + 10);
+            } else {
+            	nextNonIdleCycle =  (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
+            			+ (regs.get(Reg.LY) + 1) * LINE_CYCLES;
             }
-            nextNonIdleCycle =  (drawnImages) * LINE_CYCLES * (LCD_HEIGHT + 10)
-                    + (regs.get(Reg.LY) + 1) * LINE_CYCLES;
             
             break;
         case 2:
