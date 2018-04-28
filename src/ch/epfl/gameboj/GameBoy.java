@@ -93,7 +93,7 @@ public final class GameBoy {
      * @param cycle,
      *            the number of cycles + 1 the components will run
      * @throws IllegalArgumentException
-     *             if the param cycle si strictly inferior than the number of
+     *             if the param cycle is strictly inferior than the number of
      *             cycles already simulated
      */
     public void runUntil(long cycle) {
