@@ -215,8 +215,6 @@ public final class LcdController implements Clocked, Component {
             firstLineDrawn = true;
             break;
         }
-        ;
-        // TODO
     }
 
     /**
@@ -251,8 +249,8 @@ public final class LcdController implements Clocked, Component {
                     tileAddress = 0x9000 + tileIndex;
                 }
             }
-            int lsbBg = read(tileAddress + Math.floorMod(index, 8) * 2);
-            int msbBg = read(tileAddress + Math.floorMod(index, 8) * 2 + 1);
+            int lsbBg = read(tileAddress +(index& 8) * 2);
+            int msbBg = read(tileAddress + (index% 8) * 2 + 1);
             lineBuilder.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
         }
         return lineBuilder.build();
