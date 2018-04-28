@@ -246,12 +246,12 @@ public final class LcdController implements Clocked, Component {
 //            int tileAddress = AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)?1:0]+tileIndex;
             int tileAddress = 0;
             if (tileIndex > 0x7F) {
-                tileAddress = 0x8800 + tileIndex;
+                tileAddress = 0x8800 + 16*(tileIndex-0x80);
             } else {
                 if (regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)) {
-                    tileAddress = 0x8000 + tileIndex;
+                    tileAddress = 0x8000 + 16*tileIndex;
                 } else {
-                    tileAddress = 0x9000 + tileIndex;
+                    tileAddress = 0x9000 + 16*tileIndex;
                 }
             }
             int lsbBg = read( tileAddress + Math.floorMod(index , 8) * 2  );
