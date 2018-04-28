@@ -188,9 +188,9 @@ public final class LcdController implements Clocked, Component {
             // mode 1 //Completed
             regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             checkIfLYEqualsLYC();
-            if (regs.get(Reg.LY)==144) {
-            	currentImage = nextImageBuilder.build();
-            	nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
+            if (regs.get(Reg.LY) == 144) {
+                currentImage = nextImageBuilder.build();
+                nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
             }
             nextNonIdleCycle = (drawnImages + 1) * LINE_CYCLES
                     * (LCD_HEIGHT + 10);
@@ -229,30 +229,31 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine computeLine(int line) {
-        LcdImageLine bgLine = computeBgLine(Math.floorMod(line+regs.get(Reg.SCY),256));
+        LcdImageLine bgLine = computeBgLine((line + regs.get(Reg.SCY))%256);
         bgLine = bgLine.extractWrapped(regs.get(Reg.SCX), LCD_WIDTH);
         return bgLine;
     }
-    
+
     private LcdImageLine computeBgLine(int index) {
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(BG_SIZE);
         for (int i = 0; i < BG_SIZE / 8; ++i) {
             int tileIndex = read(
                     AddressMap.BG_DISPLAY_DATA[regs.testBit(Reg.LCDC,
                             LCDCBit.BG_AREA) ? 1 : 0] + i + (index / 8) * 32);
+//            int tileAddress = AddressMap.TILE_SOURCE[regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)?1:0]+tileIndex;
             int tileAddress = 0;
-            if (tileIndex >0x7F) {
-            	tileAddress = 0x8800 + tileIndex;
+            if (tileIndex > 0x7F) {
+                tileAddress = 0x8800 + tileIndex;
             } else {
-            	if (regs.testBit(Reg.LCDC,LCDCBit.TILE_SOURCE)){
-            		tileAddress =  0x8000 + tileIndex ;
-            	} else {
-            		tileAddress = 0x9000 + tileIndex;
-            	}
+                if (regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)) {
+                    tileAddress = 0x8000 + tileIndex;
+                } else {
+                    tileAddress = 0x9000 + tileIndex;
+                }
             }
-            int lsbBg = read( tileAddress + Math.floorMod(index , 8) * 16  );
-            int msbBg = read( tileAddress + Math.floorMod(index , 8) * 16 + 1);
-            lineBuilder.setBytes(i, msbBg, lsbBg);
+            int lsbBg = read(tileAddress + Math.floorMod(index, 8) * 2);
+            int msbBg = read(tileAddress + Math.floorMod(index, 8) * 2 + 1);
+            lineBuilder.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
         }
         return lineBuilder.build();
     }
