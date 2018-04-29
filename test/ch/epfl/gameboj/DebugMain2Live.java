@@ -73,4 +73,8 @@ public final class DebugMain2Live extends Application {
         Application.launch(args);
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 1282c41bd7979feba4c674d3c885822fb7840eb0
