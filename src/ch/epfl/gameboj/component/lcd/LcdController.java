@@ -225,9 +225,6 @@ public final class LcdController implements Clocked, Component {
 
     
     private LcdImageLine computeLine(int line) {
-    	LcdImageLine neutral = new LcdImageLine(new BitVector(BG_SIZE),
-    			new BitVector(BG_SIZE),
-    			new BitVector(BG_SIZE));
     	LcdImageLine bgLine = new LcdImageLine(new BitVector(BG_SIZE),
     			new BitVector(BG_SIZE),
     			new BitVector(BG_SIZE));
@@ -235,13 +232,15 @@ public final class LcdController implements Clocked, Component {
     			new BitVector(BG_SIZE),
     			new BitVector(BG_SIZE));
     	
-//    	if (background active)
-        	bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
-        	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY)) {
-        		windowLine = buildWindowLine();
+    	if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
+        		bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
+    			//bgLine=PaletteTransform(bgLine)
+    	}
+        if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>7) {
+        	windowLine = buildWindowLine();
         }
         
-        return neutral.below( bgLine.join(windowLine.extractWrapped(regs.get(Reg.WX),BG_SIZE),regs.get(Reg.WX)) );
+        return bgLine.join(windowLine.extractWrapped(regs.get(Reg.WX)-7,BG_SIZE),regs.get(Reg.WX) );
     }
     
     
