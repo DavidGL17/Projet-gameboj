@@ -225,7 +225,9 @@ public final class LcdController implements Clocked, Component {
 
     private LcdImageLine computeLine(int line) {
         LcdImageLine bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
-        return bgLine;
+        LcdImageLine windowLine = buildWindowLine();
+        
+        return bgLine.join(windowLine,regs.get(Reg.WX));
     }
     
     
@@ -261,7 +263,7 @@ public final class LcdController implements Clocked, Component {
         return buildLine(line, true).extractWrapped(regs.get(Reg.SCX), LCD_WIDTH);
     }
 
-    private LcdImageLine computeWindowLine () {
+    private LcdImageLine buildWindowLine () {
     	return buildLine(winY,false).extractWrapped(regs.get(Reg.WX),LCD_WIDTH);
     }
     /// Manages the current mode of the LCD controller
