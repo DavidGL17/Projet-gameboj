@@ -225,8 +225,16 @@ public final class LcdController implements Clocked, Component {
 
     
     private LcdImageLine computeLine(int line) {
+    	
+    	LcdImageLine behindSprites = new LcdImageLine( new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH));
     
     	LcdImageLine bgLine = new LcdImageLine( new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH));
+    	
+    	LcdImageLine foregroundSprites = new LcdImageLine( new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH));
     	
@@ -236,10 +244,10 @@ public final class LcdController implements Clocked, Component {
     	}
         if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>7) {
         	LcdImageLine windowLine = buildWindowLine();
-        	return bgLine.join(windowLine,regs.get(Reg.WX) ); 
+        	return behindSprites.below(bgLine.join(windowLine,regs.get(Reg.WX)) ); 
         }
         
-        return bgLine;
+        return behindSprites.below(bgLine);
     }
     
     
@@ -292,8 +300,54 @@ public final class LcdController implements Clocked, Component {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
             }
         }
-
     }
+    
+    private class Sprite {   // Temporaire peut-être inutilement contraignant lourd en mise en oeuvre 
+    	//	(En particulier -> fin de vie d'un Sprite)
+    	int index ;
+    	public Sprite(int index) {
+    		this.index=index;
+    	}
+    	
+    	public int getY() {
+    		return read(0xFE00+4*index)-16;
+    	}
+    	
+    	public int getX() {
+    		return read(0xFE00+4*index+1)-8;
+    	}
+    	
+    	private int getTileIndex() {
+    		return read(0xFE00+4*index+2);
+    	}
+    	
+    	public int getTileAddress() {
+    		return read(0x8000 + 16 * getTileIndex());
+    	}
+    	
+    	public int getPalette() {
+    		return (Bits.test(read(0xFE00+4*index+3),SpriteBit.PALETTE) ? regs.get(Reg.OBP0) : regs.get(Reg.OBP1)) ;
+    	}
+    	
+    	public boolean getFlipH() {
+    		return Bits.test(read(0xFE00+4*index+3),SpriteBit.FLIP_H);
+    	}
+    	
+    	public boolean behingBg() {
+    		return Bits.test(read(0xFE00+4*index+3),SpriteBit.BEHIND_BG);
+    	}
+    	
+    }
+    
+    private enum SpriteBit implements Bit {
+    	
+    	PALETTE,FLIP_H,FLIP_V,BEHIND_BG;
+    	
+    	public int index() {
+    		return this.ordinal()+4;
+    	}
+    }
+    
 
     private int getMode() {
         int statValue = regs.get(Reg.STAT);
