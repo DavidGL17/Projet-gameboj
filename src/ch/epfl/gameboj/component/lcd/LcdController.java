@@ -287,7 +287,7 @@ public final class LcdController implements Clocked, Component {
         	bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
         	bgLine = bgLine.mapColors(regs.get(Reg.BGP));
     	}
-    	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) ) { //Ajouter condition sur reg.WX correct
+    	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>=7 ) { //Ajouter condition sur reg.WX correct
         	LcdImageLine windowLine = buildWindowLine();
         	return behindSprites.below(bgLine.join(windowLine,regs.get(Reg.WX)-7)); 
     	}
