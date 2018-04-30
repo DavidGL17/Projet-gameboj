@@ -117,7 +117,7 @@ public final class LcdController implements Clocked, Component {
         }
         if (Preconditions.checkBits16(address) >= AddressMap.OAM_START
                 && address < AddressMap.OAM_END) {
-            objectAttributeMemory.write(address, data);
+            objectAttributeMemory.write(address-AddressMap.OAM_START, data);
         }
         if (address >= AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
