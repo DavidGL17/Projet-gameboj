@@ -289,7 +289,7 @@ public final class LcdController implements Clocked, Component {
     	}
     	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) ) { //Ajouter condition sur reg.WX correct
         	LcdImageLine windowLine = buildWindowLine();
-        	return behindSprites.below(bgLine.join(windowLine,regs.get(Reg.WX)) ); 
+        	return behindSprites.below(bgLine.join(windowLine,regs.get(Reg.WX)-7)); 
     	}
 
         return behindSprites.below(bgLine);
@@ -300,6 +300,12 @@ public final class LcdController implements Clocked, Component {
                 LCD_WIDTH);
     }
 
+
+    private LcdImageLine buildWindowLine () {
+    	LcdImageLine res= buildLine(winY,false).extractWrapped(regs.get(Reg.WX)-7,LCD_WIDTH);
+    	winY++;
+    	return res;
+    }
 
     private LcdImageLine buildLine(int line, boolean background) {
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(BG_SIZE);
@@ -370,13 +376,7 @@ public final class LcdController implements Clocked, Component {
 
     }
 
-    private LcdImageLine buildWindowLine () {
-    	LcdImageLine res= buildLine(winY,false).extractWrapped(regs.get(Reg.WX)-7,LCD_WIDTH);
-    	winY++;
-    	return res;
-    }
-
-    	private enum SpriteBit implements Bit {
+    private enum SpriteBit implements Bit {
 
         PALETTE, FLIP_H, FLIP_V, BEHIND_BG;
 
