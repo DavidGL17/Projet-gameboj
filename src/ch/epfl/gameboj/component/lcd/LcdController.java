@@ -3,6 +3,7 @@ package ch.epfl.gameboj.component.lcd;
 import java.util.Arrays;
 
 import ch.epfl.gameboj.AddressMap;
+import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
@@ -41,20 +42,27 @@ public final class LcdController implements Clocked, Component {
     private final static int LINE_CYCLES = 20 + 43 + 51;
 
     private final Cpu cpu;
+    private Bus bus;
     private LcdImage currentImage;
     private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH,
             LCD_HEIGHT);
     private final Ram videoRam;
+    private final Ram objectAttributeMemory;
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
     private long lcdOnCycle;
     private long nextNonIdleCycle;
     private int winY;
 
     private boolean firstLineDrawn = false;
+    
+    private boolean oamCopy = false;
+    private int octetsCopiedToOam = 0;
+    private int addressToCopy = 0;
 
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
         videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
+        objectAttributeMemory = new Ram(AddressMap.OAM_RAM_SIZE);
         LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
         Arrays.fill(lines, new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH)));
@@ -65,6 +73,17 @@ public final class LcdController implements Clocked, Component {
     /*
      * (non-Javadoc)
      * 
+     * @see ch.epfl.gameboj.component.Component#attachTo(ch.epfl.gameboj.Bus)
+     */
+    @Override
+    public void attachTo(Bus bus) {
+        this.bus = bus;
+        Component.super.attachTo(bus);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
      * @see ch.epfl.gameboj.component.Component#read(int)
      */
     @Override
@@ -72,6 +91,10 @@ public final class LcdController implements Clocked, Component {
         if (Preconditions.checkBits16(address) >= AddressMap.VIDEO_RAM_START
                 && address < AddressMap.VIDEO_RAM_END) {
             return videoRam.read(address - AddressMap.VIDEO_RAM_START);
+        }
+        if (Preconditions.checkBits16(address) >= AddressMap.OAM_START
+                && address < AddressMap.OAM_END) {
+            return objectAttributeMemory.read(address - AddressMap.OAM_START);
         }
         if (address >= AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
@@ -91,6 +114,10 @@ public final class LcdController implements Clocked, Component {
         if (Preconditions.checkBits16(address) >= AddressMap.VIDEO_RAM_START
                 && address < AddressMap.VIDEO_RAM_END) {
             videoRam.write(address - AddressMap.VIDEO_RAM_START, data);
+        }
+        if (Preconditions.checkBits16(address) >= AddressMap.OAM_START
+                && address < AddressMap.OAM_END) {
+            objectAttributeMemory.write(address, data);
         }
         if (address >= AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
@@ -113,6 +140,11 @@ public final class LcdController implements Clocked, Component {
             case 0xFF45:
                 regs.set(Reg.LYC, data);
                 checkIfLYEqualsLYC();
+                break;
+            case 0xFF46:
+                oamCopy = true;
+                octetsCopiedToOam = 0;
+                addressToCopy = data<<8;
                 break;
             default:
                 regs.set(Reg.values()[address - AddressMap.REGS_LCDC_START],
@@ -172,6 +204,14 @@ public final class LcdController implements Clocked, Component {
             setMode(0);
             regs.set(Reg.LY, 0);
             checkIfLYEqualsLYC();
+        }
+        if (oamCopy) {
+            if (octetsCopiedToOam>=160) {
+                oamCopy = false;
+            } else {
+                objectAttributeMemory.write(octetsCopiedToOam, bus.read(addressToCopy+octetsCopiedToOam));
+                ++octetsCopiedToOam;
+            }
         }
 
     }
@@ -244,6 +284,13 @@ public final class LcdController implements Clocked, Component {
     }
     
     
+    private LcdImageLine buildBgLine(int line) {
+        return buildLine(line, true).extractWrapped(regs.get(Reg.SCX), LCD_WIDTH);
+    }
+    
+    private LcdImageLine buildWindowLine () {
+        return buildLine(winY,false).extractWrapped(regs.get(Reg.WX),LCD_WIDTH);
+    }
     
     private LcdImageLine buildLine(int line, boolean background) {
     	LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(BG_SIZE);
@@ -272,13 +319,6 @@ public final class LcdController implements Clocked, Component {
     }
     
 
-    private LcdImageLine buildBgLine(int line) {
-        return buildLine(line, true).extractWrapped(regs.get(Reg.SCX), LCD_WIDTH);
-    }
-
-    private LcdImageLine buildWindowLine () {
-    	return buildLine(winY,false).extractWrapped(regs.get(Reg.WX),LCD_WIDTH);
-    }
     /// Manages the current mode of the LCD controller
 
     private void setMode(int mode) {
