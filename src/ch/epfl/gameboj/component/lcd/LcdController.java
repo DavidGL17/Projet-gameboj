@@ -225,22 +225,21 @@ public final class LcdController implements Clocked, Component {
 
     
     private LcdImageLine computeLine(int line) {
-    	LcdImageLine bgLine = new LcdImageLine(new BitVector(BG_SIZE),
-    			new BitVector(BG_SIZE),
-    			new BitVector(BG_SIZE));
-    	LcdImageLine windowLine = new LcdImageLine(new BitVector(BG_SIZE),
-    			new BitVector(BG_SIZE),
-    			new BitVector(BG_SIZE));
+    
+    	LcdImageLine bgLine = new LcdImageLine( new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH));
     	
     	if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
-        		bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
-    			//bgLine=PaletteTransform(bgLine)
+        	bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
+        	bgLine = bgLine.mapColors(regs.get(Reg.BGP));
     	}
         if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>7) {
-        	windowLine = buildWindowLine();
+        	LcdImageLine windowLine = buildWindowLine();
+        	return bgLine.join(windowLine,regs.get(Reg.WX) ); 
         }
         
-        return bgLine.join(windowLine.extractWrapped(regs.get(Reg.WX)-7,BG_SIZE),regs.get(Reg.WX) );
+        return bgLine;
     }
     
     
@@ -277,7 +276,7 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine buildWindowLine () {
-    	return buildLine(winY,false).extractWrapped(regs.get(Reg.WX),LCD_WIDTH);
+    	return buildLine(winY,false).extractWrapped(regs.get(Reg.WX)-7,LCD_WIDTH);
     }
     /// Manages the current mode of the LCD controller
 
