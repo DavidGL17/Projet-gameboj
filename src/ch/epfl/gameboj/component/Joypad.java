@@ -13,6 +13,7 @@ public final class Joypad implements Component {
 
     private final Cpu cpu;
     private int P1;
+    
     public Joypad(Cpu cpu) {
         this.cpu = cpu;
     }
@@ -23,7 +24,7 @@ public final class Joypad implements Component {
      */
     @Override
     public int read(int address) {
-        // TODO Auto-generated method stub
+        
         return 0;
     }
 
