@@ -28,6 +28,9 @@ public final class DebugMain2Live extends Application {
     private static final int[] COLOR_MAP = new int[] {
             0xFF_FF_FF, 0xD3_D3_D3, 0xA9_A9_A9, 0x00_00_00
     };
+    public static void main(String[] args) {
+        Application.launch(args);
+    }
 
     @Override public void start(Stage stage) throws IOException, InterruptedException {
         // Create GameBoy
@@ -69,8 +72,5 @@ public final class DebugMain2Live extends Application {
         return SwingFXUtils.toFXImage(bufferedImage, null);
     }
 
-    public static void main(String[] args) {
-        Application.launch(args);
-    }
 
 }
