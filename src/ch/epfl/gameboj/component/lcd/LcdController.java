@@ -48,7 +48,7 @@ public final class LcdController implements Clocked, Component {
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
     private long lcdOnCycle;
     private long nextNonIdleCycle;
-    private int winY;
+    private int winY=0;
 
     private boolean firstLineDrawn = false;
 
@@ -193,6 +193,7 @@ public final class LcdController implements Clocked, Component {
             	nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
             }
         	nextNonIdleCycle= cycle + LINE_CYCLES;
+        	winY=0;
             break;
         case 2:
             // mode 2 // Completed
@@ -242,7 +243,7 @@ public final class LcdController implements Clocked, Component {
         	bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
         	bgLine = bgLine.mapColors(regs.get(Reg.BGP));
     	}
-        if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>7) {
+    	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) ) { //Ajouter condition sur reg.WX correct
         	LcdImageLine windowLine = buildWindowLine();
         	return behindSprites.below(bgLine.join(windowLine,regs.get(Reg.WX)) ); 
         }
@@ -284,7 +285,9 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine buildWindowLine () {
-    	return buildLine(winY,false).extractWrapped(regs.get(Reg.WX)-7,LCD_WIDTH);
+    	LcdImageLine res= buildLine(winY,false).extractWrapped(regs.get(Reg.WX)-7,LCD_WIDTH);
+    	winY++;
+    	return res;
     }
     /// Manages the current mode of the LCD controller
 

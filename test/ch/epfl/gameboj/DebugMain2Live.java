@@ -21,7 +21,7 @@ import java.io.IOException;
 
 public final class DebugMain2Live extends Application {
 
-    private static final String ROM_PATH = "flappyboy.gb";
+    private static final String ROM_PATH = "tasmaniaStory.gb";
 
     private static final int CYCLES_PER_ITERATION = 17_556;
 

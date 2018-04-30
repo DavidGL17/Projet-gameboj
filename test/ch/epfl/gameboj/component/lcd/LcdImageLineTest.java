@@ -259,10 +259,10 @@ class LcdImageLineTest {
 
     @Test
     void joinWorks( ) {
-    		for (int i=0 ; i<20 ; i++) {
+    		for (int i=0 ; i<100 ; i++) {
 	    		Random random = new Random();
 	    	
-		    	BitVector msb1 =  BitVectorTest.randomBitVectorInstantiation();
+		    BitVector msb1 =  BitVectorTest.randomBitVectorInstantiation();
 			BitVector lsb1 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
 			BitVector opacity1 =  BitVectorTest.randomBitVectorInstantiation(msb1.size());
 			
