@@ -1,6 +1,9 @@
 package ch.epfl.gameboj.component.lcd;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
@@ -271,7 +274,7 @@ public final class LcdController implements Clocked, Component {
 
     private LcdImageLine computeLine(int line) {
     	
-    	LcdImageLine behindSprites = new LcdImageLine( new BitVector(LCD_WIDTH),
+    	LcdImageLine behindSpritesLine = new LcdImageLine( new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH));
     
@@ -279,20 +282,25 @@ public final class LcdController implements Clocked, Component {
     			new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH));
     	
-    	LcdImageLine foregroundSprites = new LcdImageLine( new BitVector(LCD_WIDTH),
+    	LcdImageLine foregroundSpritesLine = new LcdImageLine( new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH));
     	
+    	if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
+    		// Build SpriteLine
+    		// build SpriteLine
+    		
+    	}
     	if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
         	bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
         	bgLine = bgLine.mapColors(regs.get(Reg.BGP));
     	}
-    	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) ) { //Ajouter condition sur reg.WX correct
+    	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>=7 ) { //Ajouter condition sur reg.WX correct
         	LcdImageLine windowLine = buildWindowLine();
-        	return behindSprites.below(bgLine.join(windowLine,regs.get(Reg.WX)-7)); 
+        	return behindSpritesLine.below(bgLine.join(windowLine,regs.get(Reg.WX)-7)).below(foregroundSpritesLine); 
     	}
 
-        return behindSprites.below(bgLine);
+        return behindSpritesLine.below(bgLine).below(foregroundSpritesLine);
     }
 
     private LcdImageLine buildBgLine(int line) {
@@ -306,6 +314,7 @@ public final class LcdController implements Clocked, Component {
     	winY++;
     	return res;
     }
+    
 
     private LcdImageLine buildLine(int line, boolean background) {
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(BG_SIZE);
@@ -333,23 +342,144 @@ public final class LcdController implements Clocked, Component {
         return lineBuilder.build();
 
     }
+    
+    private LcdImageLine[] buildSpritesLines(int line) {
+    	List foregroundSprites = new ArrayList<Sprite>();
+    	List backgroundSprites = new ArrayList<Sprite>();
+    	byte i=0;
+    	int filled=0;
+    	while (filled<10 && i<40) {
+    		Sprite sprite = new Sprite(i);
+    		int y=sprite.getY();
+    		boolean is8by8 = regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE);
+    		// Multiplications des variables pour réduire le nombre de lecture sur OAM
+    		if ((line-y>0) && (line-y<8 && is8by8 || (line-y<16 && !is8by8))){
+    			if (sprite.isBehindBg()) {
+    				backgroundSprites.add(sprite);
+    			} else {
+    				foregroundSprites.add(sprite);
+    			}
+    			filled++;
+    		}
+    		i++;
+    	}
+    	
+    	LcdImageLine[] res = { buildSpritesLine(line,backgroundSprites),
+			buildSpritesLine(line,foregroundSprites)	};
+    	
+    	return res;
+    	
+    }
+    
+    private LcdImageLine buildSpritesLine(int line, List<Sprite> list) {
+    	LcdImageLine res = new LcdImageLine(new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH));
+    	list.sort(new SpriteSorter());
+    	for (Sprite sprite : list ) {
+    		
+    		res= buildSpriteLine(line,sprite).below(res);
+    	}
+    	return res;
+    	
+    }
+    
+    private LcdImageLine buildSpriteLine(int line, Sprite sprite) {
+    	LcdImageLine.Builder builder = new LcdImageLine.Builder(LCD_WIDTH);
+    	LcdImageLine resLine ;
+    	boolean hFlipped = sprite.isHFlipped();
+    	boolean vFlipped = sprite.isVFlipped();
+    	LcdImageLine ref = new LcdImageLine( new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH),
+    			new BitVector(LCD_WIDTH));
+    	
+	    if (line-sprite.getY()<=8) { 
+	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2);
+	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2+1);
+	   		builder.setBytes(0,
+	   				hFlipped ? Bits.reverse8(msb) : msb ,
+    				hFlipped ? Bits.reverse8(lsb) : lsb );
+	   		resLine = builder.build();
+	    	resLine = resLine.shift(sprite.getX());
+	   		resLine = resLine.mapColors(sprite.getPalette());
+	   	} else if (line-sprite.getY()<=16 && regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) {
+	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2 + 16);
+	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2+1 + 16);
+   			builder.setBytes(0,
+   					hFlipped ? Bits.reverse8(msb) : msb,
+	   				hFlipped ? Bits.reverse8(lsb) : lsb );
+	       	resLine = builder.build();
+	       	resLine = resLine.shift(sprite.getX());
+	       	resLine = resLine.mapColors(sprite.getPalette());
+	   	} else {
+	   		throw new IllegalArgumentException(" Cannot nuild SpriteLine");
+	   	}
+	    	
+    	
+    	return ref.below(resLine);
+    	
+    }
+    
+    private class SpriteSorter implements Comparator<Sprite> {
 
+		@Override
+		public int compare(Sprite o1, Sprite o2) {
+			int first = ((Integer)o1.getIndex()).compareTo((Integer)o2.getIndex());
+			if (first != 0)
+				return first;
+			return o2.getX()-o1.getX();
+		}
+    	
+    }
+    
+    private class Sprite { 
+    	//Pas temporaire car extrêmement pratique ->
+    	// Traitement en focntion du retour une méthode d'un sprite, puis en fonction d'un second etc
+        private byte index; 
 
-    private class Sprite { // Temporaire peut-être inutilement contraignant
-                           // lourd en mise en oeuvre
-        // (En particulier -> fin de vie d'un Sprite)
-        int index;
+        //Peu d'attributs car en fonction des durées de vie, potentiellement attribut non à jours
+//        Utilisation des méthodes : getY() 0-2
+        //							getX() 0-2
+        //							getTileAddress() 0-1 
+        //							getPalette() 0-1
+        //							isHFlipped() 0-1
+        //							isVFlipped() 0-1
+        //							isBehindBg() 0-1
+//        												0-1 --> pas d'attributs
+//        												X,Y envisager de créer un attribut ? --> Demander
+//        												en projet ce qu'il pense de la durée de vie
+        	
 
-        public Sprite(int index) {
+        public Sprite(byte index) {
             this.index = index;
         }
-
+        
+        public int getIndex() {
+        	return index;
+        }
+        
+//        Esperais qu'on puisse s'en servir pour détruire instance inutilisée/réduire nombre d'instance, 
+//        genre fonctionnemnt du type si 2 instances sont égales une seule est utilisée mais voit pas faire sans 
+//        attributs ou méthode statiques
+        @Override
+        public boolean equals(Object that) {
+        	if (that instanceof Sprite)	{
+        		return (((Sprite)that).index==this.index);
+        	}
+        	return false;
+        }
+        
+        @Override
+        public int hashCode() {
+        	return index;
+        }
+        
         public int getY() {
             return read(0xFE00 + 4 * index) - 16;
         }
 
         public int getX() {
-            return read(0xFE00 + 4 * index + 1) - 8;
+        		return read(0xFE00 + 4 * index + 1) - 8;
         }
 
         private int getTileIndex() {
@@ -366,11 +496,15 @@ public final class LcdController implements Clocked, Component {
                     : regs.get(Reg.OBP1));
         }
 
-        public boolean getFlipH() {
+        public boolean isHFlipped() {
             return Bits.test(read(0xFE00 + 4 * index + 3), SpriteBit.FLIP_H);
         }
+        
+        public boolean isVFlipped() {
+            return Bits.test(read(0xFE00 + 4 * index + 3), SpriteBit.FLIP_V);
+        }
 
-        public boolean behingBg() {
+        public boolean isBehindBg() {
             return Bits.test(read(0xFE00 + 4 * index + 3), SpriteBit.BEHIND_BG);
         }
 
