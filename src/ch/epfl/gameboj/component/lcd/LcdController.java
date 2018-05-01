@@ -343,7 +343,7 @@ public final class LcdController implements Clocked, Component {
 
     }
     
-    private LcdImageLine[] buildSpriteLines(int line) {
+    private LcdImageLine[] buildSpritesLines(int line) {
     	List foregroundSprites = new ArrayList<Sprite>();
     	List backgroundSprites = new ArrayList<Sprite>();
     	byte i=0;
@@ -387,28 +387,36 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine buildSpriteLine(int line, Sprite sprite) {
     	LcdImageLine.Builder builder = new LcdImageLine.Builder(LCD_WIDTH);
     	LcdImageLine resLine ;
+    	boolean hFlipped = sprite.isHFlipped();
+    	boolean vFlipped = sprite.isVFlipped();
     	LcdImageLine ref = new LcdImageLine( new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH));
-    	if (line-sprite.getY()<=8) {
-    		builder.setBytes(0,
-    				read(sprite.getTileAddress()+(line-sprite.getY())*2),
-    				read(sprite.getTileAddress()+(line-sprite.getY())*2+1));
-    		resLine = builder.build();
-    		resLine = resLine.shift(sprite.getX());
-    		resLine = resLine.mapColors(sprite.getPalette());
-    	} else if (line-sprite.getY()<=16 && regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) {
-   			builder.setBytes(0,
-       				read(sprite.getTileAddress()+(line-sprite.getY())*2 + 16),
-       				read(sprite.getTileAddress()+(line-sprite.getY())*2+1) + 16);
-       		resLine = builder.build();
-       		resLine = resLine.shift(sprite.getX());
-        	resLine = resLine.mapColors(sprite.getPalette());
-    	} else {
-   			throw new IllegalArgumentException(" Cannot nuild SpriteLine");
-   		}
     	
-    	return resLine;
+	    if (line-sprite.getY()<=8) { 
+	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2);
+	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2+1);
+	   		builder.setBytes(0,
+	   				hFlipped ? Bits.reverse8(msb) : msb ,
+    				hFlipped ? Bits.reverse8(lsb) : lsb );
+	   		resLine = builder.build();
+	    	resLine = resLine.shift(sprite.getX());
+	   		resLine = resLine.mapColors(sprite.getPalette());
+	   	} else if (line-sprite.getY()<=16 && regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) {
+	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2 + 16);
+	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2+1 + 16);
+   			builder.setBytes(0,
+   					hFlipped ? Bits.reverse8(msb) : msb,
+	   				hFlipped ? Bits.reverse8(lsb) : lsb );
+	       	resLine = builder.build();
+	       	resLine = resLine.shift(sprite.getX());
+	       	resLine = resLine.mapColors(sprite.getPalette());
+	   	} else {
+	   		throw new IllegalArgumentException(" Cannot nuild SpriteLine");
+	   	}
+	    	
+    	
+    	return ref.below(resLine);
     	
     }
     
@@ -431,7 +439,7 @@ public final class LcdController implements Clocked, Component {
 //        private int y;  //nécessaire à tout Sprite instancié (pour savoir si il fait parti 
         // Non utilisation unique
         //Peu d'attributs car en fonction des durées de vie, potentiellement attribut non à jours
-        private Integer x=null;
+//        Utilisation des méthodes : getY()
 
         public Sprite(byte index) {
             this.index = index;
@@ -459,9 +467,7 @@ public final class LcdController implements Clocked, Component {
         }
 
         public int getX() {
-        	if (x==null)
-        		x = read(0xFE00 + 4 * index + 1) - 8;
-            return x;
+        		return read(0xFE00 + 4 * index + 1) - 8;
         }
 
         private int getTileIndex() {
