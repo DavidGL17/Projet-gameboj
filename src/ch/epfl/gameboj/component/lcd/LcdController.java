@@ -435,11 +435,20 @@ public final class LcdController implements Clocked, Component {
     private class Sprite { 
     	//Pas temporaire car extrêmement pratique ->
     	// Traitement en focntion du retour une méthode d'un sprite, puis en fonction d'un second etc
-        private byte index; //nécessaire à toute les autres méthodes -> à tout Sprite instancié
-//        private int y;  //nécessaire à tout Sprite instancié (pour savoir si il fait parti 
-        // Non utilisation unique
+        private byte index; 
+
         //Peu d'attributs car en fonction des durées de vie, potentiellement attribut non à jours
-//        Utilisation des méthodes : getY()
+//        Utilisation des méthodes : getY() 0-2
+        //							getX() 0-2
+        //							getTileAddress() 0-1 
+        //							getPalette() 0-1
+        //							isHFlipped() 0-1
+        //							isVFlipped() 0-1
+        //							isBehindBg() 0-1
+//        												0-1 --> pas d'attributs
+//        												X,Y envisager de créer un attribut ? --> Demander
+//        												en projet ce qu'il pense de la durée de vie
+        	
 
         public Sprite(byte index) {
             this.index = index;
@@ -449,6 +458,9 @@ public final class LcdController implements Clocked, Component {
         	return index;
         }
         
+//        Esperais qu'on puisse s'en servir pour détruire instance inutilisée/réduire nombre d'instance, 
+//        genre fonctionnemnt du type si 2 instances sont égales une seule est utilisée mais voit pas faire sans 
+//        attributs ou méthode statiques
         @Override
         public boolean equals(Object that) {
         	if (that instanceof Sprite)	{
