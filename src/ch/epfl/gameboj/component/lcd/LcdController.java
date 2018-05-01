@@ -274,33 +274,29 @@ public final class LcdController implements Clocked, Component {
 
     private LcdImageLine computeLine(int line) {
     	
-    	LcdImageLine behindSpritesLine = new LcdImageLine( new BitVector(LCD_WIDTH),
-    			new BitVector(LCD_WIDTH),
-    			new BitVector(LCD_WIDTH));
+    	
     
     	LcdImageLine bgLine = new LcdImageLine( new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH));
     	
-    	LcdImageLine foregroundSpritesLine = new LcdImageLine( new BitVector(LCD_WIDTH),
-    			new BitVector(LCD_WIDTH),
-    			new BitVector(LCD_WIDTH));
+    	LcdImageLine behindSpritesLine = buildSpritesLines(line)[0];
+    	LcdImageLine foregroundSpritesLine = buildSpritesLines(line)[1];
     	
-    	if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
-    		// Build SpriteLine
-    		// build SpriteLine
-    		
-    	}
+    	
     	if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
         	bgLine = buildBgLine(Math.floorMod(line+regs.get(Reg.SCY),BG_SIZE));
         	bgLine = bgLine.mapColors(regs.get(Reg.BGP));
     	}
+    	
+    	LcdImageLine backgroundAndBehindSprites = behindSpritesLine.below(bgLine,bgLine.getOpacity().or(behindSpritesLine.getOpacity()));
+    	
     	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>=7 ) { //Ajouter condition sur reg.WX correct
         	LcdImageLine windowLine = buildWindowLine();
-        	return behindSpritesLine.below(bgLine.join(windowLine,regs.get(Reg.WX)-7)).below(foregroundSpritesLine); 
+        	return backgroundAndBehindSprites.join(windowLine,regs.get(Reg.WX)-7).below(foregroundSpritesLine); 
     	}
 
-        return behindSpritesLine.below(bgLine).below(foregroundSpritesLine);
+        return backgroundAndBehindSprites.below(foregroundSpritesLine);
     }
 
     private LcdImageLine buildBgLine(int line) {
