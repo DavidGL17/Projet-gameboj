@@ -22,8 +22,7 @@ import ch.epfl.gameboj.component.memory.Ram;
  *
  */
 public final class Cpu implements Component, Clocked {
-    
-    
+
     /**
      * Represents the 8 bit registers of the cpu
      */
@@ -37,7 +36,7 @@ public final class Cpu implements Component, Clocked {
     private enum Reg16 implements Register {
         AF, BC, DE, HL
     }
-    
+
     /**
      * Represents the different type of Interruption
      */
@@ -72,7 +71,7 @@ public final class Cpu implements Component, Clocked {
         }
         return table;
     }
-    
+
     /// Methods imposed by Component
 
     /*
@@ -123,7 +122,7 @@ public final class Cpu implements Component, Clocked {
     }
 
     /// Functionality offered to other Components
-    
+
     /**
      * Allows an Interruption to be raised
      * 
@@ -135,7 +134,7 @@ public final class Cpu implements Component, Clocked {
     }
 
     /// Visibility for test purposes
-    
+
     /**
      * Allows the state of the Cpu to be known for test purposes
      * 
@@ -150,7 +149,7 @@ public final class Cpu implements Component, Clocked {
     }
 
     /// Method imposed by Clocked
-    
+
     /**
      * Determines wether the gameboy should be functionning or waiting in order
      * to simulate a gameboy if the gameboy is in HALT, determines wether the
@@ -215,7 +214,7 @@ public final class Cpu implements Component, Clocked {
             IME = false;
             registerIF = Bits.set(registerIF, toManage, false);
             push16(registerPC);
-            registerPC = AddressMap.INTERRUPTS[toManage]; 
+            registerPC = AddressMap.INTERRUPTS[toManage];
         }
     }
 
@@ -239,8 +238,7 @@ public final class Cpu implements Component, Clocked {
         }
         nextNonIdleCycle = cycle + opcode.cycles + additional;
     }
-    
-    
+
     /**
      * Operates the action corresponding to the opcode and updates
      * nextNonIdleCycle accordingly
