@@ -361,6 +361,38 @@ public final class LcdController implements Clocked, Component {
     		}
     		i++;
     	}
+    	System.out.println();
+    	System.out.println();
+    	System.out.println();
+    	System.out.println();
+    	if (!backgroundSprites.isEmpty()) {
+	    	System.out.println(backgroundSprites);
+	     	for (Sprite s : backgroundSprites) {
+	    		System.out.println("X = " + s.getX());
+	    		System.out.println("Y = " + s.getY());
+	    		System.out.println("getTileAddress =" + s.getTileAddress());
+	    		System.out.println();
+	     	}
+    	} else {
+    		System.out.println("backgroundSprites empty");
+    	}
+    	System.out.println();
+    	
+    	if (!backgroundSprites.isEmpty()) {
+	    	System.out.println(foregroundSprites);
+	    	for (Sprite s : foregroundSprites) {
+	    		System.out.println("X = " + s.getX());
+	    		System.out.println("Y = " + s.getY());
+	    		System.out.println("getTileAddress =" + s.getTileAddress());
+	    		System.out.println();
+	    	}
+    	} else {
+    		System.out.println("foregroundSprites empty");
+    	}
+    	System.out.println();
+    	System.out.println();
+    	
+    	
     	
     	LcdImageLine[] res = { buildSpritesLine(line,backgroundSprites),
 			buildSpritesLine(line,foregroundSprites)	};
@@ -396,8 +428,8 @@ public final class LcdController implements Clocked, Component {
     	
 //    	Quelque chose ne va pas 
 	    if (line-y<=8 && !regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) { 
-	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+y-line :line-y )*2);
-	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+y-line :line-y )*2+1);
+	   		int msb = read(sprite.getTileAddress()+(vFlipped ?y-line+8 :line-y )*2);
+	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?y-line+8 :line-y )*2+1);
 	   		System.out.println((msb<0xFF) && (lsb<0xFF));
 	   		System.out.println(hFlipped);
 	   		System.out.println("" + (msb==0x100) + " " + (lsb==0x100));
@@ -417,7 +449,8 @@ public final class LcdController implements Clocked, Component {
 	       	resLine = resLine.shift(sprite.getX());
 	       	resLine = resLine.mapColors(sprite.getPalette());
 	   	} else {
-	   		throw new IllegalArgumentException(" Cannot nuild SpriteLine");
+	   		System.out.println("line = " + line );
+	   		throw new IllegalArgumentException(" Cannot build SpriteLine");
 	   	}
 	    	
     	
@@ -481,6 +514,11 @@ public final class LcdController implements Clocked, Component {
         	return index;
         }
         
+        @Override
+        public String toString() {
+        	return ((Integer)(int)index).toString();
+        }
+        
         public boolean exists() {
         	boolean res = true;
         	if (getY()==NO_DATA){
@@ -515,7 +553,7 @@ public final class LcdController implements Clocked, Component {
         }
 
         public int getTileAddress() {
-            return read( 0x8000 + 16 * getTileIndex());
+            return 0x8000 + 16 * getTileIndex();
         }
 
         public int getPalette() {
