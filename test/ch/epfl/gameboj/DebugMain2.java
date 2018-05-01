@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj;
 
 import java.awt.image.BufferedImage;
@@ -15,6 +12,7 @@ import ch.epfl.gameboj.component.lcd.LcdImage;
 
 /**
  * @author David Gonzalez leon (270845)
+ * @author Melvin Malonga-Matouba (288405)
  *
  */
 public class DebugMain2 {

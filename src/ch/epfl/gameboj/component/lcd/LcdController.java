@@ -382,7 +382,7 @@ public final class LcdController implements Clocked, Component {
   		boolean is8by16 = regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE);
   		while (filled<10 && rank<40) {
   			int y = spriteGetY(rank)-16;
-  			if (line>y-16 && (is8by16?line<y :line<y-8)) {
+  			if (line>y && (is8by16?line<y :line<y-8)) {
   				res[filled] = (y+16)<<16+spriteGetX(rank)<<8+rank;
   				filled++;
   			}
@@ -396,19 +396,26 @@ public final class LcdController implements Clocked, Component {
   		int index = Bits.extract(yxindex,0,6);
   		int y=Bits.extract(yxindex,16,8)-16;
   		boolean isHFlipped = spriteIsHFlipped(index);
+  		boolean isVFlipped = spriteIsVFlipped(index);
   		int tileAddress = spriteGetTileAddress(index);
   		int relativeAddress = 0;
   		
-  		if (spriteIsVFlipped(index)){
+  		if (isVFlipped){
   			if (regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) {
-  				relativeAddress=32+2*(y-line);
+  				System.out.print("indeed   ");
+  				relativeAddress=2*(y-line+15);
   			} else {
-  				relativeAddress=16+2*(y-line);
+  				relativeAddress=2*(y-line+7);
   			}
   		} else {
   			relativeAddress=2*(line-y);
   		}
   		
+  		System.out.println("Tilesize " + ((regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE))? "8x16" : "8x8"));
+  		System.out.println("isHFlipped : " + isHFlipped);
+  		System.out.println("isVFlipped : " + isVFlipped);
+  		System.out.println("y :" + y);
+  		System.out.println("index :" + index);
   		
   		res.setBytes(0,
   				isHFlipped? read(tileAddress+relativeAddress) : Bits.reverse8(read(tileAddress+relativeAddress)),
