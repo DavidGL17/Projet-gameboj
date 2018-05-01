@@ -17,9 +17,13 @@ public final class LcdImage {
 
     /**
      * Builds a LcdImage
-     * @param lines, a list of lines
-     * @param width, the width of the image
-     * @param height, the height of the image
+     * 
+     * @param lines,
+     *            a list of lines
+     * @param width,
+     *            the width of the image
+     * @param height,
+     *            the height of the image
      */
     public LcdImage(List<LcdImageLine> lines, int width, int height) {
         Preconditions

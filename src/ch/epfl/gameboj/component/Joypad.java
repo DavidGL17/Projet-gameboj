@@ -18,8 +18,8 @@ public final class Joypad implements Component {
     public enum Key {
         RIGHT(0, 1), LEFT(1, 1), UP(2, 1), DOWN(3, 1), A(0, 2), B(1,
                 2), SELECT(2, 2), START(3, 2);
-        public final int index;
-        public final int line;
+        private final int index;
+        private final int line;
 
         private Key(int index, int line) {
             this.index = index;
@@ -43,7 +43,7 @@ public final class Joypad implements Component {
     @Override
     public int read(int address) {
         if (AddressMap.REG_P1 == Preconditions.checkBits16(address)) {
-            return Bits.reverse8(line1 | line2);
+            return Bits.complement8(line1 | line2);
         }
         return NO_DATA;
     }
