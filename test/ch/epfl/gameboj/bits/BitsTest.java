@@ -315,7 +315,7 @@ class BitsTest {
             assertEquals(v8, Bits.reverse8(Bits.reverse8(v8)));
         }
     }
-
+    
     @Test
     void reverse8WorksOnKnownValues() {
         assertEquals(0b0000_0000, Bits.reverse8(0b0000_0000));
