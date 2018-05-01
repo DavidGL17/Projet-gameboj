@@ -2,6 +2,7 @@ package ch.epfl.gameboj;
 
 import java.util.Objects;
 
+import ch.epfl.gameboj.component.Joypad;
 import ch.epfl.gameboj.component.Timer;
 import ch.epfl.gameboj.component.cartridge.Cartridge;
 import ch.epfl.gameboj.component.cpu.Cpu;
@@ -24,12 +25,18 @@ public final class GameBoy {
     private final Timer timer;
     private final BootRomController bootRomController;
     private final LcdController lcdController;
+    private final Joypad joypad;
 
     private long currentCycle = 0;
+    public static final long cyclesPerSecond = (long) Math.pow(2, 20);
+    public static final long cyclesPerNanosecond = (long) (cyclesPerSecond
+            * Math.pow(10, -9));
 
     /**
      * Builds a GameBoy
-     * @param cartridge, the cartridge the GameBoy will run
+     * 
+     * @param cartridge,
+     *            the cartridge the GameBoy will run
      */
     public GameBoy(Cartridge cartridge) {
         Ram ram = new Ram(AddressMap.WORK_RAM_SIZE);
@@ -41,6 +48,7 @@ public final class GameBoy {
         bootRomController = new BootRomController(
                 Objects.requireNonNull(cartridge));
         lcdController = new LcdController(cpu);
+        joypad = new Joypad(cpu);
 
         workRam.attachTo(bus);
         echoRam.attachTo(bus);
@@ -48,6 +56,7 @@ public final class GameBoy {
         timer.attachTo(bus);
         bootRomController.attachTo(bus);
         lcdController.attachTo(bus);
+        joypad.attachTo(bus);
     }
 
     /**
@@ -76,7 +85,7 @@ public final class GameBoy {
     public Timer timer() {
         return timer;
     }
-    
+
     /**
      * Returns the gameBoy's LcdController
      * 
@@ -84,6 +93,15 @@ public final class GameBoy {
      */
     public LcdController lcdController() {
         return lcdController;
+    }
+
+    /**
+     * Returns the gameBoy's joypad
+     * 
+     * @return joypad the gameBoy's joypad
+     */
+    public Joypad joypad() {
+        return joypad;
     }
 
     /**

@@ -3,6 +3,9 @@
  */
 package ch.epfl.gameboj.component;
 
+import ch.epfl.gameboj.AddressMap;
+import ch.epfl.gameboj.Preconditions;
+import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.cpu.Cpu;
 
 /**
@@ -11,30 +14,73 @@ import ch.epfl.gameboj.component.cpu.Cpu;
  */
 public final class Joypad implements Component {
 
+    public enum Key {
+        RIGHT(0, 1), LEFT(1, 1), UP(2, 1), DOWN(3, 1), A(0, 2), B(1,
+                2), SELECT(2, 2), START(3, 2);
+        public final int index;
+        public final int line;
+
+        private Key(int index, int line) {
+            this.index = index;
+            this.line = line;
+        }
+    }
+
     private final Cpu cpu;
-    private int P1;
-    
+    private int line1 = 0;
+    private int line2 = 0;
+
     public Joypad(Cpu cpu) {
         this.cpu = cpu;
     }
-    
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see ch.epfl.gameboj.component.Component#read(int)
      */
     @Override
     public int read(int address) {
-        
-        return 0;
+        if (AddressMap.REG_P1 == Preconditions.checkBits16(address)) {
+            return Bits.reverse8(line1 | line2);
+        }
+        return NO_DATA;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see ch.epfl.gameboj.component.Component#write(int, int)
      */
     @Override
     public void write(int address, int data) {
-        // TODO Auto-generated method stub
-
+        if (AddressMap.REG_P1 == Preconditions.checkBits16(address)) {
+            line1 = Bits.set(line1, 4,
+                    !Bits.test(Preconditions.checkBits8(data), 4));
+            line2 = Bits.set(line2, 5, !Bits.test(data, 5));
+            ;
+        }
     }
 
+    public void keyPressed(Key key) {
+        switch (key.line) {
+        case 1:
+            line1 = Bits.set(line1, key.index, true);
+            break;
+        case 2:
+            line2 = Bits.set(line2, key.index, true);
+            break;
+        }
+    }
+
+    public void keyReleased(Key key) {
+        switch (key.line) {
+        case 1:
+            line1 = Bits.set(line1, key.index, false);
+            break;
+        case 2:
+            line2 = Bits.set(line2, key.index, false);
+            break;
+        }
+    }
 }
