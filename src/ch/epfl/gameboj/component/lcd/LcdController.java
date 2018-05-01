@@ -340,22 +340,24 @@ public final class LcdController implements Clocked, Component {
     }
     
     private LcdImageLine[] buildSpritesLines(int line) {
-    	List foregroundSprites = new ArrayList<Sprite>();
-    	List backgroundSprites = new ArrayList<Sprite>();
+    	List<Sprite> foregroundSprites = new ArrayList<Sprite>();
+    	List<Sprite> backgroundSprites = new ArrayList<Sprite>();
     	byte i=0;
     	int filled=0;
     	while (filled<10 && i<40) {
     		Sprite sprite = new Sprite(i);
-    		int y=sprite.getY();
-    		boolean is8by8 = regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE);
-    		// Multiplications des variables pour réduire le nombre de lecture sur OAM
-    		if ((line-y>0) && (line-y<8 && is8by8 || (line-y<16 && !is8by8))){
-    			if (sprite.isBehindBg()) {
-    				backgroundSprites.add(sprite);
-    			} else {
-    				foregroundSprites.add(sprite);
-    			}
-    			filled++;
+    		if (sprite.exists()){
+	    		int y=sprite.getY();
+	    		boolean is8by8 = regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE);
+	    		// Multiplications des variables pour réduire le nombre de lecture sur OAM
+	    		if ((line>y) && (line-y<8 && is8by8 || (line-y<16 && !is8by8))){
+	    			if (sprite.isBehindBg()) {
+	    				backgroundSprites.add(sprite);
+	    			} else {
+	    				foregroundSprites.add(sprite);
+	    			}
+	    			filled++;
+	    		}
     		}
     		i++;
     	}
@@ -371,10 +373,12 @@ public final class LcdController implements Clocked, Component {
     	LcdImageLine res = new LcdImageLine(new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH));
-    	list.sort(new SpriteSorter());
-    	for (Sprite sprite : list ) {
-    		
-    		res= buildSpriteLine(line,sprite).below(res);
+    	if (!list.isEmpty()) {
+	    	list.sort(new SpriteSorter());
+	    	for (Sprite sprite : list ) {
+	    		
+	    		res= buildSpriteLine(line,sprite).below(res);
+	    	}
     	}
     	return res;
     	
@@ -385,22 +389,27 @@ public final class LcdController implements Clocked, Component {
     	LcdImageLine resLine ;
     	boolean hFlipped = sprite.isHFlipped();
     	boolean vFlipped = sprite.isVFlipped();
+    	int y =sprite.getY();
     	LcdImageLine ref = new LcdImageLine( new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH),
     			new BitVector(LCD_WIDTH));
     	
-	    if (line-sprite.getY()<=8) { 
-	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2);
-	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2+1);
+//    	Quelque chose ne va pas 
+	    if (line-y<=8 && !regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) { 
+	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+y-line :line-y )*2);
+	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+y-line :line-y )*2+1);
+	   		System.out.println((msb<0xFF) && (lsb<0xFF));
+	   		System.out.println(hFlipped);
+	   		System.out.println("" + (msb==0x100) + " " + (lsb==0x100));
 	   		builder.setBytes(0,
 	   				hFlipped ? Bits.reverse8(msb) : msb ,
     				hFlipped ? Bits.reverse8(lsb) : lsb );
 	   		resLine = builder.build();
 	    	resLine = resLine.shift(sprite.getX());
 	   		resLine = resLine.mapColors(sprite.getPalette());
-	   	} else if (line-sprite.getY()<=16 && regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) {
-	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2 + 16);
-	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+sprite.getY()-line :line-sprite.getY() )*2+1 + 16);
+	   	} else if (line-y<=16 && regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) {
+	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+y-line :line-y )*2 + 16);
+	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+y-line :line-y )*2+1 + 16);
    			builder.setBytes(0,
    					hFlipped ? Bits.reverse8(msb) : msb,
 	   				hFlipped ? Bits.reverse8(lsb) : lsb );
@@ -432,15 +441,17 @@ public final class LcdController implements Clocked, Component {
     	//Pas temporaire car extrêmement pratique ->
     	// Traitement en focntion du retour une méthode d'un sprite, puis en fonction d'un second etc
         private byte index; 
+        private Integer x=null;
+        private Integer y=null;
 
         //Peu d'attributs car en fonction des durées de vie, potentiellement attribut non à jours
-//        Utilisation des méthodes : getY() 0-2
-        //							getX() 0-2
-        //							getTileAddress() 0-1 
-        //							getPalette() 0-1
-        //							isHFlipped() 0-1
-        //							isVFlipped() 0-1
-        //							isBehindBg() 0-1
+//        Utilisation des méthodes : getY() 0-2 + 1
+        //							getX() 0-2 + 1
+        //							getTileAddress() 0-1 + 1 
+        //							getPalette() 0-1 + 1'
+        //							isHFlipped() 0-1 + 1'
+        //							isVFlipped() 0-1 + 1'
+        //							isBehindBg() 0-1 + 1'
 //        												0-1 --> pas d'attributs
 //        												X,Y envisager de créer un attribut ? --> Demander
 //        												en projet ce qu'il pense de la durée de vie
@@ -470,38 +481,59 @@ public final class LcdController implements Clocked, Component {
         	return index;
         }
         
+        public boolean exists() {
+        	boolean res = true;
+        	if (getY()==NO_DATA){
+        		return false;
+        	}
+        	if (getX()==NO_DATA){
+        		return false;
+        	}
+        	if (getTileIndex()==NO_DATA) {
+        		return false;
+        	}
+        	if (objectAttributeMemory.read(4*index + 3) == NO_DATA) {
+        		return false;
+        	}
+        	return res;
+        }
+        
         public int getY() {
-            return read(0xFE00 + 4 * index) - 16;
+        	if(y==null)
+        		y=objectAttributeMemory.read(4 * index) - 16;
+            return y;
         }
 
         public int getX() {
-        		return read(0xFE00 + 4 * index + 1) - 8;
+        	if (x==null)
+        		x=objectAttributeMemory.read(4 * index + 1) - 8;
+        		return x;
         }
 
         private int getTileIndex() {
-            return read(0xFE00 + 4 * index + 2);
+            return objectAttributeMemory.read( 4 * index + 2);
         }
 
         public int getTileAddress() {
-            return read(0x8000 + 16 * getTileIndex());
+            return read( 0x8000 + 16 * getTileIndex());
         }
 
         public int getPalette() {
-            return (Bits.test(read(0xFE00 + 4 * index + 3), SpriteBit.PALETTE)
+            return (Bits.test(objectAttributeMemory.read( 4 * index + 3), SpriteBit.PALETTE)
                     ? regs.get(Reg.OBP0)
                     : regs.get(Reg.OBP1));
         }
 
         public boolean isHFlipped() {
-            return Bits.test(read(0xFE00 + 4 * index + 3), SpriteBit.FLIP_H);
+            return Bits.test(objectAttributeMemory.read( 4 * index + 3), SpriteBit.FLIP_H);
         }
         
         public boolean isVFlipped() {
-            return Bits.test(read(0xFE00 + 4 * index + 3), SpriteBit.FLIP_V);
+            return Bits.test(objectAttributeMemory.read( 4 * index + 3), SpriteBit.FLIP_V);
         }
 
         public boolean isBehindBg() {
-            return Bits.test(read(0xFE00 + 4 * index + 3), SpriteBit.BEHIND_BG);
+            return Bits.test(objectAttributeMemory.read( 4 * index + 3), SpriteBit.BEHIND_BG);
         }
 
     }
