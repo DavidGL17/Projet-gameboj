@@ -7,6 +7,7 @@ import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.cpu.Cpu;
+import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -71,6 +72,7 @@ public final class Joypad implements Component {
             line2 = Bits.set(line2, key.index, true);
             break;
         }
+        cpu.requestInterrupt(Interrupt.JOYPAD);
     }
 
     public void keyReleased(Key key) {
