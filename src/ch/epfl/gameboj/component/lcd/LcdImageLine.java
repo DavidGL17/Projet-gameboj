@@ -21,7 +21,7 @@ public final class LcdImageLine {
      * 
      * @param msb,
      *            the msb vector
-     * @param lsb,
+     * @param lsb, 
      *            the lsb vector
      * @param opacity,
      *            the opacity vector

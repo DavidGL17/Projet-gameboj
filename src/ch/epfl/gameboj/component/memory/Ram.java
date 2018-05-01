@@ -23,7 +23,7 @@ public final class Ram {
      *            the size we want the memory to be
      * @throws IllegalArgumentException
      *             if the size is strictly smaller than 0
-     */
+     */ 
     public Ram(int size) {
         Preconditions.checkArgument(size >= 0);
         data = new byte[size];

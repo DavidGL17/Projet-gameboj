@@ -339,243 +339,32 @@ public final class LcdController implements Clocked, Component {
 
     }
     
-    private LcdImageLine[] buildSpritesLines(int line) {
-    	List<Sprite> foregroundSprites = new ArrayList<Sprite>();
-    	List<Sprite> backgroundSprites = new ArrayList<Sprite>();
-    	byte i=0;
-    	int filled=0;
-    	while (filled<10 && i<40) {
-    		Sprite sprite = new Sprite(i);
-    		if (sprite.exists()){
-	    		int y=sprite.getY();
-	    		boolean is8by8 = regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE);
-	    		// Multiplications des variables pour réduire le nombre de lecture sur OAM
-	    		if ((line>y) && (line-y<8 && is8by8 || (line-y<16 && !is8by8))){
-	    			if (sprite.isBehindBg()) {
-	    				backgroundSprites.add(sprite);
-	    			} else {
-	    				foregroundSprites.add(sprite);
-	    			}
-	    			filled++;
-	    		}
-    		}
-    		i++;
-    	}
-    	System.out.println();
-    	System.out.println();
-    	System.out.println();
-    	System.out.println();
-    	if (!backgroundSprites.isEmpty()) {
-	    	System.out.println(backgroundSprites);
-	     	for (Sprite s : backgroundSprites) {
-	    		System.out.println("X = " + s.getX());
-	    		System.out.println("Y = " + s.getY());
-	    		System.out.println("getTileAddress =" + s.getTileAddress());
-	    		System.out.println();
-	     	}
-    	} else {
-    		System.out.println("backgroundSprites empty");
-    	}
-    	System.out.println();
-    	
-    	if (!backgroundSprites.isEmpty()) {
-	    	System.out.println(foregroundSprites);
-	    	for (Sprite s : foregroundSprites) {
-	    		System.out.println("X = " + s.getX());
-	    		System.out.println("Y = " + s.getY());
-	    		System.out.println("getTileAddress =" + s.getTileAddress());
-	    		System.out.println();
-	    	}
-    	} else {
-    		System.out.println("foregroundSprites empty");
-    	}
-    	System.out.println();
-    	System.out.println();
-    	
-    	
-    	
-    	LcdImageLine[] res = { buildSpritesLine(line,backgroundSprites),
-			buildSpritesLine(line,foregroundSprites)	};
-    	
-    	return res;
-    	
-    }
-    
-    private LcdImageLine buildSpritesLine(int line, List<Sprite> list) {
-    	LcdImageLine res = new LcdImageLine(new BitVector(LCD_WIDTH),
-    			new BitVector(LCD_WIDTH),
-    			new BitVector(LCD_WIDTH));
-    	if (!list.isEmpty()) {
-	    	list.sort(new SpriteSorter());
-	    	for (Sprite sprite : list ) {
-	    		
-	    		res= buildSpriteLine(line,sprite).below(res);
-	    	}
-    	}
-    	return res;
-    	
-    }
-    
-    private LcdImageLine buildSpriteLine(int line, Sprite sprite) {
-    	LcdImageLine.Builder builder = new LcdImageLine.Builder(LCD_WIDTH);
-    	LcdImageLine resLine ;
-    	boolean hFlipped = sprite.isHFlipped();
-    	boolean vFlipped = sprite.isVFlipped();
-    	int y =sprite.getY();
-    	LcdImageLine ref = new LcdImageLine( new BitVector(LCD_WIDTH),
-    			new BitVector(LCD_WIDTH),
-    			new BitVector(LCD_WIDTH));
-    	
-//    	Quelque chose ne va pas 
-	    if (line-y<=8 && !regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) { 
-	   		int msb = read(sprite.getTileAddress()+(vFlipped ?y-line+8 :line-y )*2);
-	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?y-line+8 :line-y )*2+1);
-	   		System.out.println((msb<0xFF) && (lsb<0xFF));
-	   		System.out.println(hFlipped);
-	   		System.out.println("" + (msb==0x100) + " " + (lsb==0x100));
-	   		builder.setBytes(0,
-	   				hFlipped ? Bits.reverse8(msb) : msb ,
-    				hFlipped ? Bits.reverse8(lsb) : lsb );
-	   		resLine = builder.build();
-	    	resLine = resLine.shift(sprite.getX());
-	   		resLine = resLine.mapColors(sprite.getPalette());
-	   	} else if (line-y<=16 && regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE)) {
-	   		int msb = read(sprite.getTileAddress()+(vFlipped ?8+y-line :line-y )*2 + 16);
-	   		int lsb = read(sprite.getTileAddress()+(vFlipped ?8+y-line :line-y )*2+1 + 16);
-   			builder.setBytes(0,
-   					hFlipped ? Bits.reverse8(msb) : msb,
-	   				hFlipped ? Bits.reverse8(lsb) : lsb );
-	       	resLine = builder.build();
-	       	resLine = resLine.shift(sprite.getX());
-	       	resLine = resLine.mapColors(sprite.getPalette());
-	   	} else {
-	   		System.out.println("line = " + line );
-	   		throw new IllegalArgumentException(" Cannot build SpriteLine");
-	   	}
-	    	
-    	
-    	return ref.below(resLine);
-    	
-    }
-    
-    private class SpriteSorter implements Comparator<Sprite> {
+   
+  private int spriteGetY(int index) {
+	  return read(0xFE00 + 4*index)-16;
+  }
+  
+  private int spriteGetX(int index) {
+	  return read(0xFE00 + 4*index + 1)-8;
+  }
+  
+  private class SpriteSorter implements Comparator<Integer> {
 
-		@Override
-		public int compare(Sprite o1, Sprite o2) {
-			int first = ((Integer)o1.getIndex()).compareTo((Integer)o2.getIndex());
-			if (first != 0)
-				return first;
-			return o2.getX()-o1.getX();
+	@Override
+	public int compare(Integer o1, Integer o2) {
+		int substract = spriteGetX(o2)-spriteGetX(o1);
+		if (substract != 0) {
+			return substract;
 		}
-    	
-    }
+		return o2-o1;
+	}
+  }
+  
+  	private int[] spritesIntersectingLine(int line) {
+	  
+  }
+  
     
-    private class Sprite { 
-    	//Pas temporaire car extrêmement pratique ->
-    	// Traitement en focntion du retour une méthode d'un sprite, puis en fonction d'un second etc
-        private byte index; 
-        private Integer x=null;
-        private Integer y=null;
-
-        //Peu d'attributs car en fonction des durées de vie, potentiellement attribut non à jours
-//        Utilisation des méthodes : getY() 0-2 + 1
-        //							getX() 0-2 + 1
-        //							getTileAddress() 0-1 + 1 
-        //							getPalette() 0-1 + 1'
-        //							isHFlipped() 0-1 + 1'
-        //							isVFlipped() 0-1 + 1'
-        //							isBehindBg() 0-1 + 1'
-//        												0-1 --> pas d'attributs
-//        												X,Y envisager de créer un attribut ? --> Demander
-//        												en projet ce qu'il pense de la durée de vie
-        	
-
-        public Sprite(byte index) {
-            this.index = index;
-        }
-        
-        public int getIndex() {
-        	return index;
-        }
-        
-//        Esperais qu'on puisse s'en servir pour détruire instance inutilisée/réduire nombre d'instance, 
-//        genre fonctionnemnt du type si 2 instances sont égales une seule est utilisée mais voit pas faire sans 
-//        attributs ou méthode statiques
-        @Override
-        public boolean equals(Object that) {
-        	if (that instanceof Sprite)	{
-        		return (((Sprite)that).index==this.index);
-        	}
-        	return false;
-        }
-        
-        @Override
-        public int hashCode() {
-        	return index;
-        }
-        
-        @Override
-        public String toString() {
-        	return ((Integer)(int)index).toString();
-        }
-        
-        public boolean exists() {
-        	boolean res = true;
-        	if (getY()==NO_DATA){
-        		return false;
-        	}
-        	if (getX()==NO_DATA){
-        		return false;
-        	}
-        	if (getTileIndex()==NO_DATA) {
-        		return false;
-        	}
-        	if (objectAttributeMemory.read(4*index + 3) == NO_DATA) {
-        		return false;
-        	}
-        	return res;
-        }
-        
-        public int getY() {
-        	if(y==null)
-        		y=objectAttributeMemory.read(4 * index) - 16;
-            return y;
-        }
-
-        public int getX() {
-        	if (x==null)
-        		x=objectAttributeMemory.read(4 * index + 1) - 8;
-        		return x;
-        }
-
-        private int getTileIndex() {
-            return objectAttributeMemory.read( 4 * index + 2);
-        }
-
-        public int getTileAddress() {
-            return 0x8000 + 16 * getTileIndex();
-        }
-
-        public int getPalette() {
-            return (Bits.test(objectAttributeMemory.read( 4 * index + 3), SpriteBit.PALETTE)
-                    ? regs.get(Reg.OBP0)
-                    : regs.get(Reg.OBP1));
-        }
-
-        public boolean isHFlipped() {
-            return Bits.test(objectAttributeMemory.read( 4 * index + 3), SpriteBit.FLIP_H);
-        }
-        
-        public boolean isVFlipped() {
-            return Bits.test(objectAttributeMemory.read( 4 * index + 3), SpriteBit.FLIP_V);
-        }
-
-        public boolean isBehindBg() {
-            return Bits.test(objectAttributeMemory.read( 4 * index + 3), SpriteBit.BEHIND_BG);
-        }
-
-    }
-
     private enum SpriteBit implements Bit {
 
         PALETTE, FLIP_H, FLIP_V, BEHIND_BG;
