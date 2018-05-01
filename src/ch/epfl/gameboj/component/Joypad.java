@@ -43,7 +43,7 @@ public final class Joypad implements Component {
     @Override
     public int read(int address) {
         if (AddressMap.REG_P1 == Preconditions.checkBits16(address)) {
-            return Bits.reverse8(line1 | line2);
+            return Bits.complement8(line1 | line2);
         }
         return NO_DATA;
     }
