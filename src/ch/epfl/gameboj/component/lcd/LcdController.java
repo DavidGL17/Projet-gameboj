@@ -300,7 +300,7 @@ public final class LcdController implements Clocked, Component {
     	
     	LcdImageLine backgroundAndBehindSprites = behindSpritesLine.below(bgLine,bgLine.getOpacity().or(behindSpritesLine.getOpacity().not()));
     	
-    	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>=7 ) { //Ajouter condition sur reg.WX correct
+    	if (regs.testBit(Reg.LCDC,LCDCBit.WIN) && regs.get(Reg.LY)>regs.get(Reg.WY) && regs.get(Reg.WX)>=7 ) { 
         	LcdImageLine windowLine = buildWindowLine();
         	return backgroundAndBehindSprites.join(windowLine,regs.get(Reg.WX)-7).below(foregroundSpritesLine); 
     	}

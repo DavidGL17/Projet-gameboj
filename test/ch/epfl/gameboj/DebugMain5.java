@@ -17,7 +17,7 @@ import ch.epfl.gameboj.component.lcd.LcdImage;
  * @author David Gonzalez leon (270845)
  *
  */
-public final class DebugMain3 {
+public final class DebugMain5 {
     private static final int[] COLOR_MAP = new int[] {
       0xFF_FF_FF, 0xD3_D3_D3, 0xA9_A9_A9, 0x00_00_00
     };
