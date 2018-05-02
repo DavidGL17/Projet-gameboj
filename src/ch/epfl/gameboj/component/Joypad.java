@@ -43,7 +43,7 @@ public final class Joypad implements Component {
     @Override
     public int read(int address) {
         if (AddressMap.REG_P1 == Preconditions.checkBits16(address)) {
-            return Bits.complement8(line1 | line2);
+            return getP1();
         }
         return NO_DATA;
     }
@@ -64,6 +64,9 @@ public final class Joypad implements Component {
     }
 
     public void keyPressed(Key key) {
+        if (Bits.test(getP1(), key.index)) {
+            cpu.requestInterrupt(Interrupt.JOYPAD);
+        }
         switch (key.line) {
         case 1:
             line1 = Bits.set(line1, key.index, true);
@@ -72,7 +75,6 @@ public final class Joypad implements Component {
             line2 = Bits.set(line2, key.index, true);
             break;
         }
-        cpu.requestInterrupt(Interrupt.JOYPAD);
     }
 
     public void keyReleased(Key key) {
@@ -84,5 +86,18 @@ public final class Joypad implements Component {
             line2 = Bits.set(line2, key.index, false);
             break;
         }
+    }
+
+    private int getP1() {
+        if (Bits.test(line1, 4) && Bits.test(line2, 5)) {
+            return Bits.complement8(line1 | line2);
+        }
+        if (Bits.test(line1, 4)) {
+            return Bits.complement8(line1);
+        }
+        if (Bits.test(line2, 5)) {
+            return Bits.complement8(line2);
+        }
+        return 0xC0;
     }
 }

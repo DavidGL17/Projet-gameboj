@@ -1,5 +1,6 @@
 package ch.epfl.gameboj;
 
+import ch.epfl.gameboj.component.Joypad.Key;
 import ch.epfl.gameboj.component.cartridge.Cartridge;
 import ch.epfl.gameboj.component.lcd.LcdController;
 import ch.epfl.gameboj.component.lcd.LcdImage;
@@ -56,6 +57,9 @@ public final class DebugMain2Live extends Application {
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
                 gb.runUntil(gb.cycles() + CYCLES_PER_ITERATION);
+                if (gb.cycles()>10000000) {
+                    gb.joypad().keyPressed(Key.A);
+                }
                 imageView.setImage(null);
                 imageView.setImage(getImage(gb));
             }
