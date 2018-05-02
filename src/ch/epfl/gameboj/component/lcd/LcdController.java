@@ -288,8 +288,9 @@ public final class LcdController implements Clocked, Component {
     	
     	if (regs.testBit(Reg.LCDC,LCDCBit.OBJ)) {
 	    	int [] tab =  spritesIntersectingLine(line);
-	    	behindSpritesLine = buildSpritesLines(tab,line)[0];
-	    	foregroundSpritesLine = buildSpritesLines(tab,line)[1];
+	    	LcdImageLine [] temp = buildSpritesLines(tab,line);
+	    	foregroundSpritesLine = temp[1];
+	    	behindSpritesLine = temp[0];
     	}
     	
     	
@@ -349,51 +350,9 @@ public final class LcdController implements Clocked, Component {
     }
     
    
-  private int spriteGetY(int index) {
-	  return objectAttributeMemory.read(4*index);
-  }
-  
-  private int spriteGetX(int index) {
-	  return objectAttributeMemory.read(4*index + 1);
-  }
-  
-  private int spriteGetTileAddress(int index) {
-	  return 0x8000 + 16*objectAttributeMemory.read(4*index +2);
-  }
-  
-  private boolean spriteIsVFlipped(int index) {
-	  return Bits.test(objectAttributeMemory.read(4*index+3),SpriteBit.FLIP_V);
-  }
-  
-  private boolean spriteIsHFlipped(int index) {
-	  return Bits.test(objectAttributeMemory.read(4*index+3),SpriteBit.FLIP_H);
-  }
-  
-  private boolean spriteIsBehindBg(int index) {
-	  return Bits.test(objectAttributeMemory.read(4*index+3),SpriteBit.BEHIND_BG);
-  }
-  
-  private int[] spritesIntersectingLine(int line) {
-  		int filled = 0;
-  		int rank=0;
-  		int[] res = {
-  				-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
-  		};
-  		boolean is8by16 = regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE);
-  		while (filled<10 && rank<40) {
-  			int y = spriteGetY(rank)-16;
-  			if (line>y && (is8by16?line<y :line<y-8)) {
-  				res[filled] = (y+16)<<16+spriteGetX(rank)<<8+rank;
-  				filled++;
-  			}
-  			rank++;
-  		}
-  		return res;
-  	}
-  	
-  	private LcdImageLine buildSpriteLine(int yxindex, int line) {
+  private LcdImageLine buildSpriteLine(int yxindex, int line) {
   		LcdImageLine.Builder res = new LcdImageLine.Builder(LCD_WIDTH);
-  		int index = Bits.extract(yxindex,0,6);
+  		int index = Bits.extract(yxindex,1,6);
   		int y=Bits.extract(yxindex,16,8)-16;
   		boolean isHFlipped = spriteIsHFlipped(index);
   		boolean isVFlipped = spriteIsVFlipped(index);
@@ -438,8 +397,8 @@ public final class LcdController implements Clocked, Component {
   		
   		for (int i = tab.length-1 ; i>=0 ; i--) {
   			yxindex=tab[i];
-  			if (yxindex >=0) {
-	  			int index = Bits.extract(yxindex,0,6);
+  			if (yxindex >0) {
+	  			int index = Bits.extract(yxindex,1,6);
 		  			if (spriteIsBehindBg(index)) {
 		  				behindBgLine = buildSpriteLine(yxindex, line).below(behindBgLine);
 		  			} else {
@@ -462,7 +421,47 @@ public final class LcdController implements Clocked, Component {
 
     /// Manages the current mode of the LCD controller
     
-    private void setMode(int mode) {
+    private int spriteGetY(int index) {
+		  return objectAttributeMemory.read(4*index);
+	  }
+
+	private int spriteGetX(int index) {
+		  return objectAttributeMemory.read(4*index + 1);
+	  }
+
+	private int spriteGetTileAddress(int index) {
+		  return 0x8000 + 16*objectAttributeMemory.read(4*index +2);
+	  }
+
+	private boolean spriteIsVFlipped(int index) {
+		  return Bits.test(objectAttributeMemory.read(4*index+3),SpriteBit.FLIP_V);
+	  }
+
+	private boolean spriteIsHFlipped(int index) {
+		  return Bits.test(objectAttributeMemory.read(4*index+3),SpriteBit.FLIP_H);
+	  }
+
+	private boolean spriteIsBehindBg(int index) {
+		  return Bits.test(objectAttributeMemory.read(4*index+3),SpriteBit.BEHIND_BG);
+	  }
+
+	private int[] spritesIntersectingLine(int line) {
+		int filled = 0;
+		int rank=0;
+		int[] res = new int[10];
+		boolean is8by16 = regs.testBit(Reg.LCDC,LCDCBit.OBJ_SIZE);
+		while (filled<10 && rank<40) {
+			int y = spriteGetY(rank)-16;
+			if (line>y && (is8by16? (line<y) : (line<y-8)) ) {
+				res[filled] = (y+16)<<16+spriteGetX(rank)<<8+rank<<1 +1 ;
+				filled++;
+			}
+			rank++;
+		}
+		return res;
+	}
+
+	private void setMode(int mode) {
         int statValue = regs.get(Reg.STAT);
         int previousMode = Bits.clip(2, statValue);
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),

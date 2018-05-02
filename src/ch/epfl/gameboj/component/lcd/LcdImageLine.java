@@ -188,7 +188,9 @@ public final class LcdImageLine {
                 .or(givenOpacity.not().and(msb));
         BitVector finalLSB = givenOpacity.and(that.lsb)
                 .or(givenOpacity.not().and(lsb));
-        return new LcdImageLine(finalMSB, finalLSB, givenOpacity);
+        BitVector finalOpacity = givenOpacity.or(getOpacity());
+        
+        return new LcdImageLine(finalMSB, finalLSB, finalOpacity);
         //
         // Builder b = new Builder(size());
         // int msbByte = 0,lsbByte = 0;
