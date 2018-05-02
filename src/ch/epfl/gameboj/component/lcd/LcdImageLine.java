@@ -184,8 +184,8 @@ public final class LcdImageLine {
      * @return
      */
     public LcdImageLine below(LcdImageLine that, BitVector givenOpacity) {
-        BitVector finalMSB = givenOpacity.not().and(that.msb)
-                .or(givenOpacity.and(msb));
+        BitVector finalMSB = givenOpacity.and(that.msb)
+                .or(givenOpacity.not().and(msb));
         BitVector finalLSB = givenOpacity.and(that.lsb)
                 .or(givenOpacity.not().and(lsb));
         return new LcdImageLine(finalMSB, finalLSB, givenOpacity);
