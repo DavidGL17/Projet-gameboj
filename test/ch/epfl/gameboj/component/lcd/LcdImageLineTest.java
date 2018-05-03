@@ -152,21 +152,24 @@ class LcdImageLineTest {
 
     @Test
     void extractWrappedWorks() {
-    		Random random= new Random();
-    	 
-        BitVector msb=BitVectorTest.randomBitVectorInstantiation();
-        BitVector lsb=BitVectorTest.randomBitVectorInstantiation(msb.size());
-        BitVector opacity=BitVectorTest.randomBitVectorInstantiation(msb.size());
-        
-        LcdImageLine test = new LcdImageLine(msb,lsb,opacity);
-        
-        int start= (random.nextBoolean() ? 1: -1 )*random.nextInt(15);
-        int size=32*random.nextInt(11);
-        LcdImageLine extracted = test.extractWrapped(start,size);
-        assertEquals(msb.extractWrapped(start,size),extracted.getMsb());
-        assertEquals(lsb.extractWrapped(start,size),extracted.getLsb());
-        assertEquals(opacity.extractWrapped(start,size),extracted.getOpacity());
-
+    	for(int i=0 ; i<40 ; i++) {
+	    	Random random= new Random();
+	    	 
+	        BitVector msb=BitVectorTest.randomBitVectorInstantiation();
+	        BitVector lsb=BitVectorTest.randomBitVectorInstantiation(msb.size());
+	        BitVector opacity=BitVectorTest.randomBitVectorInstantiation(msb.size());
+	        
+	        LcdImageLine test = new LcdImageLine(msb,lsb,opacity);
+	        
+	        int start= (random.nextBoolean() ? 1: -1 )*random.nextInt(15);
+	        int size=32*random.nextInt(11);
+	        size = size>0 ? size : Math.abs(size);
+	        LcdImageLine extracted = test.extractWrapped(start,size);
+	        assertEquals(msb.extractWrapped(start,size),extracted.getMsb());
+	        assertEquals(lsb.extractWrapped(start,size),extracted.getLsb());
+	        assertEquals(opacity.extractWrapped(start,size),extracted.getOpacity());
+	
+	    }
     }
 
     @Test
