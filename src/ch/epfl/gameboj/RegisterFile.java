@@ -11,10 +11,10 @@ import ch.epfl.gameboj.bits.Bits;
  *
  */
 public final class RegisterFile<E extends Register> {
-	
+
     private final ArrayList<E> allRegs = new ArrayList<>();
     private final int[] registers;
-    
+
     public RegisterFile(E[] allRegs) {
         Preconditions.checkArgument(allRegs.length > 0);
         for (int i = 0; i < allRegs.length; ++i) {
@@ -72,8 +72,7 @@ public final class RegisterFile<E extends Register> {
      *            the new value
      */
     public void setBit(E reg, Bit bit, boolean newValue) {
-        registers[getIndex(reg)] = Bits.set(registers[getIndex(reg)],
-                bit.index(), newValue);
+        set(reg, Bits.set(registers[getIndex(reg)], bit.index(), newValue));
     }
 
     private int getIndex(E reg) {

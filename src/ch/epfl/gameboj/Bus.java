@@ -39,18 +39,13 @@ public final class Bus {
      */
     public int read(int address) {
         Preconditions.checkBits16(address);
-        if (composants.size() > 0) {
-            for (int i = 0; i < composants.size(); ++i) {
-                int value = composants.get(i).read(address);
-                if (value != Component.NO_DATA) {
-                    return value;
-                }
+        for (Component c : composants) {
+            int value = c.read(address);
+            if (value != Component.NO_DATA) {
+                return value;
             }
-            return defaultReturnValue;
-
-        } else {
-            return defaultReturnValue;
         }
+        return defaultReturnValue;
     }
 
     /**
@@ -68,8 +63,8 @@ public final class Bus {
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
-        for (int i = 0; i < composants.size(); ++i) {
-            composants.get(i).write(address, data);
+        for (Component c : composants) {
+            c.write(address, data);
         }
     }
 }

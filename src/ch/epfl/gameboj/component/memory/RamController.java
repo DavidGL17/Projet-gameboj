@@ -32,9 +32,11 @@ public final class RamController implements Component {
      *             size of the ram
      */
     public RamController(Ram ram, int startAddress, int endAddress) {
-        Preconditions.checkArgument(endAddress - startAddress <= Objects.requireNonNull(ram).size());
-        this.startAddress = Preconditions.checkBits16(startAddress);
-        this.endAddress = Preconditions.checkBits16(endAddress);
+        Preconditions.checkArgument(Preconditions.checkBits16(endAddress)
+                - Preconditions.checkBits16(startAddress) <= Objects
+                        .requireNonNull(ram).size());
+        this.startAddress = startAddress;
+        this.endAddress = endAddress;
         this.ram = ram;
     }
 

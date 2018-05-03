@@ -63,7 +63,7 @@ public final class Cpu implements Component, Clocked {
      * Builds a table of opcodes of the specified kind
      */
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[0x200];
+        Opcode[] table = new Opcode[256];
         for (Opcode o : Opcode.values()) {
             if (o.kind == kind) {
                 table[o.encoding] = o;
@@ -363,36 +363,19 @@ public final class Cpu implements Component, Clocked {
 
         // Add
         case ADD_A_R8: {
-            boolean c = extractCarry(opcode);
-            combineAluFlags(
-                    Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),
-                            c),
-                    FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
-            Regs.set(Reg.A, Bits.clip(8, Regs.get(Reg.A)
-                    + Regs.get(extractReg(opcode, 0)) + (c ? 1 : 0)));
+            setRegFlags(Reg.A, Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),extractCarry(opcode)));
         }
         break;
         case ADD_A_N8: {
-            boolean c = extractCarry(opcode);
-            combineAluFlags(Alu.add(Regs.get(Reg.A), read8AfterOpcode(), c),
-                    FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
-            Regs.set(Reg.A, Bits.clip(8,
-                    Regs.get(Reg.A) + read8AfterOpcode() + (c ? 1 : 0)));
+            setRegFlags(Reg.A, Alu.add(Regs.get(Reg.A), read8AfterOpcode(),extractCarry(opcode)));
         }
         break;
         case ADD_A_HLR: {
-            boolean c = extractCarry(opcode);
-            combineAluFlags(Alu.add(Regs.get(Reg.A), read8AtHl(), c),
-                    FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
-            Regs.set(Reg.A,
-                    Bits.clip(8, Regs.get(Reg.A) + read8AtHl() + (c ? 1 : 0)));
+            setRegFlags(Reg.A, Alu.add(Regs.get(Reg.A), read8AtHl(),extractCarry(opcode)));
         }
         break;
         case INC_R8: {
-            combineAluFlags(Alu.add(Regs.get(extractReg(opcode, 3)), 1),
-                    FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
-            Regs.set(extractReg(opcode, 3),
-                    Bits.clip(8, Regs.get(extractReg(opcode, 3)) + 1));
+            setRegFlags(extractReg(opcode, 3), Alu.add(Regs.get(extractReg(opcode, 3)), 1));
         }
         break;
         case INC_HLR: {
@@ -719,12 +702,12 @@ public final class Cpu implements Component, Clocked {
             int res = 0;
             if (Bits.test(opcode.encoding, 3)) {
                 res += (Bits.test(Regs.get(Reg.F), Flag.C)) ? 0
-                        : Flag.C.getMask();
+                        : Flag.C.mask();
             } else {
-                res += Flag.C.getMask();
+                res += Flag.C.mask();
 
             }
-            res += (Bits.test(Regs.get(Reg.F), Flag.Z)) ? Flag.Z.getMask() : 0;
+            res += (Bits.test(Regs.get(Reg.F), Flag.Z)) ? Flag.Z.mask() : 0;
             setFlags(res);
         }
         break;
@@ -1274,40 +1257,40 @@ public final class Cpu implements Component, Clocked {
             FlagSrc c) {
         int toEnable = 0, toDisable = 0, toKeep = 0, toTake = 0;
         if (z == FlagSrc.V0) {
-            toDisable += Alu.Flag.Z.getMask();
+            toDisable += Alu.Flag.Z.mask();
         } else if (z == FlagSrc.V1) {
-            toEnable += Alu.Flag.Z.getMask();
+            toEnable += Alu.Flag.Z.mask();
         } else if (z == FlagSrc.CPU) {
-            toKeep += Alu.Flag.Z.getMask();
+            toKeep += Alu.Flag.Z.mask();
         } else if (z == FlagSrc.ALU) {
-            toTake += Alu.Flag.Z.getMask();
+            toTake += Alu.Flag.Z.mask();
         }
         if (n == FlagSrc.V0) {
-            toDisable += Alu.Flag.N.getMask();
+            toDisable += Alu.Flag.N.mask();
         } else if (n == FlagSrc.V1) {
-            toEnable += Alu.Flag.N.getMask();
+            toEnable += Alu.Flag.N.mask();
         } else if (n == FlagSrc.CPU) {
-            toKeep += Alu.Flag.N.getMask();
+            toKeep += Alu.Flag.N.mask();
         } else if (n == FlagSrc.ALU) {
-            toTake += Alu.Flag.N.getMask();
+            toTake += Alu.Flag.N.mask();
         }
         if (h == FlagSrc.V0) {
-            toDisable += Alu.Flag.H.getMask();
+            toDisable += Alu.Flag.H.mask();
         } else if (h == FlagSrc.V1) {
-            toEnable += Alu.Flag.H.getMask();
+            toEnable += Alu.Flag.H.mask();
         } else if (h == FlagSrc.CPU) {
-            toKeep += Alu.Flag.H.getMask();
+            toKeep += Alu.Flag.H.mask();
         } else if (h == FlagSrc.ALU) {
-            toTake += Alu.Flag.H.getMask();
+            toTake += Alu.Flag.H.mask();
         }
         if (c == FlagSrc.V0) {
-            toDisable += Alu.Flag.C.getMask();
+            toDisable += Alu.Flag.C.mask();
         } else if (c == FlagSrc.V1) {
-            toEnable += Alu.Flag.C.getMask();
+            toEnable += Alu.Flag.C.mask();
         } else if (c == FlagSrc.CPU) {
-            toKeep += Alu.Flag.C.getMask();
+            toKeep += Alu.Flag.C.mask();
         } else if (c == FlagSrc.ALU) {
-            toTake += Alu.Flag.C.getMask();
+            toTake += Alu.Flag.C.mask();
         }
 
         int res = vf & toTake;
