@@ -215,7 +215,7 @@ public final class BitVector {
     }
 
     private BitVector extract(int start, int size, ExtensionType ext) {
-        Preconditions.checkArgument((size > 0) && (size % 32 == 0));
+        Preconditions.checkArgument((size > 0) && (Math.floorMod(size,32) == 0));
         int[] newTable = new int[size / 32];
         int internalShift = Math.floorMod(start, Integer.SIZE);
         int cellShift = Math.floorDiv(start, 32);

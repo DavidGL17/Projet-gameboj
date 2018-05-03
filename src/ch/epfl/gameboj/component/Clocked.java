@@ -14,5 +14,5 @@ public interface Clocked {
      * 
      * @param cycle, the cycle to simulate
      */
-    abstract void cycle(long cycle);
+    void cycle(long cycle);
 }

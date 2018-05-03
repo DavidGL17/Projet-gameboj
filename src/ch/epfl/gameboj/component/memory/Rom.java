@@ -3,6 +3,7 @@
  */
 package ch.epfl.gameboj.component.memory;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -24,10 +25,7 @@ public final class Rom {
      *             if the parameter is null
      */
     public Rom(byte[] data) {
-        this.data = new byte[Objects.requireNonNull(data).length];
-        for (int i = 0; i < data.length; ++i) {
-            this.data[i] = data[i];
-        }
+        this.data = Arrays.copyOf(data, data.length);
     }
 
     /**
