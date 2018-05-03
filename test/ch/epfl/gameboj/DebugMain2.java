@@ -35,9 +35,9 @@ public class DebugMain2 {
             0xA9_A9_A9, 0x00_00_00 };
 
     public static void main(String[] args) {
-        for (String test : allTests) {
-            test2(test, "30000000");
-        }
+//        for (String test : allTests) {
+            test2("sprite_priority.gb", "30000000");
+//        }
     }
 
     private static void test1(String arg1, String arg2) {
