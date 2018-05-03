@@ -391,7 +391,7 @@ public final class LcdController implements Clocked, Component {
 
     private LcdImageLine buildSpriteLine(int yxindex, int line) {
         LcdImageLine.Builder res = new LcdImageLine.Builder(LCD_WIDTH);
-        int index = Bits.extract(yxindex, 1, 6);
+        int index = Bits.extract(yxindex, 1, 6);//Ces extract tu pourrais les mettre en méthode peut être? (pas sur)
         int y = Bits.extract(yxindex, 16, 8) - 16;
         boolean isHFlipped = spriteIsHFlipped(index);
         boolean isVFlipped = spriteIsVFlipped(index);
