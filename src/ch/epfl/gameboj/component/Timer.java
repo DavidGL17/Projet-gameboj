@@ -57,7 +57,9 @@ public final class Timer implements Component, Clocked {
     public void write(int address, int data) {
     		Preconditions.checkBits8(data);
         if (Preconditions.checkBits16(address) == AddressMap.REG_DIV) {
+            boolean s0 = state();
             principalCounter=0;
+            incIFChange(s0);
         } else if (address == AddressMap.REG_TIMA) {
             TIMA = data;
         } else if (address == AddressMap.REG_TMA) {
