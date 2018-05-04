@@ -401,7 +401,9 @@ public final class LcdController implements Clocked, Component {
 	    	 //Contenu du tableau semble être réinitialisé
 		    if (line%8==0)
 		    System.out.println(Arrays.toString(res));
-	    return res;
+        res[10] = filled;
+
+        return res;
 	}
 
 	private LcdImageLine[] buildSpritesLines(int[] tab, int line) {
@@ -413,7 +415,7 @@ public final class LcdController implements Clocked, Component {
         
         int filled = tab[10];
         
-        Arrays.sort(tab,0,filled);
+        Arrays.sort(tab,0,filled+1);
         
         int xindexy = tab[0];
         int i=0;
@@ -423,7 +425,7 @@ public final class LcdController implements Clocked, Component {
         while (xindexy<(0x1000000) && i<filled) {
             xindexy = tab[i];
             //index sont toujours 0
-            int index = Bits.extract(xindexy,8,6);
+            int index = Bits.extract(xindexy,8,8);
 		            if (line%8==0)
 		            System.out.print (index + " ");
             if (spriteIsBehindBg(index)) {
@@ -478,7 +480,8 @@ public final class LcdController implements Clocked, Component {
     private enum SpriteBit implements Bit {
 
         PALETTE, FLIP_H, FLIP_V, BEHIND_BG;
-
+        
+        @Override
         public int index() {
             return this.ordinal() + 4;
         }
