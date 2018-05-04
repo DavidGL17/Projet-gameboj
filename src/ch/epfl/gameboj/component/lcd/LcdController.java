@@ -290,43 +290,36 @@ public final class LcdController implements Clocked, Component {
         		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
                  new BitVector(LCD_WIDTH,false));
         
-        LcdImageLine imageAndBehindSprites = new LcdImageLine(
-        		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
-                 new BitVector(LCD_WIDTH,false));
-
-        if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
-            bgLine = buildBgLine(
-                    Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE)).mapColors(regs.get(Reg.BGP));
+        LcdImageLine bgAndWindow;
+        
+        if (regs.testBit(Reg.LCDC,LCDCBit.BG)) {
+        	bgLine = buildBgLine(
+        			Math.floorMod(line + regs.get(Reg.SCY),BG_SIZE)).mapColors(regs.get(Reg.BGP));
+        	
         }
         
-        if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
-            int[] tab = spritesIntersectingLine(line);
-            LcdImageLine[] temp = buildSpritesLines(tab, line);
-            foregroundSpritesLine = temp[1];
-            behindSpritesLine = temp[0];
+        if (regs.testBit(Reg.LCDC,LCDCBit.WIN)&&(regs.get(Reg.WX)>=7)
+        		&& line>regs.get(Reg.WY)) {
+        	LcdImageLine windowLine = buildWindowLine();
+        	bgAndWindow = bgLine.join(windowLine,regs.get(Reg.WX)-7);
         }
-
-        if (regs.testBit(Reg.LCDC, LCDCBit.WIN)
-                && regs.get(Reg.LY) > regs.get(Reg.WY)
-                && regs.get(Reg.WX) >= 7) { 
-            LcdImageLine windowLine = buildWindowLine();
-            
-            LcdImageLine bgLineAndWindowLine = bgLine
-                    .join(windowLine, regs.get(Reg.WX) - 7);
-            
-            imageAndBehindSprites = behindSpritesLine.below(
-                    bgLineAndWindowLine,
-                    bgLineAndWindowLine.getOpacity().or(behindSpritesLine.getOpacity().not()));
-            
-        } else {
-        	imageAndBehindSprites = behindSpritesLine.below(
-                    bgLine,
-                    bgLine.getOpacity().or(behindSpritesLine.getOpacity().not()));
+        else {
+        	bgAndWindow = bgLine;
         }
         
-		 
-		 
+        if (regs.testBit(Reg.LCDC,LCDCBit.OBJ)) {
+        	int [] tab = spritesIntersectingLine(line);
+        	LcdImageLine [] temp = buildSpritesLines(tab,line);
+        	foregroundSpritesLine = temp[1];
+        	behindSpritesLine = temp[0];
+        }
+        
+        LcdImageLine imageAndBehindSprites = bgAndWindow.below(behindSpritesLine.below(bgAndWindow));
+        
         return imageAndBehindSprites.below(foregroundSpritesLine);
+        
+        
+        
     }
 
     private LcdImageLine buildBgLine(int line) {
