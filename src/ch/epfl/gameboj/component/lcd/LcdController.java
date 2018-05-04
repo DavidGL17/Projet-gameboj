@@ -482,33 +482,30 @@ public final class LcdController implements Clocked, Component {
     }
 
     private int spriteGetX(int index) {
-        return objectAttributeMemory.read(4 * index + 1);
+        return objectAttributeMemory.read((4 * index) + 1);
     }
 
     private int spriteGetTileAddress(int index) {
-        return 0x8000 + 16 * objectAttributeMemory.read(4 * index + 2);
+        return 0x8000 + 16 * objectAttributeMemory.read((4 * index) + 2);
     }
 
     private boolean spriteIsVFlipped(int index) {
-        return Bits.test(objectAttributeMemory.read(4 * index + 3),
+        return Bits.test(objectAttributeMemory.read((4 * index) + 3),
                 SpriteBit.FLIP_V);
     }
 
     private boolean spriteIsHFlipped(int index) {
-    	if (index>40) {
-    		throw new IllegalArgumentException();
-    	}
-        return Bits.test(objectAttributeMemory.read(4 * index + 3),
+        return Bits.test(objectAttributeMemory.read((4 * index) + 3),
                 SpriteBit.FLIP_H);
     }
 
     private boolean spriteIsBehindBg(int index) {
-        return Bits.test(objectAttributeMemory.read(4 * index + 3),
-                SpriteBit.BEHIND_BG);
+        return Bits.test(objectAttributeMemory.read((4 * index) + 3),
+                SpriteBit.BEHIND_BG );
     }
     
     private int spriteGetPalette(int index) {
-    	return Bits.test(objectAttributeMemory.read(4 * index + 3),SpriteBit.PALETTE)?
+    	return Bits.test(objectAttributeMemory.read((4 * index) + 3),SpriteBit.PALETTE)?
     			 regs.get(Reg.OBP0):regs.get(Reg.OBP1) ;
     			
     }
