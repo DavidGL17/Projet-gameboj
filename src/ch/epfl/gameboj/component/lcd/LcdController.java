@@ -279,15 +279,20 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine computeLine(int line) {
 
         LcdImageLine behindSpritesLine = new LcdImageLine(
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH));
+                new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
+                new BitVector(LCD_WIDTH,false));
 
         LcdImageLine foregroundSpritesLine = new LcdImageLine(
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH));
-
-        LcdImageLine bgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
+        		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
+                 new BitVector(LCD_WIDTH,false));
+        
+        LcdImageLine bgLine = new LcdImageLine(
+        		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
+                 new BitVector(LCD_WIDTH,false));
+        
+        LcdImageLine imageAndBehindSprites = new LcdImageLine(
+        		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
+                 new BitVector(LCD_WIDTH,false));
 
         if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
             int[] tab = spritesIntersectingLine(line);
@@ -302,21 +307,25 @@ public final class LcdController implements Clocked, Component {
             bgLine = bgLine.mapColors(regs.get(Reg.BGP));
         }
 
-        LcdImageLine backgroundAndBehindSprites = behindSpritesLine.below(
-                bgLine,
-                bgLine.getOpacity().or(behindSpritesLine.getOpacity().not()));
-
         if (regs.testBit(Reg.LCDC, LCDCBit.WIN)
                 && regs.get(Reg.LY) > regs.get(Reg.WY)
-                && regs.get(Reg.WX) >= 7) { // Ajouter condition sur reg.WX
-                                            // correct
+                && regs.get(Reg.WX) >= 7) { 
             LcdImageLine windowLine = buildWindowLine();
-            return backgroundAndBehindSprites
-                    .join(windowLine, regs.get(Reg.WX) - 7)
-                    .below(foregroundSpritesLine);
+            
+            LcdImageLine bgLineAndWindowLine = bgLine
+                    .join(windowLine, regs.get(Reg.WX) - 7);
+            
+            imageAndBehindSprites = behindSpritesLine.below(
+                    bgLineAndWindowLine,
+                    bgLineAndWindowLine.getOpacity().or(behindSpritesLine.getOpacity().not()));
+            
+        } else {
+        	imageAndBehindSprites = behindSpritesLine.below(
+                    bgLine,
+                    bgLine.getOpacity().or(behindSpritesLine.getOpacity().not()));
         }
 
-        return backgroundAndBehindSprites.below(foregroundSpritesLine);
+        return imageAndBehindSprites.below(foregroundSpritesLine);
     }
 
     private LcdImageLine buildBgLine(int line) {
@@ -357,42 +366,89 @@ public final class LcdController implements Clocked, Component {
         return lineBuilder.build();
 
     }
+    
+    
+    
 
-    private LcdImageLine[] buildSpritesLines(int[] tab, int line) {
+    private int[] spritesIntersectingLine(int line) {
+	    int[] res = {
+	    		0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0
+	    };
+	    int spriteSizeAdjustement = regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE) ? 0 : -8;
+	    int filled = 0;
+	    int index = 0;
+	    while (filled < 10 && index < 40) {
+	        int y = spriteGetY(index);
+	        if (line > y - 16 && line <= y+spriteSizeAdjustement ) {
+	            res[filled] = spriteGetX(index)<<16 + index<<8 + y;
+				            if (line%8==0) {
+					            System.out.println(" The line is " + line);
+					            System.out.println("the sprite's index is : " + index);
+					            System.out.println("                     y is : " + y);
+					            System.out.println("                     x is : " + spriteGetX(index));
+					            System.out.println("                     the sprite size is : " + (regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE)?"8x16" : "8x8") );	
+					            System.out.println();
+				            }
+	            filled++;
+	        }
+	        index++;
+	    }
+//	    System.out.println();
+//        System.out.println();
+//        System.out.println();
+//        System.out.println();
+	    res[10] = filled;
+	    
+	    	 //Contenu du tableau semble être réinitialisé
+		    if (line%8==0)
+		    System.out.println(res[0]);
+	    return res;
+	}
+
+	private LcdImageLine[] buildSpritesLines(int[] tab, int line) {
 
         LcdImageLine behindBgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
         LcdImageLine foregroundLine = new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
-
-        Arrays.sort(tab);// Tu dois sort que les index, pas tous. la tu sort
-                         // aussi la coordonnée x (et y). Faudrais sort que les
-                         // 8 lsb
-        int yxindex = 0;
-
-        for (int i = tab.length - 1; i >= 0; i--) {
-            yxindex = tab[i];
-            if (yxindex > 0) {// Cette vérification ne sert à rien, ta valeur
-                              // sera toujours plus grande que 0 vu que tu fait
-                              // +1 à'lempaquetage (dans sprites intersecting)
-                int index = Bits.extract(yxindex, 1, 6);// Ils font pas 8 bits
-                                                        // l'index?
-                if (spriteIsBehindBg(index)) {
-                    behindBgLine = buildSpriteLine(yxindex, line)
-                            .below(behindBgLine);
-                } else {
-                    foregroundLine = buildSpriteLine(yxindex, line)
-                            .below(foregroundLine);
-                }
-            }
+        
+        int filled = tab[10];
+        
+        Arrays.sort(tab,0,filled);
+        
+        int xindexy = tab[0];
+        int i=0;
+        if (line%8==0) {
+        	System.out.print("Line : " + line + " sprites' indexes : ");
         }
+        while (xindexy<(0x1000000) && i<filled) {
+            xindexy = tab[i];
+            //index sont toujours 0
+            int index = Bits.extract(xindexy,8,6);
+		            if (line%8==0)
+		            System.out.print (index + " ");
+            if (spriteIsBehindBg(index)) {
+            	behindBgLine = buildSpriteLine(xindexy, line)
+                            .below(behindBgLine);
+            } else {
+            	foregroundLine = buildSpriteLine(xindexy, line)
+            			.below(foregroundLine);
+                }
+            i++;
+        }
+		        if (line%8==0) {
+			        System.out.println();
+			        System.out.println();
+		        }
+        tab = null;
+        
         return new LcdImageLine[] { behindBgLine, foregroundLine };
     }
 
-    private LcdImageLine buildSpriteLine(int yxindex, int line) {
+    private LcdImageLine buildSpriteLine(int xindexy, int line) {
         LcdImageLine.Builder res = new LcdImageLine.Builder(LCD_WIDTH);
-        int index = Bits.extract(yxindex, 1, 6);//Ces extract tu pourrais les mettre en méthode peut être? (pas sur)
-        int y = Bits.extract(yxindex, 16, 8) - 16;
+        int index = Bits.extract(xindexy, 8, 8);//Ces extract tu pourrais les mettre en méthode peut être? (pas sur)
+        int y = Bits.extract(xindexy, 0, 8) - 16;
         boolean isHFlipped = spriteIsHFlipped(index);
         boolean isVFlipped = spriteIsVFlipped(index);
         int tileAddress = spriteGetTileAddress(index);
@@ -401,21 +457,14 @@ public final class LcdController implements Clocked, Component {
         if (isVFlipped) {
             if (regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE)) {
                 System.out.print("indeed   ");
-                relativeAddress = 2 * (y - line + 15);
+                relativeAddress = 2 * (15-line+y);
             } else {
-                relativeAddress = 2 * (y - line + 7);
+                relativeAddress = 2 * (7-line+y);
             }
         } else {
             relativeAddress = 2 * (line - y);
         }
 
-        System.out.println("Tilesize "
-                + ((regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE)) ? "8x16"
-                        : "8x8"));
-        System.out.println("isHFlipped : " + isHFlipped);
-        System.out.println("isVFlipped : " + isVFlipped);
-        System.out.println("y :" + y);
-        System.out.println("index :" + index);
 
         res.setBytes(0,
                 isHFlipped ? read(tileAddress + relativeAddress)
@@ -424,7 +473,7 @@ public final class LcdController implements Clocked, Component {
                         : Bits.reverse8(
                                 read(tileAddress + relativeAddress + 1)));
 
-        return res.build().shift(spriteGetX(index) - 8);
+        return res.build().shift(-Bits.extract(xindexy,16,8) + 8).mapColors(spriteGetPalette(index));
     }
 
     private enum SpriteBit implements Bit {
@@ -434,31 +483,6 @@ public final class LcdController implements Clocked, Component {
         public int index() {
             return this.ordinal() + 4;
         }
-    }
-
-    private int[] spritesIntersectingLine(int line) {
-        int filled = 0;
-        int rank = 0;
-        int[] res = new int[10];
-        boolean is8by16 = regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE);
-        while (filled < 10 && rank < 40) {
-            int y = spriteGetY(rank) - 16;
-            if (line > y && (is8by16 ? (line < y) : (line < y - 8))) {// cette
-                                                                      // condition
-                                                                      // n'est
-                                                                      // jamais
-                                                                      // satisfaite
-                                                                      // ?
-                                                                      // (line<y
-                                                                      // et
-                                                                      // line>y)
-                res[filled] = (y + 16) << 16 + spriteGetX(rank) << 8 + rank << 1
-                        + 1;// Pourquoi tu empaquète aussi la valeur de y ?
-                filled++;
-            }
-            rank++;
-        }
-        return res;
     }
 
     private int spriteGetY(int index) {
@@ -479,6 +503,9 @@ public final class LcdController implements Clocked, Component {
     }
 
     private boolean spriteIsHFlipped(int index) {
+    	if (index>40) {
+    		throw new IllegalArgumentException();
+    	}
         return Bits.test(objectAttributeMemory.read(4 * index + 3),
                 SpriteBit.FLIP_H);
     }
@@ -487,7 +514,14 @@ public final class LcdController implements Clocked, Component {
         return Bits.test(objectAttributeMemory.read(4 * index + 3),
                 SpriteBit.BEHIND_BG);
     }
+    
+    private int spriteGetPalette(int index) {
+    	return Bits.test(objectAttributeMemory.read(4 * index + 3),SpriteBit.PALETTE)?
+    			 regs.get(Reg.OBP0):regs.get(Reg.OBP1) ;
+    			
+    }
 
+    
     /// Manages the current mode of the LCD controller
 
     private void setMode(int mode) {

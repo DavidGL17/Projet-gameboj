@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj;
 
 import java.awt.image.BufferedImage;
