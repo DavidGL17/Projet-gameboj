@@ -161,18 +161,7 @@ public final class LcdImageLine {
      */
     public LcdImageLine below(LcdImageLine that) {
         return below(that,that.opacity);
-        // Builder b = new Builder(size());
-        // int msbByte = 0,lsbByte = 0;
-        // for (int i = 0;i<size()/8;++i) {
-        // for (int j = 0;j<8;++j) {
-        // Bits.set(msbByte, j, that.getOpacity().testBit(i*8
-        // +j)?that.getMsb().testBit(i*8 +j):msb.testBit(i*8 +j));
-        // Bits.set(lsbByte, j, that.getOpacity().testBit(i*8
-        // +j)?that.getLsb().testBit(i*8 +j):lsb.testBit(i*8 +j));
-        // }
-        // b.setBytes(i, msbByte, lsbByte);
-        // }
-        // return b.build();
+      
     }
 
     /**
@@ -191,22 +180,8 @@ public final class LcdImageLine {
         BitVector finalOpacity = givenOpacity.or(getOpacity());
         
         return new LcdImageLine(finalMSB, finalLSB, finalOpacity);
-        //
-        // Builder b = new Builder(size());
-        // int msbByte = 0,lsbByte = 0;
-        // for (int i = 0;i<size()/8;++i) {
-        // for (int j = 0;j<8;++j) {
-        // Bits.set(msbByte, j, givenOpacity.testBit(i*8
-        // +j)?that.getMsb().testBit(i*8 +j):msb.testBit(i*8 +j));
-        // Bits.set(lsbByte, j, givenOpacity.testBit(i*8
-        // +j)?that.getLsb().testBit(i*8 +j):lsb.testBit(i*8 +j));
-        // }
-        // b.setBytes(i, msbByte, lsbByte);
-        // }
-        // return b.build();
     }
 
-    // Aucune idée de comment le faire pour le moment
     /**
      * Computes the jointure of the first LcdImageLine up to index and thw
      * second LcdImageline

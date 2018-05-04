@@ -294,12 +294,8 @@ public final class LcdController implements Clocked, Component {
         		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
                  new BitVector(LCD_WIDTH,false));
 
-        if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
-            int[] tab = spritesIntersectingLine(line);
-            LcdImageLine[] temp = buildSpritesLines(tab, line);
-            foregroundSpritesLine = temp[1];
-            behindSpritesLine = temp[0];
-        }
+        
+       
 
         if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
             bgLine = buildBgLine(
@@ -324,7 +320,15 @@ public final class LcdController implements Clocked, Component {
                     bgLine,
                     bgLine.getOpacity().or(behindSpritesLine.getOpacity().not()));
         }
-
+        
+		 if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
+		            int[] tab = spritesIntersectingLine(line);
+		            LcdImageLine[] temp = buildSpritesLines(tab, line);
+		            foregroundSpritesLine = temp[1];
+		            behindSpritesLine = temp[0];
+		        }
+		 
+		 
         return imageAndBehindSprites.below(foregroundSpritesLine);
     }
 
@@ -470,7 +474,7 @@ public final class LcdController implements Clocked, Component {
                         : Bits.reverse8(
                                 read(tileAddress + relativeAddress + 1)));
 
-        return res.build().shift(-Bits.extract(xindexy,16,8) + 8).mapColors(spriteGetPalette(index));
+        return res.build().shift(-Bits.extract(xindexy,16,8) +8).mapColors(spriteGetPalette(index));
     }
 
     private enum SpriteBit implements Bit {
