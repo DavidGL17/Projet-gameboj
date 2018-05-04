@@ -294,13 +294,16 @@ public final class LcdController implements Clocked, Component {
         		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
                  new BitVector(LCD_WIDTH,false));
 
-        
-       
-
         if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
             bgLine = buildBgLine(
-                    Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE));
-            bgLine = bgLine.mapColors(regs.get(Reg.BGP));
+                    Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE)).mapColors(regs.get(Reg.BGP));
+        }
+        
+        if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
+            int[] tab = spritesIntersectingLine(line);
+            LcdImageLine[] temp = buildSpritesLines(tab, line);
+            foregroundSpritesLine = temp[1];
+            behindSpritesLine = temp[0];
         }
 
         if (regs.testBit(Reg.LCDC, LCDCBit.WIN)
@@ -321,12 +324,6 @@ public final class LcdController implements Clocked, Component {
                     bgLine.getOpacity().or(behindSpritesLine.getOpacity().not()));
         }
         
-		 if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
-		            int[] tab = spritesIntersectingLine(line);
-		            LcdImageLine[] temp = buildSpritesLines(tab, line);
-		            foregroundSpritesLine = temp[1];
-		            behindSpritesLine = temp[0];
-		        }
 		 
 		 
         return imageAndBehindSprites.below(foregroundSpritesLine);
