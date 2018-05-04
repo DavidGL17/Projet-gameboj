@@ -1,9 +1,6 @@
 package ch.epfl.gameboj.component.lcd;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
