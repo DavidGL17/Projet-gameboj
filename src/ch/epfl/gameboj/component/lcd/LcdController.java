@@ -359,7 +359,6 @@ public final class LcdController implements Clocked, Component {
             }
             int lsbBg = read(tileAddress + Math.floorMod(line, 8) * 2);
             int msbBg = read(tileAddress + Math.floorMod(line, 8) * 2 + 1);
-            lineBuilder.setBytes(i, msbBg, lsbBg);
 
             lineBuilder.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
         }
@@ -401,7 +400,7 @@ public final class LcdController implements Clocked, Component {
 	    
 	    	 //Contenu du tableau semble être réinitialisé
 		    if (line%8==0)
-		    System.out.println(res[0]);
+		    System.out.println(Arrays.toString(res));
 	    return res;
 	}
 

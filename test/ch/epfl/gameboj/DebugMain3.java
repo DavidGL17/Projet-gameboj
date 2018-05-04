@@ -20,7 +20,7 @@ public final class DebugMain3 {
     };
 
     public static void main(String[] args) throws IOException {
-      File romFile = new File("flappyboy.gb");
+      File romFile = new File("sprite_priority.gb");
       long cycles = 30_000_000;
 
       GameBoy gb = new GameBoy(Cartridge.ofFile(romFile));
