@@ -478,7 +478,7 @@ public final class LcdController implements Clocked, Component {
     
     private int spriteGetPalette(int index) {
     	return Bits.test(objectAttributeMemory.read((4 * index) + 3),SpriteBit.PALETTE)?
-    			 regs.get(Reg.OBP0):regs.get(Reg.OBP1) ;
+    			 regs.get(Reg.OBP1):regs.get(Reg.OBP0) ;
     			
     }
 
