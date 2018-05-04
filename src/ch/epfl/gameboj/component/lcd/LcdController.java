@@ -379,7 +379,7 @@ public final class LcdController implements Clocked, Component {
 	    while (filled < 10 && index < 40) {
 	        int y = spriteGetY(index);
 	        if (line > y - 16 && line <= y+spriteSizeAdjustement ) {
-	            res[filled] = spriteGetX(index)<<16 + index<<8 + y;
+	            res[filled] = (spriteGetX(index)<<16) | (index<<8) | y;
 				            if (line%8==0) {
 					            System.out.println(" The line is " + line);
 					            System.out.println("the sprite's index is : " + index);
@@ -388,14 +388,10 @@ public final class LcdController implements Clocked, Component {
 					            System.out.println("                     the sprite size is : " + (regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE)?"8x16" : "8x8") );	
 					            System.out.println();
 				            }
-	            filled++;
+	            ++filled;
 	        }
-	        index++;
+	        ++index;
 	    }
-//	    System.out.println();
-//        System.out.println();
-//        System.out.println();
-//        System.out.println();
 	    res[10] = filled;
 	    
 	    	 //Contenu du tableau semble être réinitialisé

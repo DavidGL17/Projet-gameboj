@@ -36,7 +36,7 @@ public class DebugMain2 {
 
     public static void main(String[] args) {
 //        for (String test : allTests) {
-            test2("flappyboy.gb", "30000000");
+            test2("sprite_priority.gb", "30000000");
 //        }
     }
 
