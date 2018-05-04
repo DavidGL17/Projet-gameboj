@@ -276,43 +276,46 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine computeLine(int line) {
 
         LcdImageLine behindSpritesLine = new LcdImageLine(
-                new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
-                new BitVector(LCD_WIDTH,false));
+                new BitVector(LCD_WIDTH, false),
+                new BitVector(LCD_WIDTH, false),
+                new BitVector(LCD_WIDTH, false));
 
         LcdImageLine foregroundSpritesLine = new LcdImageLine(
-        		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
-                 new BitVector(LCD_WIDTH,false));
-        
-        LcdImageLine bgLine = new LcdImageLine(
-        		 new BitVector(LCD_WIDTH,false), new BitVector(LCD_WIDTH,false),
-                 new BitVector(LCD_WIDTH,false));
-        
+                new BitVector(LCD_WIDTH, false),
+                new BitVector(LCD_WIDTH, false),
+                new BitVector(LCD_WIDTH, false));
+
+        LcdImageLine bgLine = new LcdImageLine(new BitVector(LCD_WIDTH, false),
+                new BitVector(LCD_WIDTH, false),
+                new BitVector(LCD_WIDTH, false));
+
         LcdImageLine bgAndWindow;
-        
-        if (regs.testBit(Reg.LCDC,LCDCBit.BG)) {
-        	bgLine = buildBgLine(
-        			Math.floorMod(line + regs.get(Reg.SCY),BG_SIZE)).mapColors(regs.get(Reg.BGP));
-        	
+
+        if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
+            bgLine = buildBgLine(
+                    Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE))
+                            .mapColors(regs.get(Reg.BGP));
+
         }
-        
-        if (regs.testBit(Reg.LCDC,LCDCBit.WIN)&&(regs.get(Reg.WX)>=7)
-        		&& line>regs.get(Reg.WY)) {
-        	LcdImageLine windowLine = buildWindowLine();
-        	bgAndWindow = bgLine.join(windowLine,regs.get(Reg.WX)-7);
+
+        if (regs.testBit(Reg.LCDC, LCDCBit.WIN) && (regs.get(Reg.WX) >= 7)
+                && line > regs.get(Reg.WY)) {
+            LcdImageLine windowLine = buildWindowLine();
+            bgAndWindow = bgLine.join(windowLine, regs.get(Reg.WX) - 7);
+        } else {
+            bgAndWindow = bgLine;
         }
-        else {
-        	bgAndWindow = bgLine;
+
+        if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
+            int[] tab = spritesIntersectingLine(line);
+            LcdImageLine[] temp = buildSpritesLines(tab, line);
+            foregroundSpritesLine = temp[1];
+            behindSpritesLine = temp[0];
         }
-        
-        if (regs.testBit(Reg.LCDC,LCDCBit.OBJ)) {
-        	int [] tab = spritesIntersectingLine(line);
-        	LcdImageLine [] temp = buildSpritesLines(tab,line);
-        	foregroundSpritesLine = temp[1];
-        	behindSpritesLine = temp[0];
-        }
-        
-        LcdImageLine imageAndBehindSprites = bgAndWindow.below(behindSpritesLine.below(bgAndWindow));
-        
+
+        LcdImageLine imageAndBehindSprites = bgAndWindow
+                .below(behindSpritesLine.below(bgAndWindow));
+
         return imageAndBehindSprites.below(foregroundSpritesLine);
     }
 
@@ -353,53 +356,50 @@ public final class LcdController implements Clocked, Component {
         return lineBuilder.build();
 
     }
-    
-    
-    
 
     private int[] spritesIntersectingLine(int line) {
-	    int[] res = {
-	    		0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0b1<<30, 0
-	    };
-	    int spriteSizeAdjustement = regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE) ? 0 : -8;
-	    int filled = 0;
-	    int index = 0;
-	    while (filled < 10 && index < 40) {
-	        int y = spriteGetY(index);
-	        if (line >= y - 16 && line < y+spriteSizeAdjustement ) {
-	            res[filled] = (spriteGetX(index)<<16) | (index<<8) | y;
-	            ++filled;
-	        }
-	        ++index;
-	    }
-	    res[10] = filled;
-	    
-	    Arrays.sort(res,0,filled);
-	    
-        return res;
-	}
+        int[] res = { 0b1 << 30, 0b1 << 30, 0b1 << 30, 0b1 << 30, 0b1 << 30,
+                0b1 << 30, 0b1 << 30, 0b1 << 30, 0b1 << 30, 0b1 << 30, 0 };
+        int spriteSizeAdjustement = regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE) ? 0
+                : -8;
+        int filled = 0;
+        int index = 0;
+        while (filled < 10 && index < 40) {
+            int y = spriteGetY(index);
+            if (line >= y - 16 && line < y + spriteSizeAdjustement) {
+                res[filled] = (spriteGetX(index) << 16) | (index << 8) | y;
+                ++filled;
+            }
+            ++index;
+        }
+        res[10] = filled;
 
-	private LcdImageLine[] buildSpritesLines(int[] tab, int line) {
+        Arrays.sort(res, 0, filled);
+
+        return res;
+    }
+
+    private LcdImageLine[] buildSpritesLines(int[] tab, int line) {
 
         LcdImageLine behindBgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
         LcdImageLine foregroundLine = new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
-        
+
         int filled = tab[10];
-        
-        for(int i=0 ; i<filled ; ++i) {
+
+        for (int i = 0; i < filled; ++i) {
             int xindexy = tab[i];
-            int index = Bits.extract(xindexy,8,8);
+            int index = Bits.extract(xindexy, 8, 8);
             if (spriteIsBehindBg(index)) {
-            	behindBgLine = buildSpriteLine(xindexy, line)
-                            .below(behindBgLine);
+                behindBgLine = buildSpriteLine(xindexy, line)
+                        .below(behindBgLine);
             } else {
-            	foregroundLine = buildSpriteLine(xindexy, line)
-            			.below(foregroundLine);
-                }
+                foregroundLine = buildSpriteLine(xindexy, line)
+                        .below(foregroundLine);
+            }
         }
-        
+
         return new LcdImageLine[] { behindBgLine, foregroundLine };
     }
 
@@ -413,33 +413,31 @@ public final class LcdController implements Clocked, Component {
 
         if (isVFlipped) {
             if (regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE)) {
-                relativeAddress = 2 * (15-line+yAbsolute);
+                relativeAddress = 2 * (15 - line + yAbsolute);
             } else {
-                relativeAddress = 2 * (7-line+yAbsolute);
+                relativeAddress = 2 * (7 - line + yAbsolute);
             }
         } else {
             relativeAddress = 2 * (line - yAbsolute);
         }
 
         LcdImageLine.Builder res = new LcdImageLine.Builder(LCD_WIDTH);
-        
-        int msb =  isHFlipped ? read(tileAddress + relativeAddress )
-                : Bits.reverse8(read(tileAddress + relativeAddress));
-        
-		int lsb = isHFlipped ? read(tileAddress + relativeAddress + 1)
-				: Bits.reverse8(read(tileAddress + relativeAddress + 1));
 
-		return res.setBytes(0, msb, lsb).build().shift(Bits.extract(xindexy, 16, 8) - 8)
-				.mapColors(spriteGetPalette(index));
+        int msb = isHFlipped ? read(tileAddress + relativeAddress)
+                : Bits.reverse8(read(tileAddress + relativeAddress));
+
+        int lsb = isHFlipped ? read(tileAddress + relativeAddress + 1)
+                : Bits.reverse8(read(tileAddress + relativeAddress + 1));
+
+        return res.setBytes(0, msb, lsb).build()
+                .shift(Bits.extract(xindexy, 16, 8) - 8)
+                .mapColors(spriteGetPalette(index));
     }
-    
-    
-    
 
     private enum SpriteBit implements Bit {
 
         PALETTE, FLIP_H, FLIP_V, BEHIND_BG;
-        
+
         @Override
         public int index() {
             return this.ordinal() + 4;
@@ -470,16 +468,15 @@ public final class LcdController implements Clocked, Component {
 
     private boolean spriteIsBehindBg(int index) {
         return Bits.test(objectAttributeMemory.read((4 * index) + 3),
-                SpriteBit.BEHIND_BG );
-    }
-    
-    private int spriteGetPalette(int index) {
-    	return Bits.test(objectAttributeMemory.read((4 * index) + 3),SpriteBit.PALETTE)?
-    			 regs.get(Reg.OBP1):regs.get(Reg.OBP0) ;
-    			
+                SpriteBit.BEHIND_BG);
     }
 
-    
+    private int spriteGetPalette(int index) {
+        return Bits.test(objectAttributeMemory.read((4 * index) + 3),
+                SpriteBit.PALETTE) ? regs.get(Reg.OBP1) : regs.get(Reg.OBP0);
+
+    }
+
     /// Manages the current mode of the LCD controller
 
     private void setMode(int mode) {
