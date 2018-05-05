@@ -41,7 +41,7 @@ public final class BitVector {
     }
 
     private BitVector(int[] table) {
-        this.table = table; 
+        this.table = table;
     }
 
     /*
@@ -52,7 +52,7 @@ public final class BitVector {
     @Override
     public boolean equals(Object arg0) {
         if (arg0 instanceof BitVector) {
-            return Arrays.equals(table, ((BitVector)arg0).table);
+            return Arrays.equals(table, ((BitVector) arg0).table);
         }
         return false;
     }
@@ -66,23 +66,6 @@ public final class BitVector {
     public int hashCode() {
         return Arrays.hashCode(table);
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    // @Override
-    // public String toString() {
-    // String res = "";
-    // for (int value : table) {
-    // for (int i = 0; i < Integer.SIZE; i++) {
-    // res = res
-    // + ((Integer) (Bits.test(value, i) ? 1 : 0)).toString();
-    // }
-    // }
-    // return res;
-    // }
 
     /*
      * (non-Javadoc)
@@ -111,16 +94,18 @@ public final class BitVector {
     }
 
     // Peut être intéressante ? Pas demandée pour le moment
+    // Je pense pas qu'on va devoir tester un Bit dans un vecteur (vu
+    // l'utilisation qu'on leur donne la maintenant
     // public boolean testBit(Bit bit) {
     // return testBit(bit.index());
     // }
 
     /**
-     * Checks if a bit is activated
+     * Checks if the bit at the given index is activated
      * 
      * @param index
      *            - the index of the bit
-     * @return wether the bit is activated
+     * @return whether the bit is activated or not, as a boolean value
      */
     public boolean testBit(int index) {
         Objects.checkIndex(index, size());
@@ -129,9 +114,9 @@ public final class BitVector {
     }
 
     /**
-     * Computes the complementary BitVector
+     * Computes the complementary of this BitVector
      * 
-     * @return complementary BitVector
+     * @return the complementary of this BitVector
      */
     public BitVector not() {
         int[] notTable = new int[table.length];
@@ -145,8 +130,8 @@ public final class BitVector {
      * Computes the conjunction of two BitVectors
      * 
      * @param that
-     *            - the BitVector with which we want to compute the conjuction
-     * @return conjunction BitVector
+     *            - the BitVector with which we want to compute the conjunction
+     * @return conjunction of the two BitVectors
      */
     public BitVector and(BitVector that) {
         Preconditions.checkArgument(that.size() == size());
@@ -162,7 +147,7 @@ public final class BitVector {
      * 
      * @param that
      *            - the BitVector with which we want to compute the disjunction
-     * @return disjunction BitVector
+     * @return disjunction of the two BitVector
      */
     public BitVector or(BitVector that) {
         Preconditions.checkArgument(that.size() == size());
@@ -171,10 +156,6 @@ public final class BitVector {
             orTable[i] = table[i] | that.table[i];
         }
         return new BitVector(orTable);
-    }
-
-    protected enum ExtensionType {
-        BYZERO, WRAPPED
     }
 
     /**
@@ -204,7 +185,8 @@ public final class BitVector {
     }
 
     /**
-     * Computes the shift of the instance
+     * Computes the shift of the instance, a left shift if start is positive and
+     * a right shift if start is negative
      * 
      * @param start
      *            - the index of the first bit in extraction
@@ -214,8 +196,18 @@ public final class BitVector {
         return extractZeroExtended(-start, size());
     }
 
+    /**
+     * This enum is used in the extract methods and allows us to simplify the
+     * writing of the two methods
+     *
+     */
+    protected enum ExtensionType {
+        BYZERO, WRAPPED
+    }
+
     private BitVector extract(int start, int size, ExtensionType ext) {
-        Preconditions.checkArgument((size > 0) && (Math.floorMod(size,32) == 0));
+        Preconditions
+                .checkArgument((size > 0) && (Math.floorMod(size, 32) == 0));
         int[] newTable = new int[size / 32];
         int internalShift = Math.floorMod(start, Integer.SIZE);
         int cellShift = Math.floorDiv(start, 32);
@@ -246,7 +238,7 @@ public final class BitVector {
         private byte[] table = null;
 
         /**
-         * Builds a Builder
+         * Builds a BitVector Builder
          * 
          * @param size
          *            the number of Bit of the desired BitVector
@@ -258,11 +250,17 @@ public final class BitVector {
         }
 
         /**
-         * Sets the byte of weight index to a value
+         * Sets the byte of weight index to the given value
          * 
          * @param index
          * @param value
          * @return the updated Builder
+         * @throws IndexOutOfBoundsException
+         *             if the index is not valid
+         * @throws IllegalArgumentException
+         *             if the value is not an 8 bit value
+         * @throws IllegalStateException
+         *             if the builder has already built the bitVector
          */
         public Builder setByte(int index, int value) {
             Preconditions.checkBits8(value);
@@ -276,12 +274,19 @@ public final class BitVector {
         }
 
         /**
-         * Builds the BitVector corresponding to the Builder
+         * Builds the BitVector corresponding to the current state of the
+         * Builder
+         * 
+         * The Builder then makes himself unusable
          * 
          * @return the BitVector
+         * @throws IllegalStateException
+         *             if the builder has already built the bitVector
          */
         public BitVector build() {
-            Objects.requireNonNull(table);
+            if (table == null) {
+                throw new IllegalStateException();
+            }
             int[] argument = buildIntTable();
             table = null;
             return new BitVector(argument);
@@ -305,6 +310,12 @@ public final class BitVector {
             return res;
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#toString()
+         */
+        @Override
         public String toString() {
             return Arrays.toString(table);
         }
