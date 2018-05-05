@@ -24,6 +24,10 @@ import ch.epfl.gameboj.component.memory.Ram;
  */
 public final class LcdController implements Clocked, Component {
 
+    /**
+     * Represents the registers of the LcdController, is used as the type of the
+     * registerFile regs, allowing a quick implementation of these registers
+     */
     private enum Reg implements Register {
         LCDC, STAT, SCY, SCX, LY, LYC, DMA, BGP, OBP0, OBP1, WY, WX;
     }
@@ -39,26 +43,31 @@ public final class LcdController implements Clocked, Component {
     public final static int LCD_WIDTH = 160;
     public final static int LCD_HEIGHT = 144;
     private final static int BG_SIZE = 256;
-    private final static int LINE_CYCLES = 20 + 43 + 51;
+    private final static int LINE_CYCLES = 114;
 
     private final Cpu cpu;
-    private Bus bus;
-    private LcdImage currentImage;
-    private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH,
-            LCD_HEIGHT);
     private final Ram videoRam;
     private final Ram objectAttributeMemory;
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
+    private Bus bus;
+
+    private LcdImage currentImage;
+    private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH,
+            LCD_HEIGHT);
     private long lcdOnCycle;
     private long nextNonIdleCycle;
-    private int winY = 0;
-
     private boolean firstLineDrawn = false;
+    private int winY = 0;
 
     private boolean oamCopy = false;
     private int octetsCopiedToOam = 0;
     private int addressToCopy = 0;
 
+    /**
+     * Creates a new LcdController
+     * 
+     * @param cpu
+     */
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
         videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
@@ -115,8 +124,7 @@ public final class LcdController implements Clocked, Component {
                 && address < AddressMap.VIDEO_RAM_END) {
             videoRam.write(address - AddressMap.VIDEO_RAM_START, data);
         }
-        if (Preconditions.checkBits16(address) >= AddressMap.OAM_START
-                && address < AddressMap.OAM_END) {
+        if (address >= AddressMap.OAM_START && address < AddressMap.OAM_END) {
             objectAttributeMemory.write(address - AddressMap.OAM_START, data);
         }
         if (address >= AddressMap.REGS_LCDC_START
@@ -205,6 +213,7 @@ public final class LcdController implements Clocked, Component {
             regs.set(Reg.LY, 0);
             checkIfLYEqualsLYC();
         }
+
         if (oamCopy) {
             if (octetsCopiedToOam >= 160) {
                 oamCopy = false;
@@ -267,36 +276,32 @@ public final class LcdController implements Clocked, Component {
     /**
      * Returns the last image drawn by the LcdController
      * 
-     * @return currentImage a LcdImage
+     * @return currentImage the last LcdImage drawn by the LcdController
      */
     public LcdImage currentImage() {
         return currentImage;
     }
 
+    /**
+     * Computes a line of the LcdController's image
+     * 
+     * @param line,
+     *            the line to compute
+     * @return an LcdImageLine containing the background, the window and both
+     *         the background and foreground sprites
+     */
     private LcdImageLine computeLine(int line) {
-
-        LcdImageLine behindSpritesLine = new LcdImageLine(
-                new BitVector(LCD_WIDTH, false),
-                new BitVector(LCD_WIDTH, false),
-                new BitVector(LCD_WIDTH, false));
-
-        LcdImageLine foregroundSpritesLine = new LcdImageLine(
-                new BitVector(LCD_WIDTH, false),
-                new BitVector(LCD_WIDTH, false),
-                new BitVector(LCD_WIDTH, false));
-
-        LcdImageLine bgLine = new LcdImageLine(new BitVector(LCD_WIDTH, false),
-                new BitVector(LCD_WIDTH, false),
-                new BitVector(LCD_WIDTH, false));
-
-        LcdImageLine bgAndWindow;
-
+        LcdImageLine bgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
+                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
+        
         if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
             bgLine = buildBgLine(
                     Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE))
                             .mapColors(regs.get(Reg.BGP));
 
         }
+        
+        LcdImageLine bgAndWindow;
 
         if (regs.testBit(Reg.LCDC, LCDCBit.WIN) && (regs.get(Reg.WX) >= 7)
                 && line > regs.get(Reg.WY)) {
@@ -306,6 +311,13 @@ public final class LcdController implements Clocked, Component {
             bgAndWindow = bgLine;
         }
 
+        LcdImageLine behindSpritesLine = new LcdImageLine(
+                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH),
+                new BitVector(LCD_WIDTH));
+        LcdImageLine foregroundSpritesLine = new LcdImageLine(
+                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH),
+                new BitVector(LCD_WIDTH));
+        
         if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
             int[] tab = spritesIntersectingLine(line);
             LcdImageLine[] temp = buildSpritesLines(tab, line);
@@ -499,7 +511,7 @@ public final class LcdController implements Clocked, Component {
                 | (Bits.test(statValue, STATBit.MODE0) ? 1 : 0);
     }
 
-    /// Manages the Bits in Stat that throw exceptions if they are on
+    /// Manages the Bits in Stat 
 
     private void checkIfLYEqualsLYC() {
         int statValue = regs.get(Reg.STAT);
