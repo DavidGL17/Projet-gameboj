@@ -21,7 +21,7 @@ public final class LcdImageLine {
      * 
      * @param msb,
      *            the msb vector
-     * @param lsb, 
+     * @param lsb,
      *            the lsb vector
      * @param opacity,
      *            the opacity vector
@@ -69,7 +69,7 @@ public final class LcdImageLine {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(msb,lsb,opacity);
+        return Objects.hash(msb, lsb, opacity);
     }
 
     /*
@@ -80,8 +80,9 @@ public final class LcdImageLine {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof LcdImageLine) {
-            return (lsb.equals(((LcdImageLine)obj).getLsb()) && msb.equals(((LcdImageLine)obj).getMsb())
-                    && opacity.equals(((LcdImageLine)obj).getOpacity()));
+            return (lsb.equals(((LcdImageLine) obj).getLsb())
+                    && msb.equals(((LcdImageLine) obj).getMsb())
+                    && opacity.equals(((LcdImageLine) obj).getOpacity()));
         }
         return false;
     }
@@ -92,7 +93,8 @@ public final class LcdImageLine {
      * @param shiftNumber
      */
     public LcdImageLine shift(int shiftNumber) {
-        return new LcdImageLine(msb.shift(shiftNumber),lsb.shift(shiftNumber),opacity.shift(shiftNumber));
+        return new LcdImageLine(msb.shift(shiftNumber), lsb.shift(shiftNumber),
+                opacity.shift(shiftNumber));
     }
 
     /**
@@ -112,9 +114,12 @@ public final class LcdImageLine {
     }
 
     /**
-     * Changes the color of each bit of the line according ti the given palette
+     * Changes the color of each bit of the line according to the given palette
      * 
      * @param palette
+     *            an int containing the new set of colors
+     * @return a new LcdImageLine with the colors changed to correspond to the
+     *         given palette
      */
     public LcdImageLine mapColors(int palette) {
         if (checkAllColorsSame(palette)) {
@@ -157,11 +162,11 @@ public final class LcdImageLine {
      * 
      * @param that,
      *            the given line
-     * @return
+     * @return the composition of the two lines
      */
     public LcdImageLine below(LcdImageLine that) {
-        return below(that,that.opacity);
-      
+        return below(that, that.opacity);
+
     }
 
     /**
@@ -170,7 +175,7 @@ public final class LcdImageLine {
      * 
      * @param that,
      *            the given line
-     * @return
+     * @return the composition of the two lines
      */
     public LcdImageLine below(LcdImageLine that, BitVector givenOpacity) {
         BitVector finalMSB = givenOpacity.and(that.msb)
@@ -178,42 +183,46 @@ public final class LcdImageLine {
         BitVector finalLSB = givenOpacity.and(that.lsb)
                 .or(givenOpacity.not().and(lsb));
         BitVector finalOpacity = givenOpacity.or(getOpacity());
-        
+
         return new LcdImageLine(finalMSB, finalLSB, finalOpacity);
     }
 
     /**
-     * Computes the jointure of the first LcdImageLine up to index and thw
-     * second LcdImageline
-     * @param that - the second LcdImageLine
-     * @param index - the index
-     * @return the jointure
+     * Computes the junction of the first LcdImageLine up to index and the
+     * second LcdImageline from the index to the end of the second LcdImageLine
+     * 
+     * @param that
+     *            - the second LcdImageLine
+     * @param index
+     *            - the index at which we start putting the second LcdImageLine
+     * @return the junction of the two LcdImageLine
+     * @throws IllegalArgumentException
+     *             if both images don't have the same size, or if the index is
+     *             not within the bounds
      */
     public LcdImageLine join(LcdImageLine that, int index) {
         Preconditions.checkArgument(
                 that.size() == size() && index >= 0 && index < size());
         BitVector.Builder builder = new BitVector.Builder(size());
-        int i=0;
-        while (index>8) {
-        		builder.setByte(i,0xFF);
-        		index-=8;
-         	i++;
+        int i = 0;
+        while (index > 8) {
+            builder.setByte(i, 0xFF);
+            index -= 8;
+            i++;
         }
-        builder.setByte(i,Bits.clip(index,-1))	;
-        BitVector mask=builder.build();
-        
-        BitVector newMsb = ( mask.and(this.msb) ).or( 
-        		(mask.not()).and(that.msb) );
-        BitVector newLsb = ( mask.and(this.lsb) ).or( 
-        		(mask.not()).and(that.lsb) );
-        BitVector newOpacity = ( mask.and(this.opacity) ).or( 
-        		(mask.not()).and(that.opacity) );
-        
-        return new LcdImageLine(newMsb,newLsb,newOpacity);
+        builder.setByte(i, Bits.clip(index, -1));
+        BitVector mask = builder.build();
+
+        BitVector newMsb = (mask.and(this.msb)).or((mask.not()).and(that.msb));
+        BitVector newLsb = (mask.and(this.lsb)).or((mask.not()).and(that.lsb));
+        BitVector newOpacity = (mask.and(this.opacity))
+                .or((mask.not()).and(that.opacity));
+
+        return new LcdImageLine(newMsb, newLsb, newOpacity);
     }
 
     /**
-     * Allows the build per byte of a LcdImageLine
+     * Enables the build byte per byte of a LcdImageLine
      *
      */
     public static class Builder {
@@ -221,7 +230,7 @@ public final class LcdImageLine {
         private BitVector.Builder lsbBuilder;
 
         /**
-         * Builds a LcdImageLine builder
+         * Creates a LcdImageLine builder
          * 
          * @param size,
          *            the length of the desired line
@@ -235,10 +244,17 @@ public final class LcdImageLine {
          * sets a byte at the given index in the msb and lsb vector and adapts
          * the opacity accordingly
          * 
-         * @param index
+         * @param index,
+         *            the index of the byte
          * @param msbBytes
          * @param lsbBytes
-         * @return this
+         * @return the updated Builder
+         * @throws IndexOutOfBoundsException
+         *             if the index is not valid
+         * @throws IllegalArgumentException
+         *             if the value is not an 8 bit value
+         * @throws IllegalStateException
+         *             if the builder has already built the lcdImageLine
          */
         public Builder setBytes(int index, int msbBytes, int lsbBytes) {
             msbBuilder.setByte(index, msbBytes);
@@ -247,15 +263,19 @@ public final class LcdImageLine {
         }
 
         /**
-         * builds a LcdImageLine
+         * builds a LcdImageLine corresponding to the current state of the
+         * Builder
+         * 
+         * The builder is then unusable
          * 
          * @return a new LcdImageLine
+         * @throws IllegalStateException
+         *             if the builder has already built the lcdImageLine
          */
         public LcdImageLine build() {
-        		BitVector msb=msbBuilder.build();
-        		BitVector lsb=lsbBuilder.build();
-            return new LcdImageLine(msb, lsb, msb.or(lsb)
-                    );
+            BitVector msb = msbBuilder.build();
+            BitVector lsb = lsbBuilder.build();
+            return new LcdImageLine(msb, lsb, msb.or(lsb));
         }
     }
 
