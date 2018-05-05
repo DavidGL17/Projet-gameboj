@@ -15,6 +15,9 @@ import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
  */
 public final class Joypad implements Component {
 
+    /**
+     * Represents the different keys of the gameboy
+     */
     public enum Key {
         RIGHT(0, 1), LEFT(1, 1), UP(2, 1), DOWN(3, 1), A(0, 2), B(1,
                 2), SELECT(2, 2), START(3, 2);
@@ -63,6 +66,13 @@ public final class Joypad implements Component {
         }
     }
 
+    /**
+     * Presses the given key, updates P1 accodringly, and requests the JOYPAD
+     * interupt in the cpu if necessary
+     * 
+     * @param key,
+     *            the key to press
+     */
     public void keyPressed(Key key) {
         if (Bits.test(getP1(), key.index)) {
             cpu.requestInterrupt(Interrupt.JOYPAD);
@@ -77,6 +87,12 @@ public final class Joypad implements Component {
         }
     }
 
+    /**
+     * Releases the given key, and updates P1 accordingly
+     * 
+     * @param key,
+     *            the key to release
+     */
     public void keyReleased(Key key) {
         switch (key.line) {
         case 1:
@@ -88,6 +104,11 @@ public final class Joypad implements Component {
         }
     }
 
+    /**
+     * Computes P1 according to which line is on, and which key is pressed
+     * 
+     * @return P1
+     */
     private int getP1() {
         if (Bits.test(line1, 4) && Bits.test(line2, 5)) {
             return Bits.complement8(line1 | line2);
