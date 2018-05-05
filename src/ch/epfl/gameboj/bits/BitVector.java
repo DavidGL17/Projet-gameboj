@@ -233,12 +233,16 @@ public final class BitVector {
         throw new IllegalStateException("how");
     }
 
+    /**
+     * Enables the build byte per byte of a BitVector
+     *
+     */
     public final static class Builder {
 
         private byte[] table = null;
 
         /**
-         * Builds a BitVector Builder
+         * Creates a BitVector Builder
          * 
          * @param size
          *            the number of Bit of the desired BitVector

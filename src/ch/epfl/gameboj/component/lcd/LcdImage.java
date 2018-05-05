@@ -33,29 +33,6 @@ public final class LcdImage {
         this.height = height;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(lines, height, width);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof LcdImage) {
-            return lines.equals(((LcdImage) obj).lines);
-        }
-        return false;
-    }
-
     /**
      * @return the width of the image
      */
@@ -84,12 +61,39 @@ public final class LcdImage {
                 | (lines.get(y).getLsb().testBit(x) ? 1 : 0);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(lines, height, width);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof LcdImage) {
+            return lines.equals(((LcdImage) obj).lines);
+        }
+        return false;
+    }
+
+    /**
+     * Enables the build line per line of a LcdImage
+     *
+     */
     public static class Builder {
         private final LcdImageLine[] lines;
         private final int width;
 
         /**
-         * Builds a LcdImage builder
+         * Creates a LcdImage builder
          * 
          * @param height,
          *            the height of the builder
@@ -108,7 +112,14 @@ public final class LcdImage {
          * 
          * @param line
          * @param index
-         * @return
+         * @return the updated Builder
+         * @throws IllegalArgumentException
+         *             if the index is not within the bounds or if the size of
+         *             the given line is not equal to the width of the image
+         * @throws NullPointerException
+         *             if the given line is null
+         * @throws IllegalStateException
+         *             if the builder has already built the lcdImage
          */
         public Builder setLine(LcdImageLine line, int index) {
             Preconditions.checkArgument(index < lines.length && index >= 0
@@ -118,7 +129,13 @@ public final class LcdImage {
         }
 
         /**
+         * Builds a new LcdImage containing the lines previously added
+         * 
+         * The builder is then unusable
+         * 
          * @return a new LcdImage
+         * @throws IllegalStateException
+         *             if the builder has already built the lcdImage
          */
         public LcdImage build() {
             return new LcdImage(Arrays.asList(lines.clone()), width,
