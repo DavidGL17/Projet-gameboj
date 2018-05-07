@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ch.epfl.gameboj.bits.BitVector;
@@ -150,6 +151,7 @@ class LcdImageLineTest {
         assertEquals(opacity.shift(shift),shifted.getOpacity());
     }
 
+    @Disabled
     @Test
     void extractWrappedWorks() {
     	for(int i=0 ; i<40 ; i++) {

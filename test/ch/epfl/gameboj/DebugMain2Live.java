@@ -66,6 +66,9 @@ public final class DebugMain2Live extends Application {
                 if (gb.cycles()>10000000) {
                     gb.joypad().keyPressed(Key.A);
                 }
+                if (gb.cycles()>10100000) {
+                    gb.joypad().keyReleased(Key.A);
+                }
                 imageView.setImage(null);
                 imageView.setImage(getImage(gb));
             }

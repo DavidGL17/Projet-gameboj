@@ -131,7 +131,8 @@ public final class LcdController implements Clocked, Component {
                 && address < AddressMap.REGS_LCDC_END) {
             switch (address) {
             case 0xFF40:
-                if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)&& !Bits.test(data, 7)) {
+                if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)
+                        && !Bits.test(data, 7)) {
                     regs.set(Reg.LY, 0);
                     checkIfLYEqualsLYC();
                     setMode(0);
@@ -289,14 +290,13 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine computeLine(int line) {
         LcdImageLine bgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
-        
+
         if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
             bgLine = buildBgLine(
-                    Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE))
-                            .mapColors(regs.get(Reg.BGP));
+                    Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE));
 
         }
-        
+
         LcdImageLine bgAndWindow;
 
         if (regs.testBit(Reg.LCDC, LCDCBit.WIN) && (regs.get(Reg.WX) >= 7)
@@ -313,7 +313,7 @@ public final class LcdController implements Clocked, Component {
         LcdImageLine foregroundSpritesLine = new LcdImageLine(
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH));
-        
+
         if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
             int[] tab = spritesIntersectingLine(line);
             LcdImageLine[] temp = buildSpritesLines(tab, line);
@@ -329,7 +329,7 @@ public final class LcdController implements Clocked, Component {
 
     private LcdImageLine buildBgLine(int line) {
         return buildLine(line, true).extractWrapped(regs.get(Reg.SCX),
-                LCD_WIDTH);
+                LCD_WIDTH).mapColors(regs.get(Reg.BGP));
     }
 
     private LcdImageLine buildWindowLine() {
@@ -507,7 +507,7 @@ public final class LcdController implements Clocked, Component {
                 | (Bits.test(statValue, STATBit.MODE0) ? 1 : 0);
     }
 
-    /// Manages the Bits in Stat 
+    /// Manages the Bits in Stat
 
     private void checkIfLYEqualsLYC() {
         int statValue = regs.get(Reg.STAT);
