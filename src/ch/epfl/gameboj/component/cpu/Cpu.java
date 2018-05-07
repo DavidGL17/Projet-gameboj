@@ -63,7 +63,7 @@ public final class Cpu implements Component, Clocked {
      * Builds a table of opcodes of the specified kind
      */
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[300];
+        Opcode[] table = new Opcode[0x200];
         for (Opcode o : Opcode.values()) {
             if (o.kind == kind) {
                 table[o.encoding] = o;
@@ -363,19 +363,36 @@ public final class Cpu implements Component, Clocked {
 
         // Add
         case ADD_A_R8: {
-            setRegFlags(Reg.A, Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),extractCarry(opcode)));
+            boolean c = extractCarry(opcode);
+            combineAluFlags(
+                    Alu.add(Regs.get(Reg.A), Regs.get(extractReg(opcode, 0)),
+                            c),
+                    FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Bits.clip(8, Regs.get(Reg.A)
+                    + Regs.get(extractReg(opcode, 0)) + (c ? 1 : 0)));
         }
         break;
         case ADD_A_N8: {
-            setRegFlags(Reg.A, Alu.add(Regs.get(Reg.A), read8AfterOpcode(),extractCarry(opcode)));
+            boolean c = extractCarry(opcode);
+            combineAluFlags(Alu.add(Regs.get(Reg.A), read8AfterOpcode(), c),
+                    FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A, Bits.clip(8,
+                    Regs.get(Reg.A) + read8AfterOpcode() + (c ? 1 : 0)));
         }
         break;
         case ADD_A_HLR: {
-            setRegFlags(Reg.A, Alu.add(Regs.get(Reg.A), read8AtHl(),extractCarry(opcode)));
+            boolean c = extractCarry(opcode);
+            combineAluFlags(Alu.add(Regs.get(Reg.A), read8AtHl(), c),
+                    FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+            Regs.set(Reg.A,
+                    Bits.clip(8, Regs.get(Reg.A) + read8AtHl() + (c ? 1 : 0)));
         }
         break;
         case INC_R8: {
-            setRegFlags(extractReg(opcode, 3), Alu.add(Regs.get(extractReg(opcode, 3)), 1));
+            combineAluFlags(Alu.add(Regs.get(extractReg(opcode, 3)), 1),
+                    FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
+            Regs.set(extractReg(opcode, 3),
+                    Bits.clip(8, Regs.get(extractReg(opcode, 3)) + 1));
         }
         break;
         case INC_HLR: {
