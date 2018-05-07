@@ -20,6 +20,7 @@ public final class Cartridge implements Component {
 
     private final Component MBC;
     private static final int MBC_IDENTIFICATION_ADDRESS = 0x147;
+    private static final int MBC_SIZE_RAM_IDENTIFICATION_ADDRESS = 0x149;
 
     private Cartridge(Component MBC) {
         this.MBC = MBC;
@@ -41,12 +42,11 @@ public final class Cartridge implements Component {
                 data[i] = (byte) n;
                 ++i;
             }
+            Rom rom = new Rom(data);
             if(data[MBC_IDENTIFICATION_ADDRESS] == 0) {
-	            Rom rom = new Rom(data);
 	            return new Cartridge(new MBC0(rom));
             } else if (data[MBC_IDENTIFICATION_ADDRESS] > 0 && data[MBC_IDENTIFICATION_ADDRESS] <= 3) {
-            	Rom rom = new Rom(data);
-	            return new Cartridge(new MBC1(rom, data[MBC_IDENTIFICATION_ADDRESS]));
+	            return new Cartridge(new MBC1(rom, data[MBC_SIZE_RAM_IDENTIFICATION_ADDRESS]));
             } else {
             	throw new IllegalArgumentException("not recongnized cartridge");
             }
