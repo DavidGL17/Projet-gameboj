@@ -131,7 +131,7 @@ public final class LcdController implements Clocked, Component {
                 && address < AddressMap.REGS_LCDC_END) {
             switch (address) {
             case 0xFF40:
-                if (Bits.test(data, 7)) {
+                if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)&& !Bits.test(data, 7)) {
                     regs.set(Reg.LY, 0);
                     checkIfLYEqualsLYC();
                     setMode(0);
@@ -208,10 +208,6 @@ public final class LcdController implements Clocked, Component {
                 }
                 reallyCycle(cycle, drawnImages);
             }
-        } else {
-            setMode(0);
-            regs.set(Reg.LY, 0);
-            checkIfLYEqualsLYC();
         }
 
         if (oamCopy) {

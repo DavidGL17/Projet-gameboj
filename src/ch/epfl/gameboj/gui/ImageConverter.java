@@ -5,9 +5,9 @@ import javafx.scene.image.Image;
 
 public class ImageConverter {
 	
-	public static Image convert(LcdImage image) {
+//	public static Image convert(LcdImage image) {
 		//TODO
 		
-	}
+//	}
 
 }

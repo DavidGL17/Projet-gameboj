@@ -63,7 +63,7 @@ public final class Cpu implements Component, Clocked {
      * Builds a table of opcodes of the specified kind
      */
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[256];
+        Opcode[] table = new Opcode[300];
         for (Opcode o : Opcode.values()) {
             if (o.kind == kind) {
                 table[o.encoding] = o;
