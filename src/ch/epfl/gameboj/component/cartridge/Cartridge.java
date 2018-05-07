@@ -41,9 +41,15 @@ public final class Cartridge implements Component {
                 data[i] = (byte) n;
                 ++i;
             }
-            Preconditions.checkArgument(data[MBC_IDENTIFICATION_ADDRESS] == 0);
-            Rom rom = new Rom(data);
-            return new Cartridge(new MBC0(rom));
+            if(data[MBC_IDENTIFICATION_ADDRESS] == 0) {
+	            Rom rom = new Rom(data);
+	            return new Cartridge(new MBC0(rom));
+            } else if (data[MBC_IDENTIFICATION_ADDRESS] > 0 && data[MBC_IDENTIFICATION_ADDRESS] <= 3) {
+            	Rom rom = new Rom(data);
+	            return new Cartridge(new MBC1(rom, data[MBC_IDENTIFICATION_ADDRESS]));
+            } else {
+            	throw new IllegalArgumentException("not recongnized cartridge");
+            }
         } catch (FileNotFoundException i) {
             throw new IOException();
         }
