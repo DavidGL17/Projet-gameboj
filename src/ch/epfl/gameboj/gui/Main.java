@@ -13,40 +13,46 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-	
+
     private final long CYCLES_PER_ITERATION = 17556;
-    
-	public static void main (String[] args) {
-		Application.launch(new String[] {"tasmaniaStory.gb"});
-	}
+
+    public static void main(String[] args) {
+        Application.launch(new String[] { "tasmaniaStory.gb" });
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         List<String> romName = getParameters().getRaw();
-        if (romName.size()!=1) {
+        if (romName.size() != 1) {
             System.exit(1);
         }
+        long start = System.nanoTime();
         GameBoy gb = new GameBoy(Cartridge.ofFile(new File(romName.get(0))));
-        
-        ImageView imageView = new ImageView(ImageConverter.convert(gb.lcdController().currentImage()));
-        imageView.setFitHeight(2*gb.lcdController().height());
-        imageView.setFitWidth(2*gb.lcdController().width());
-//        imageView.setOnKeyPressed(KeyEvent.KEY_PRESSED);
-        
-        
+
+        ImageView imageView = new ImageView(
+                ImageConverter.convert(gb.lcdController().currentImage()));
+        imageView.setFitHeight(2 * gb.lcdController().height());
+        imageView.setFitWidth(2 * gb.lcdController().width());
+        // imageView.setOnKeyPressed(KeyEvent.KEY_PRESSED);
+
         BorderPane pane = new BorderPane(imageView);
         Scene scene = new Scene(pane);
-        
+
         primaryStage.setScene(scene);
         primaryStage.setTitle("gameboj");
         primaryStage.show();
         imageView.requestFocus();
-        
+
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                gb.runUntil(gb.cycles() + CYCLES_PER_ITERATION);
-                imageView.setImage(ImageConverter.convert(gb.lcdController().currentImage()));
+                long timeSpent = now - start;
+                long cyclesOfGb = (long) (timeSpent
+                        * GameBoy.cyclesPerNanosecond);
+                System.out.println(cyclesOfGb-gb.cycles());
+                gb.runUntil(cyclesOfGb);
+                imageView.setImage(ImageConverter
+                        .convert(gb.lcdController().currentImage()));
             }
         };
         timer.start();

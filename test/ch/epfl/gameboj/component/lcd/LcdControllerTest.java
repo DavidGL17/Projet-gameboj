@@ -59,4 +59,10 @@ public class LcdControllerTest {
             ++cycle;
         }
     }
+    
+    @Test
+    void randomTest() {
+        System.out.println((long)GameBoy.cyclesPerNanosecond);
+        System.out.println(GameBoy.cyclesPerSecond);
+    }
 }

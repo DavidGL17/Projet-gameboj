@@ -28,7 +28,7 @@ public final class GameBoy {
     private final Joypad joypad;
 
     private long currentCycle = 0;
-    public static final long cyclesPerSecond = 1 << 20;
+    public static final long cyclesPerSecond = 2 << 20;
     public static final double cyclesPerNanosecond = cyclesPerSecond
             / Math.pow(10, 9);
 
