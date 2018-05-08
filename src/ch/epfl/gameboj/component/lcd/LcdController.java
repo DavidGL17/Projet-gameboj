@@ -79,6 +79,21 @@ public final class LcdController implements Clocked, Component {
                 LCD_HEIGHT);
     }
 
+    /**
+     * @return LCD_WIDTH, the width of the LcdImage of the LcdController
+     */
+    public int width() {
+        return LCD_WIDTH;
+    }
+    
+    /**
+     * @return LCD_HEIGHT, the height of the LcdImage of the LcdController
+     */
+    public int height() {
+        return LCD_HEIGHT;
+    }
+    
+    
     /*
      * (non-Javadoc)
      * 

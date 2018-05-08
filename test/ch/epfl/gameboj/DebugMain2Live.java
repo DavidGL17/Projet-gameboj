@@ -1,10 +1,12 @@
 package ch.epfl.gameboj;
 
-import ch.epfl.gameboj.component.Joypad.Key;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 import ch.epfl.gameboj.component.cartridge.Cartridge;
 import ch.epfl.gameboj.component.lcd.LcdController;
 import ch.epfl.gameboj.component.lcd.LcdImage;
-
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
@@ -16,15 +18,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
 public final class DebugMain2Live extends Application {
 
     /** Configuration */
 
-    private static final String ROM_PATH = "flappyboy.gb";
+    private static final String ROM_PATH = "tasmaniaStory.gb";
 
     private static final float EMULATION_SPEED = 1f;
     private static final int CYCLES_PER_ITERATION = (int) (17_556
@@ -63,12 +61,6 @@ public final class DebugMain2Live extends Application {
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
                 gb.runUntil(gb.cycles() + CYCLES_PER_ITERATION);
-                if (gb.cycles()>10000000) {
-                    gb.joypad().keyPressed(Key.A);
-                }
-                if (gb.cycles()>10100000) {
-                    gb.joypad().keyReleased(Key.A);
-                }
                 imageView.setImage(null);
                 imageView.setImage(getImage(gb));
             }
