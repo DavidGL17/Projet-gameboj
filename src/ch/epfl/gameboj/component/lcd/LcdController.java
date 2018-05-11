@@ -150,6 +150,7 @@ public final class LcdController implements Clocked, Component {
                 if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)
                         && !Bits.test(data, LCDCBit.LCD_STATUS.index())) {
                     regs.set(Reg.LY, 0);
+                    imagesDrawn=0;
                     checkIfLYEqualsLYC();
                     setMode(0, 0);
                     nextNonIdleCycle = Long.MAX_VALUE;
@@ -191,10 +192,7 @@ public final class LcdController implements Clocked, Component {
                 lcdOnCycle = cycle;
                 nextNonIdleCycle = cycle;
                 setMode(2, cycle);
-                if(imagesDrawn==1) {
-                    int ly = regs.get(Reg.LY);
-                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | LY :"+ly+" -> "+0);
-                }
+                imagesDrawn=0;
                 regs.set(Reg.LY, 0);
                 checkIfLYEqualsLYC();
                 reallyCycle(cycle);
@@ -216,7 +214,7 @@ public final class LcdController implements Clocked, Component {
                         setMode(2, cycle);
                         if(imagesDrawn==1) {
                             int ly = regs.get(Reg.LY);
-                            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | LY :"+ly+" -> "+0);
+                            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+ly+" -> "+0);
                         }
                         regs.set(Reg.LY, 0);
                         checkIfLYEqualsLYC();
@@ -254,12 +252,12 @@ public final class LcdController implements Clocked, Component {
             // mode 0 //Completed
             nextNonIdleCycle = lcdOnCycle
                     + imagesDrawn * LINE_CYCLES * (LCD_HEIGHT + 10)
-                    + regs.get(Reg.LY) * LINE_CYCLES + 51;
+                    + (regs.get(Reg.LY)+1) * LINE_CYCLES;
             break;
         case 1:
             // mode 1 //Completed
             if(imagesDrawn==1) {
-                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | LY :"+(ly)+" -> "+(ly+1));
+                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+(ly)+" -> "+(ly+1));
             }
             regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             checkIfLYEqualsLYC();
@@ -276,7 +274,7 @@ public final class LcdController implements Clocked, Component {
             // mode 2 // Completed
             if (firstLineDrawn) { // if vient de commencer une image
                 if(imagesDrawn==1) {
-                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | LY :"+(ly)+" -> "+(ly+1));
+                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+(ly)+" -> "+(ly+1));
                 }
                 regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             }
@@ -519,14 +517,14 @@ public final class LcdController implements Clocked, Component {
         int statValue = regs.get(Reg.STAT);
         int previousMode = Bits.clip(2, statValue);
         if(imagesDrawn==1)  {
-            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | mode :"+previousMode+" -> "+mode);
+            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+" | mode :"+previousMode+" -> "+mode);
         }
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
         if (previousMode != 1 && mode == 1) {
             cpu.requestInterrupt(Interrupt.VBLANK);
             if(imagesDrawn==1) {
-                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | request Vblank interrupt");
+                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+" | request Vblank interrupt");
             }
         }
         if (mode != 3) {
