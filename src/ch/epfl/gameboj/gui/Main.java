@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 
-    private final static String ROM_FILE_NAME = "flappyboy.gb";
+    private final static String ROM_FILE_NAME = "2048.gb";
     
     Map<KeyCode, Key> keyMap = Map.of(KeyCode.A, Key.A, KeyCode.B, Key.B,
             KeyCode.S, Key.START, KeyCode.SPACE, Key.SELECT, KeyCode.UP, Key.UP,
