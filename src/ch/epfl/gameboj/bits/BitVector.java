@@ -15,7 +15,8 @@ import ch.epfl.gameboj.Preconditions;
 public final class BitVector {
 
     private final int[] table;
-
+    public static final BitVector ZERO_OF_SIZE_256 = new BitVector(256,false);
+    public static final BitVector ZERO_OF_SIZE_160 = new BitVector(160,false);
     /**
      * Builds a BitVector
      * 
