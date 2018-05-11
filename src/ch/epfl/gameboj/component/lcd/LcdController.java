@@ -146,7 +146,7 @@ public final class LcdController implements Clocked, Component {
             switch (address) {
             case 0xFF40:
                 if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)
-                        && !Bits.test(data, 7)) {
+                        && !Bits.test(data, LCDCBit.LCD_STATUS.index())) {
                     regs.set(Reg.LY, 0);
                     checkIfLYEqualsLYC();
                     setMode(0);
@@ -211,6 +211,7 @@ public final class LcdController implements Clocked, Component {
                     if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
                         firstLineDrawn = false;
                         setMode(2);
+                        winY=0;
                         regs.set(Reg.LY, 0);
                         checkIfLYEqualsLYC();
                     }
@@ -262,7 +263,6 @@ public final class LcdController implements Clocked, Component {
             nextNonIdleCycle = lcdOnCycle
                     + drawnImages * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + (regs.get(Reg.LY) + 1) * LINE_CYCLES;
-            winY = 0;
             break;
         case 2:
             // mode 2 // Completed
