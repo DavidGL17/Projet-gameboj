@@ -59,6 +59,7 @@ public final class LcdController implements Clocked, Component {
     private boolean firstLineDrawn = false;
     private int winY = 0;
     private int imagesDrawn = 0;
+    private long previousCycle;
 
     private boolean oamCopy = false;
     private int addressToCopy = 0;
@@ -194,7 +195,7 @@ public final class LcdController implements Clocked, Component {
                 setMode(2, cycle);
                 if(imagesDrawn==1) {
                     int ly = regs.get(Reg.LY);
-                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+ly+" -> "+0);
+                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | LY :"+ly+" -> "+0);
                 }
                 regs.set(Reg.LY, 0);
                 checkIfLYEqualsLYC();
@@ -217,7 +218,7 @@ public final class LcdController implements Clocked, Component {
                         setMode(2, cycle);
                         if(imagesDrawn==1) {
                             int ly = regs.get(Reg.LY);
-                            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+ly+" -> "+0);
+                            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | LY :"+ly+" -> "+0);
                         }
                         regs.set(Reg.LY, 0);
                         checkIfLYEqualsLYC();
@@ -231,9 +232,9 @@ public final class LcdController implements Clocked, Component {
                     break;
                 }
                 reallyCycle(cycle, drawnImages);
+                previousCycle = cycle;
             } 
         }
-
         if (oamCopy) {
             if (octetsCopiedToOam >= 160) {
                 oamCopy = false;
@@ -260,7 +261,7 @@ public final class LcdController implements Clocked, Component {
         case 1:
             // mode 1 //Completed
             if(imagesDrawn==1) {
-                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+(ly)+" -> "+ly+1);
+                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | LY :"+(ly)+" -> "+(ly+1));
             }
             regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             checkIfLYEqualsLYC();
@@ -277,7 +278,7 @@ public final class LcdController implements Clocked, Component {
             // mode 2 // Completed
             if (firstLineDrawn) { // if vient de commencer une image
                 if(imagesDrawn==1) {
-                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+(ly)+" -> "+ly+1);
+                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | LY :"+(ly)+" -> "+(ly+1));
                 }
                 regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             }
@@ -520,14 +521,14 @@ public final class LcdController implements Clocked, Component {
         int statValue = regs.get(Reg.STAT);
         int previousMode = Bits.clip(2, statValue);
         if(imagesDrawn==1)  {
-            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | mode :"+previousMode+" -> "+mode);
+            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | mode :"+previousMode+" -> "+mode);
         }
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
         if (previousMode != 1 && mode == 1) {
             cpu.requestInterrupt(Interrupt.VBLANK);
             if(imagesDrawn==1) {
-                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | request Vblank interrupt");
+                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-previousCycle)+" | request Vblank interrupt");
             }
         }
         if (mode != 3) {
