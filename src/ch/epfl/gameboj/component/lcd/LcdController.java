@@ -85,15 +85,14 @@ public final class LcdController implements Clocked, Component {
     public int width() {
         return LCD_WIDTH;
     }
-    
+
     /**
      * @return LCD_HEIGHT, the height of the LcdImage of the LcdController
      */
     public int height() {
         return LCD_HEIGHT;
     }
-    
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -166,9 +165,10 @@ public final class LcdController implements Clocked, Component {
                 checkIfLYEqualsLYC();
                 break;
             case 0xFF46:
+                System.out.println("dma is written");
                 oamCopy = true;
                 octetsCopiedToOam = 0;
-                addressToCopy = data<<8;
+                addressToCopy = data << 8;
                 break;
             default:
                 regs.set(Reg.values()[address - AddressMap.REGS_LCDC_START],
@@ -224,14 +224,17 @@ public final class LcdController implements Clocked, Component {
                 }
                 reallyCycle(cycle, drawnImages);
             }
+        } else {
+//            System.out.println("is off at :" + cycle);
         }
 
         if (oamCopy) {
+//            System.out.println("is copying");
             if (octetsCopiedToOam >= 160) {
                 oamCopy = false;
             } else {
                 objectAttributeMemory.write(octetsCopiedToOam,
-                        bus.read(addressToCopy+octetsCopiedToOam));
+                        bus.read(addressToCopy + octetsCopiedToOam));
                 ++octetsCopiedToOam;
             }
         }
@@ -305,7 +308,7 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine computeLine(int line) {
         LcdImageLine bgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
-
+//        System.out.println("is drawing line :" + line);
         if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
             bgLine = buildBgLine(
                     Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE));
@@ -343,8 +346,9 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine buildBgLine(int line) {
-        return buildLine(line, true).extractWrapped(regs.get(Reg.SCX),
-                LCD_WIDTH).mapColors(regs.get(Reg.BGP));
+        return buildLine(line, true)
+                .extractWrapped(regs.get(Reg.SCX), LCD_WIDTH)
+                .mapColors(regs.get(Reg.BGP));
     }
 
     private LcdImageLine buildWindowLine() {
@@ -531,6 +535,7 @@ public final class LcdController implements Clocked, Component {
                 Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
         if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
+            System.out.println("throws LCD_STAT");
         }
     }
 
