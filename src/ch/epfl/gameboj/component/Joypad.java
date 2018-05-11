@@ -74,7 +74,7 @@ public final class Joypad implements Component {
      *            the key to press
      */
     public void keyPressed(Key key) {
-        if (Bits.test(getP1(), key.index)) {
+        if (Bits.test(getP1(), key.index)&&Bits.test((key.line==1?line1:line2), key.line+3)) {
             cpu.requestInterrupt(Interrupt.JOYPAD);
         }
         switch (key.line) {
