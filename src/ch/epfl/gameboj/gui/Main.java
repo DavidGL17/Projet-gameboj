@@ -74,14 +74,11 @@ public class Main extends Application {
             @Override
             public void handle(long now) {
                 long timeSpent = now - start;
-                long cyclesOfGb = (long) ((timeSpent
-                        * GameBoy.cyclesPerNanosecond));
-                System.out.println(cyclesOfGb - gb.cycles());
+                long cyclesOfGb = (long) (timeSpent
+                        * GameBoy.cyclesPerNanosecond);
                 gb.runUntil(cyclesOfGb);
                 imageView.setImage(ImageConverter
                         .convert(gb.lcdController().currentImage()));
-                imageView.requestFocus();
-
             }
         };
         timer.start();
