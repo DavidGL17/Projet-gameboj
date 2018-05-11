@@ -58,7 +58,7 @@ public final class LcdController implements Clocked, Component {
     private long nextNonIdleCycle;
     private boolean firstLineDrawn = false;
     private int winY = 0;
-    private int imagesDrawn = 0;
+    private long imagesDrawn = 0;
     private long previousCycle;
 
     private boolean oamCopy = false;
@@ -212,6 +212,7 @@ public final class LcdController implements Clocked, Component {
                     if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
                         firstLineDrawn = false;
                         setMode(2, cycle);
+                        ++imagesDrawn;
                         if(imagesDrawn==1) {
                             int ly = regs.get(Reg.LY);
                             System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+ly+" -> "+0);
@@ -264,7 +265,6 @@ public final class LcdController implements Clocked, Component {
             if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
                 currentImage = nextImageBuilder.build();
                 nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
-                ++imagesDrawn;
             }
             nextNonIdleCycle = lcdOnCycle
                     + imagesDrawn * LINE_CYCLES * (LCD_HEIGHT + 10)
