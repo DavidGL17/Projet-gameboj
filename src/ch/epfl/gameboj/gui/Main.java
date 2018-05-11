@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     private final static String ROM_FILE_NAME = "Tetris.gb";
+    
     Map<KeyCode, Key> keyMap = Map.of(KeyCode.A, Key.A, KeyCode.B, Key.B,
             KeyCode.S, Key.START, KeyCode.SPACE, Key.SELECT, KeyCode.UP, Key.UP,
             KeyCode.DOWN, Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT,
@@ -35,7 +36,6 @@ public class Main extends Application {
         if (romName.size() != 1) {
             System.exit(1);
         }
-        long start = System.nanoTime();
         GameBoy gb = new GameBoy(Cartridge.ofFile(new File(romName.get(0))));
 
         ImageView imageView = new ImageView(
@@ -48,7 +48,6 @@ public class Main extends Application {
         imageView.setOnKeyPressed((k) -> {
             Key joypadKey = keyMap.get(k.getCode());
             if (joypadKey == null) {
-                return;
             } else {
                 gb.joypad().keyPressed(joypadKey);
             }
@@ -56,7 +55,6 @@ public class Main extends Application {
         imageView.setOnKeyReleased((k) -> {
             Key joypadKey = keyMap.get(k.getCode());
             if (joypadKey == null) {
-                return;
             } else {
                 gb.joypad().keyReleased(joypadKey);
             }
@@ -70,6 +68,7 @@ public class Main extends Application {
         primaryStage.show();
         imageView.requestFocus();
 
+        long start = System.nanoTime();
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {

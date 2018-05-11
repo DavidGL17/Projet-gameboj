@@ -60,6 +60,7 @@ public final class LcdController implements Clocked, Component {
     private int winY = 0;
 
     private boolean oamCopy = false;
+    private int addressToCopy = 0;
     private int octetsCopiedToOam = 0;
 
     /**
@@ -167,7 +168,7 @@ public final class LcdController implements Clocked, Component {
             case 0xFF46:
                 oamCopy = true;
                 octetsCopiedToOam = 0;
-                regs.set(Reg.DMA, data);
+                addressToCopy = data<<8;
                 break;
             default:
                 regs.set(Reg.values()[address - AddressMap.REGS_LCDC_START],
@@ -230,7 +231,7 @@ public final class LcdController implements Clocked, Component {
                 oamCopy = false;
             } else {
                 objectAttributeMemory.write(octetsCopiedToOam,
-                        bus.read(Bits.make16(regs.get(Reg.DMA), octetsCopiedToOam)));
+                        bus.read(addressToCopy+octetsCopiedToOam));
                 ++octetsCopiedToOam;
             }
         }

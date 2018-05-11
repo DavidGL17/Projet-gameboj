@@ -249,7 +249,7 @@ public final class Bits {
     }
 
     /**
-     * Computes a 16 bits code given to 8-bits sequences.
+     * Computes a 16 bits code given two 8-bits sequences.
      * 
      * @param highB,
      *            the 8 MSB code
