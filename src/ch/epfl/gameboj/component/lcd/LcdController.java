@@ -209,12 +209,7 @@ public final class LcdController implements Clocked, Component {
                 case 1:
                     if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
                         firstLineDrawn = false;
-<<<<<<< HEAD
                         setMode(2, cycle);
-=======
-                        setMode(2);
-                        winY=0;
->>>>>>> origin/master
                         regs.set(Reg.LY, 0);
                         if(cycle>=84442&&cycle<=101884) {
                             int ly = regs.get(Reg.LY);
