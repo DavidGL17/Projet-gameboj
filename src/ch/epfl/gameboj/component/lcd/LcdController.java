@@ -58,6 +58,7 @@ public final class LcdController implements Clocked, Component {
     private long nextNonIdleCycle;
     private boolean firstLineDrawn = false;
     private int winY = 0;
+    private int imagesDrawn = 0;
 
     private boolean oamCopy = false;
     private int addressToCopy = 0;
@@ -191,6 +192,10 @@ public final class LcdController implements Clocked, Component {
                 lcdOnCycle = cycle;
                 nextNonIdleCycle = cycle;
                 setMode(2, cycle);
+                if(imagesDrawn==1) {
+                    int ly = regs.get(Reg.LY);
+                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+ly+" -> "+0);
+                }
                 regs.set(Reg.LY, 0);
                 checkIfLYEqualsLYC();
                 reallyCycle(cycle, drawnImages);
@@ -210,11 +215,11 @@ public final class LcdController implements Clocked, Component {
                     if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
                         firstLineDrawn = false;
                         setMode(2, cycle);
-                        regs.set(Reg.LY, 0);
-                        if(cycle>=84442&&cycle<=101884) {
+                        if(imagesDrawn==1) {
                             int ly = regs.get(Reg.LY);
                             System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+ly+" -> "+0);
                         }
+                        regs.set(Reg.LY, 0);
                         checkIfLYEqualsLYC();
                     }
                     break;
@@ -227,12 +232,9 @@ public final class LcdController implements Clocked, Component {
                 }
                 reallyCycle(cycle, drawnImages);
             } 
-        } else {
-            // System.out.println("is off at :" + cycle);
         }
 
         if (oamCopy) {
-            // System.out.println("is copying");
             if (octetsCopiedToOam >= 160) {
                 oamCopy = false;
             } else {
@@ -257,14 +259,15 @@ public final class LcdController implements Clocked, Component {
             break;
         case 1:
             // mode 1 //Completed
-            regs.set(Reg.LY, regs.get(Reg.LY) + 1);
-            if(cycle>=84442&&cycle<=101884) {
-                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+(ly-1)+" -> "+ly);
+            if(imagesDrawn==1) {
+                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+(ly)+" -> "+ly+1);
             }
+            regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             checkIfLYEqualsLYC();
             if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
                 currentImage = nextImageBuilder.build();
                 nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
+                ++imagesDrawn;
             }
             nextNonIdleCycle = lcdOnCycle
                     + drawnImages * LINE_CYCLES * (LCD_HEIGHT + 10)
@@ -273,10 +276,10 @@ public final class LcdController implements Clocked, Component {
         case 2:
             // mode 2 // Completed
             if (firstLineDrawn) { // if vient de commencer une image
-                regs.set(Reg.LY, regs.get(Reg.LY) + 1);
-                if(cycle>=84442&&cycle<=101884) {
-                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+(ly-1)+" -> "+ly);
+                if(imagesDrawn==1) {
+                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | LY :"+(ly)+" -> "+ly+1);
                 }
+                regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             }
             checkIfLYEqualsLYC();
             nextNonIdleCycle = lcdOnCycle
@@ -317,7 +320,6 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine computeLine(int line) {
         LcdImageLine bgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
                 new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
-        // System.out.println("is drawing line :" + line);
         if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
             bgLine = buildBgLine(
                     Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE));
@@ -517,14 +519,14 @@ public final class LcdController implements Clocked, Component {
     private void setMode(int mode, long cycle) {
         int statValue = regs.get(Reg.STAT);
         int previousMode = Bits.clip(2, statValue);
-        if(cycle>=84442&&cycle<=101884)  {
+        if(imagesDrawn==1)  {
             System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | mode :"+previousMode+" -> "+mode);
         }
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
         if (previousMode != 1 && mode == 1) {
             cpu.requestInterrupt(Interrupt.VBLANK);
-            if(cycle>=84442&&cycle<=101884) {
+            if(imagesDrawn==1) {
                 System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-lcdOnCycle)+" | request Vblank interrupt");
             }
         }
@@ -550,7 +552,6 @@ public final class LcdController implements Clocked, Component {
                 Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
         if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
-            System.out.println("throws LCD_STAT");
         }
     }
 
