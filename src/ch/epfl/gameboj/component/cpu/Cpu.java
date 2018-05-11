@@ -165,7 +165,7 @@ public final class Cpu implements Component, Clocked {
             int toManage = 31 - Integer.numberOfLeadingZeros(
                     Integer.lowestOneBit(RaisedAndActive));
             if ((toManage >= 0) && (toManage <= 4)) {
-                nextNonIdleCycle = cycle;
+                nextNonIdleCycle = cycle;   //Unchecked
                 interruptHandler(toManage);
             } else {
                 return;
@@ -190,7 +190,7 @@ public final class Cpu implements Component, Clocked {
                     Integer.lowestOneBit(RaisedAndActive));
             if ((toManage >= 0) && (toManage <= 4)) {
                 interruptHandler(toManage);
-                nextNonIdleCycle = cycle + 5;
+                nextNonIdleCycle = cycle + 5;  //Unchecked
                 return;
             }
         }
@@ -236,7 +236,7 @@ public final class Cpu implements Component, Clocked {
                     ? opcode.additionalCycles
                             : 0;
         }
-        nextNonIdleCycle = cycle + opcode.cycles + additional;
+        nextNonIdleCycle = cycle + opcode.cycles + additional;   //checkedß
     }
 
     /**
@@ -818,7 +818,7 @@ public final class Cpu implements Component, Clocked {
 
         // Misc control
         case HALT: {
-            nextNonIdleCycle = Long.MAX_VALUE;
+            nextNonIdleCycle = Long.MAX_VALUE;  //Unchecked
             nextPC = registerPC + 1;
         }
         break;

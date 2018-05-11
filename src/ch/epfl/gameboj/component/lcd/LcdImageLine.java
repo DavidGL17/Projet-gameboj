@@ -15,7 +15,12 @@ public final class LcdImageLine {
     private BitVector msb;
     private BitVector lsb;
     private BitVector opacity;
-
+    public static final LcdImageLine ZERO_OF_SIZE_256 = new LcdImageLine(BitVector.ZERO_OF_SIZE_256,
+    		BitVector.ZERO_OF_SIZE_256, BitVector.ZERO_OF_SIZE_256);
+    public static final LcdImageLine ZERO_OF_SIZE_160 = new LcdImageLine(BitVector.ZERO_OF_SIZE_160,
+    		BitVector.ZERO_OF_SIZE_160, BitVector.ZERO_OF_SIZE_160);
+    
+    
     /**
      * Builds a LcdImageLine
      * 
@@ -128,8 +133,19 @@ public final class LcdImageLine {
         BitVector[] bitsAtColor = new BitVector[] { msb.not().and(lsb.not()),
                 msb.not().and(lsb), msb.and(lsb.not()), msb.and(lsb) };
         int i = 0;
-        BitVector newMsb = new BitVector(msb.size()),
-                newLsb = new BitVector(lsb.size());
+        
+        BitVector newMsb ,newLsb;
+        if (msb.size()==256) {
+        	newMsb=BitVector.ZERO_OF_SIZE_256;
+        } else {
+        	newMsb = new BitVector(msb.size());
+        }
+        if (lsb.size()==256) {
+        	newLsb=BitVector.ZERO_OF_SIZE_256;
+        } else {
+        	newLsb = new BitVector(msb.size());
+        }
+        
         for (BitVector colorVector : bitsAtColor) {
             if (Bits.test(palette, i)) {
                 newLsb = newLsb.or(colorVector);
