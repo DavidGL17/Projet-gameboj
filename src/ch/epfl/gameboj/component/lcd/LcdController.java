@@ -185,8 +185,6 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public void cycle(long cycle) {
-        int drawnImages = (int) ((cycle - lcdOnCycle) / LINE_CYCLES
-                / (LCD_HEIGHT + 10));
         if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)) {
             if (nextNonIdleCycle == Long.MAX_VALUE) {
                 lcdOnCycle = cycle;
@@ -198,7 +196,7 @@ public final class LcdController implements Clocked, Component {
                 }
                 regs.set(Reg.LY, 0);
                 checkIfLYEqualsLYC();
-                reallyCycle(cycle, drawnImages);
+                reallyCycle(cycle);
             }
 
             if (cycle >= nextNonIdleCycle) {
@@ -230,7 +228,7 @@ public final class LcdController implements Clocked, Component {
                     setMode(0, cycle);
                     break;
                 }
-                reallyCycle(cycle, drawnImages);
+                reallyCycle(cycle);
             } 
         }
 
@@ -246,7 +244,7 @@ public final class LcdController implements Clocked, Component {
 
     }
 
-    private void reallyCycle(long cycle, int drawnImages) {
+    private void reallyCycle(long cycle) {
         // Peut être mettre les deux variables ci dssous en argument, vu qu'on
         // les calcule déjà dans cycle?
         int ly = regs.get(Reg.LY);
@@ -254,7 +252,7 @@ public final class LcdController implements Clocked, Component {
         case 0:
             // mode 0 //Completed
             nextNonIdleCycle = lcdOnCycle
-                    + drawnImages * LINE_CYCLES * (LCD_HEIGHT + 10)
+                    + imagesDrawn * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + regs.get(Reg.LY) * LINE_CYCLES + 51;
             break;
         case 1:
@@ -270,7 +268,7 @@ public final class LcdController implements Clocked, Component {
                 ++imagesDrawn;
             }
             nextNonIdleCycle = lcdOnCycle
-                    + drawnImages * LINE_CYCLES * (LCD_HEIGHT + 10)
+                    + imagesDrawn * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + (regs.get(Reg.LY) + 1) * LINE_CYCLES;
             break;
         case 2:
@@ -283,7 +281,7 @@ public final class LcdController implements Clocked, Component {
             }
             checkIfLYEqualsLYC();
             nextNonIdleCycle = lcdOnCycle
-                    + drawnImages * LINE_CYCLES * (LCD_HEIGHT + 10)
+                    + imagesDrawn * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + regs.get(Reg.LY) * LINE_CYCLES + 20;
 
             break;
@@ -293,7 +291,7 @@ public final class LcdController implements Clocked, Component {
             nextImageBuilder.setLine(computeLine(regs.get(Reg.LY)),
                     regs.get(Reg.LY));
             nextNonIdleCycle = lcdOnCycle
-                    + drawnImages * LINE_CYCLES * (LCD_HEIGHT + 10)
+                    + imagesDrawn * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + regs.get(Reg.LY) * LINE_CYCLES + 20 + 43;
             firstLineDrawn = true;
             break;
