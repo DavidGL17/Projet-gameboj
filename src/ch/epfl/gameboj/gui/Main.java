@@ -3,7 +3,6 @@ package ch.epfl.gameboj.gui;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import ch.epfl.gameboj.GameBoy;
 import ch.epfl.gameboj.component.Joypad.Key;
@@ -13,14 +12,13 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    private final static String ROM_FILE_NAME = "Tetris.gb";
-    
+    private final static String ROM_FILE_NAME = "flappyBoy.gb";
+
     Map<KeyCode, Key> keyMap = Map.of(KeyCode.A, Key.A, KeyCode.B, Key.B,
             KeyCode.S, Key.START, KeyCode.SPACE, Key.SELECT, KeyCode.UP, Key.UP,
             KeyCode.DOWN, Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT,
