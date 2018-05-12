@@ -240,6 +240,7 @@ public final class LcdImageLine {
 	                .or((mask.not()).and(that.opacity));
 	
 	        return new LcdImageLine(newMsb, newLsb, newOpacity);
+
         }
     }
 
