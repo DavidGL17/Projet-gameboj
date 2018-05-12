@@ -77,8 +77,7 @@ public final class LcdController implements Clocked, Component {
         videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
         objectAttributeMemory = new Ram(AddressMap.OAM_RAM_SIZE);
         LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
-        Arrays.fill(lines, new LcdImageLine(new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH)));
+        Arrays.fill(lines, LcdImageLine.ZERO_OF_SIZE_160);
         currentImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
                 LCD_HEIGHT);
     }
@@ -321,8 +320,7 @@ public final class LcdController implements Clocked, Component {
      *         the background and foreground sprites
      */
     private LcdImageLine computeLine(int line) {
-        LcdImageLine bgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
+        LcdImageLine bgLine = LcdImageLine.ZERO_OF_SIZE_160;
         if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
             bgLine = buildBgLine(
                     Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE));
@@ -338,12 +336,8 @@ public final class LcdController implements Clocked, Component {
             bgAndWindow = bgLine;
         }
 
-        LcdImageLine behindSpritesLine = new LcdImageLine(
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH));
-        LcdImageLine foregroundSpritesLine = new LcdImageLine(
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH));
+        LcdImageLine behindSpritesLine = LcdImageLine.ZERO_OF_SIZE_160;
+        LcdImageLine foregroundSpritesLine = LcdImageLine.ZERO_OF_SIZE_160;
 
         if (regs.testBit(Reg.LCDC, LCDCBit.OBJ)) {
             int[] tab = spritesIntersectingLine(line);
@@ -421,10 +415,8 @@ public final class LcdController implements Clocked, Component {
 
     private LcdImageLine[] buildSpritesLines(int[] tab, int line) {
 
-        LcdImageLine behindBgLine = new LcdImageLine(new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
-        LcdImageLine foregroundLine = new LcdImageLine(new BitVector(LCD_WIDTH),
-                new BitVector(LCD_WIDTH), new BitVector(LCD_WIDTH));
+        LcdImageLine behindBgLine = LcdImageLine.ZERO_OF_SIZE_160;
+        LcdImageLine foregroundLine = LcdImageLine.ZERO_OF_SIZE_160;
 
         int filled = tab[10];
 

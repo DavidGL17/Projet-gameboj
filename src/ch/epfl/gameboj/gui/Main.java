@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 
-    private final static String ROM_FILE_NAME = "Bomberman GB (U) [S][!].gb";
+    private final static String ROM_FILE_NAME = "Tetris.gb";
     
     Map<KeyCode, Key> keyCodeMap = Map.of(KeyCode.UP, Key.UP,
             KeyCode.DOWN, Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT,
