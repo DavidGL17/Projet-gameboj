@@ -218,7 +218,7 @@ public final class LcdImageLine {
      */
     public LcdImageLine join(LcdImageLine that, int index) {
         Preconditions.checkArgument(
-                that.size() == size() && index >= 0 && index < size());
+                that.size() == size() && index >= 0 && index <= size());
         BitVector.Builder builder = new BitVector.Builder(size());
         int i = 0;
         while (index > 8) {
