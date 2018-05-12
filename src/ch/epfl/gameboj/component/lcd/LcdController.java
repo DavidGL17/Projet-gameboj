@@ -60,6 +60,8 @@ public final class LcdController implements Clocked, Component {
     private int winY = 0;
     private long imagesDrawn = 0;
     private long previousCycle;
+    
+    private static boolean test_firstTime=true;
 
     private boolean oamCopy = false;
     private int addressToCopy = 0;
@@ -213,9 +215,13 @@ public final class LcdController implements Clocked, Component {
                         firstLineDrawn = false;
                         setMode(2, cycle);
                         ++imagesDrawn;
-                        if(imagesDrawn==1) {
+                        winY=0;
+                        if(imagesDrawn==1&&test_firstTime) {
                             int ly = regs.get(Reg.LY);
                             System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+ly+" -> "+0);
+                        }
+                        if (imagesDrawn==2) {
+                        	test_firstTime=false;
                         }
                         regs.set(Reg.LY, 0);
                         checkIfLYEqualsLYC();
