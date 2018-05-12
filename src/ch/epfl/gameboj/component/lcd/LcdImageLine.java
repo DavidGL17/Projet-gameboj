@@ -224,23 +224,43 @@ public final class LcdImageLine {
         } else if (index ==0) {
         	return that;
         } else {
-	        BitVector.Builder builder = new BitVector.Builder(size());
-	        int i = 0;
-	        while (index > 8) {
-	            builder.setByte(i, 0xFF);
-	            index -= 8;
-	            i++;
-	        }
-	        builder.setByte(i, Bits.clip(index, -1));
-	        BitVector mask = builder.build();
-	
-	        BitVector newMsb = (mask.and(this.msb)).or((mask.not()).and(that.msb));
-	        BitVector newLsb = (mask.and(this.lsb)).or((mask.not()).and(that.lsb));
-	        BitVector newOpacity = (mask.and(this.opacity))
-	                .or((mask.not()).and(that.opacity));
-	
-	        return new LcdImageLine(newMsb, newLsb, newOpacity);
-
+        	if (index<size()/2) {
+		        BitVector.Builder builder = new BitVector.Builder(size());
+		        int i = 0;
+		        while (index > 8) {
+		            builder.setByte(i, 0xFF);
+		            index -= 8;
+		            i++;
+		        }
+		        builder.setByte(i, Bits.clip(index, -1));
+		        BitVector mask = builder.build();
+		
+		        BitVector newMsb = (mask.and(this.msb)).or((mask.not()).and(that.msb));
+		        BitVector newLsb = (mask.and(this.lsb)).or((mask.not()).and(that.lsb));
+		        BitVector newOpacity = (mask.and(this.opacity))
+		                .or((mask.not()).and(that.opacity));
+		
+		        return new LcdImageLine(newMsb, newLsb, newOpacity);
+        	} else {
+        		BitVector.Builder builder = new BitVector.Builder(size());
+        		index = size()-index;
+        		int i = 0;
+		        while (index > 8) {
+		            builder.setByte(size()/8-1-i, 0xFF);
+		            index -= 8;
+		            i++;
+		        }
+		        builder.setByte(size()/8-1-i, Bits.extract(-1, 31-index ,index));
+		        
+		        BitVector mask = builder.build();
+				
+		        BitVector newMsb = (mask.not().and(this.msb)).or((mask).and(that.msb));
+		        BitVector newLsb = (mask.not().and(this.lsb)).or((mask).and(that.lsb));
+		        BitVector newOpacity = (mask.not().and(this.opacity))
+		                .or((mask).and(that.opacity));
+		
+		        return new LcdImageLine(newMsb, newLsb, newOpacity);
+        	}
         }
     }
 
