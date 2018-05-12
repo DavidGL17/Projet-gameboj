@@ -46,6 +46,7 @@ public final class Cartridge implements Component {
             if(data[MBC_IDENTIFICATION_ADDRESS] == 0) {
 	            return new Cartridge(new MBC0(rom));
             } else if (data[MBC_IDENTIFICATION_ADDRESS] > 0 && data[MBC_IDENTIFICATION_ADDRESS] <= 3) {
+            	System.out.println("Cartridge type :" + data[MBC_IDENTIFICATION_ADDRESS]);
 	            return new Cartridge(new MBC1(rom, data[MBC_SIZE_RAM_IDENTIFICATION_ADDRESS]));
             } else {
             	throw new IllegalArgumentException("not recongnized cartridge");
