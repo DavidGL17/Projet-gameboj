@@ -49,7 +49,7 @@ public final class Cartridge implements Component {
             	System.out.println("Cartridge type :" + data[MBC_IDENTIFICATION_ADDRESS]);
 	            return new Cartridge(new MBC1(rom, data[MBC_SIZE_RAM_IDENTIFICATION_ADDRESS]));
             } else {
-            	throw new IllegalArgumentException("not recongnized cartridge");
+            	throw new IllegalArgumentException("not recongnized cartridge, data is : " + data[MBC_IDENTIFICATION_ADDRESS]);
             }
         } catch (FileNotFoundException i) {
             throw new IOException();
