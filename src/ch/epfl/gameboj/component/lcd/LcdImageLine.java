@@ -164,6 +164,7 @@ public final class LcdImageLine {
      *         given palette
      */
     public LcdImageLine mapColors(int palette) {
+    	
     	if (checkAllColorsSame(palette)) {
     		return this;
     	}
@@ -179,7 +180,7 @@ public final class LcdImageLine {
     		break;
     	case 0b00000000:
     		if (size==256) {
-    			newLsb= BitVector.ZERO_OF_SIZE_256;
+    			newMsb= BitVector.ZERO_OF_SIZE_256;
     		} else if (size == 160) {
     			;
     		} else {
@@ -295,7 +296,17 @@ public final class LcdImageLine {
 			System.out.println("Failed" + palette);
     	}
     	
+    	try {
     	return new LcdImageLine(newMsb, newLsb, opacity);
+    	} catch(IllegalArgumentException e) {
+    		System.out.println("newMsb == ZERO_OF_SIZE_160 : " + (newMsb.equals(BitVector.ZERO_OF_SIZE_160)));
+    		System.out.println("newMsb size = " + newMsb.size());
+    		System.out.println("newLsb == ZERO_OF_SIZE_160 : " + (newLsb.equals(BitVector.ZERO_OF_SIZE_160)));
+    		System.out.println("newLsb size = " + newLsb.size());
+    		System.out.println("opacity size = " + opacity.size());
+    		System.out.println("palette is : " + Integer.toBinaryString(palette));
+    		throw new IllegalArgumentException();
+    	}
     	
     	
     }
