@@ -152,7 +152,8 @@ public final class LcdImageLine {
 //        }
 //        return new LcdImageLine(newMsb, newLsb, opacity);
 //    }
-    //Max 4 parcours de LcdImageLine
+    
+    //Max 4 parcours de LcdImageLine !En utilisant xor! Autrement 10
     
     /**
      * Changes the color of each bit of the line according to the given palette
@@ -202,9 +203,11 @@ public final class LcdImageLine {
     		break;
     	case 0b101000:
     		newMsb=msb.xor(lsb);
+//    		newMsb=msb.and(lsb.not()).or(msb.not().and(lsb));
     		break;
     	case 0b101010:
     		newMsb=msb.and(lsb).not();
+//    		newMsb=msb.and(lsb).or(msb.not().and(lsb.not()));
     		break;
     	case 0b10000000:
     		newMsb=msb.and(lsb);
@@ -261,6 +264,7 @@ public final class LcdImageLine {
     		break;
     	case 0b10100:
     		newLsb=msb.xor(lsb);
+//    		newLsb=msb.and(lsb.not()).or(msb.not()).and(lsb);
     		break;
     	case 0b10101:
     		newLsb=msb.and(lsb).not();
@@ -270,6 +274,7 @@ public final class LcdImageLine {
     		break;
     	case 0b1000001:
     		newLsb=msb.xor(lsb.not());
+//    		newLsb=msb.and(lsb).or(msb.not().and(lsb.not()));
     		break;
     	case 0b1000100:
     		newLsb=lsb;
