@@ -175,7 +175,7 @@ class LcdImageLineTest {
     }
 
     @Test
-    void MapColorsWorks() {
+    void MapColorsWorksBasic() {
         LcdImageLine line = new LcdImageLine(
                 BitVectorTest.BitVectorInstantiation(new int[] { 0xFFFF0000 }),
                 BitVectorTest.BitVectorInstantiation(new int[] { 0xFF00FF00 }),
@@ -185,6 +185,26 @@ class LcdImageLineTest {
         assertEquals(new LcdImageLine(BitVectorTest.BitVectorInstantiation(new int[] { 0x00FFFF00 }),
                 BitVectorTest.BitVectorInstantiation(new int[] { 0x00FF00FF }),
                 BitVectorTest.BitVectorInstantiation(new int[] { 0x00000000 })), changedLine);
+    }
+    
+    @Test
+    void MapColorsWorks() {
+    	for (int j=0 ; j<50 ; j++) {
+	    	Random random = new Random();
+	    	BitVector msb = BitVectorTest.randomBitVectorInstantiation();
+	    	BitVector lsb = BitVectorTest.randomBitVectorInstantiation(msb.size());
+	    	BitVector opacity = BitVectorTest.randomBitVectorInstantiation(msb.size());
+	    	LcdImageLine line = new LcdImageLine( msb, lsb, opacity);
+	    	int palette = random.nextInt(0xFF);
+	    	LcdImageLine changedLine = line.mapColors(palette);		
+	    	
+	    	for (int i = 0 ; i<line.size(); i++ ) {
+	    		int initialColor = ((msb.testBit(i)?0b10:0b0) + (lsb.testBit(i)?0b1:0b0));
+	    		int actualNewColor =  ((changedLine.getMsb().testBit(i)?0b10:0b0) + (changedLine.getLsb().testBit(i)?0b1:0b0));
+	    		int expectedColor = Bits.extract(palette,initialColor*2,2);
+	    		assertEquals(expectedColor,actualNewColor);
+	    	}
+	    }
     }
 
     @Test

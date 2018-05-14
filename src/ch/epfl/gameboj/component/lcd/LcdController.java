@@ -8,7 +8,6 @@ import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.bits.Bit;
-import ch.epfl.gameboj.bits.BitVector;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
@@ -83,14 +82,14 @@ public final class LcdController implements Clocked, Component {
     }
 
     /**
-     * @return LCD_WIDTH, the width of the LcdImage of the LcdController
+     * @return LCD_WIDTH, the width of the LcdImage as seen on a GameBoy screen
      */
     public int width() {
         return LCD_WIDTH;
     }
 
     /**
-     * @return LCD_HEIGHT, the height of the LcdImage of the LcdController
+     * @return LCD_HEIGHT, the height of the LcdImage as seen on a GameBoy screen
      */
     public int height() {
         return LCD_HEIGHT;
@@ -250,8 +249,6 @@ public final class LcdController implements Clocked, Component {
     }
 
     private void reallyCycle(long cycle) {
-        // Peut être mettre les deux variables ci dssous en argument, vu qu'on
-        // les calcule déjà dans cycle?
         int ly = regs.get(Reg.LY);
         switch (getMode()) {
         case 0:

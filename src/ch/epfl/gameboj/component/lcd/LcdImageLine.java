@@ -166,10 +166,7 @@ public final class LcdImageLine {
      * @return true if it doesn't, false otherwise
      */
     private boolean checkAllColorsSame(int palette) {
-        boolean result = true;
-        for (int i = 0; i < 4; ++i)
-            result &= Bits.extract(palette, 2 * i, 2) == i;
-        return result;
+        return (palette==0b11100100);
     }
 
     /**
