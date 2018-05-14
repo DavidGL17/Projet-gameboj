@@ -55,7 +55,7 @@ public final class LcdController implements Clocked, Component {
     private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH,
             LCD_HEIGHT);
     private long lcdOnCycle;
-    private long nextNonIdleCycle;
+    private long nextNonIdleCycle = Long.MAX_VALUE;
     private boolean firstLineDrawn = false;
     private int winY = 0;
     private long imagesDrawn = 0;

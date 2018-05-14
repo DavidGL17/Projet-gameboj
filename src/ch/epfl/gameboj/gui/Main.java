@@ -17,15 +17,13 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    private final static String ROM_FILE_NAME = "donkeyKong.gb";
 
-    private final static String ROM_FILE_NAME = "Bomberman GB (U) [S][!].gb";
-    
-    Map<KeyCode, Key> keyCodeMap = Map.of(KeyCode.UP, Key.UP,
-            KeyCode.DOWN, Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT,
-            Key.LEFT);
-    
-    Map<String,Key> keyTextMap = Map.of("a", Key.A, "b", Key.B,
-            "s", Key.START, " ", Key.SELECT);
+    Map<KeyCode, Key> keyCodeMap = Map.of(KeyCode.UP, Key.UP, KeyCode.DOWN,
+            Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT, Key.LEFT);
+
+    Map<String, Key> keyTextMap = Map.of("a", Key.A, "b", Key.B, "s", Key.START,
+            " ", Key.SELECT);
 
     public static void main(String[] args) {
         Application.launch(new String[] { ROM_FILE_NAME });
@@ -47,48 +45,39 @@ public class Main extends Application {
         /// Gestion des touches
 
         imageView.setOnKeyPressed((k) -> {
-        	String keyText = k.getText();
+            String keyText = k.getText();
             if (keyText.equals("")) {
-            	//non textual
-            	Key joypadKey = keyCodeMap.get(k.getCode());
-	           	if (joypadKey!=null) {
-	           		gb.joypad().keyPressed(joypadKey);
-	           	} else {
-	           		System.out.println("Non textual, yet no equivalent in table");
-	           	}
+                // non textual
+                Key joypadKey = keyCodeMap.get(k.getCode());
+                if (joypadKey != null) {
+                    gb.joypad().keyPressed(joypadKey);
+                }
             } else {
-	            	//textual
-	           	Key joypadKey = keyTextMap.get(keyText);
-	           	if(joypadKey!=null) {
-	           		gb.joypad().keyPressed(joypadKey);
-	           	} else {
-	           		System.out.println("Textual, yet no equivalent in table");
-	           		System.out.println("Text is : " + (keyText==null? "NULL" : keyText));
-	           	}
+                // textual
+                Key joypadKey = keyTextMap.get(keyText);
+                if (joypadKey != null) {
+                    gb.joypad().keyPressed(joypadKey);
+                }
             }
         });
-        
-        
-        imageView.setOnKeyReleased((k) -> {
-        	 String keyText = k.getText();
-             if (keyText.equals("")) {
-             	//non textual
-            	Key joypadKey = keyCodeMap.get(k.getCode());
-            	if (joypadKey!=null) {
-            		gb.joypad().keyReleased(joypadKey);
-            	} else {
-            		System.out.println("Non textual, yet no equivalent in table");
-            	}
-             } else {
-             	//textual
-            	Key joypadKey = keyTextMap.get(keyText);
-            	if(joypadKey!=null) {
-            		gb.joypad().keyReleased(joypadKey);
-            	}else {
-            		System.out.println("Textual, yet no equivalent in table");
-            		System.out.println("Text is : " + (keyText==null? "NULL" : keyText));
-            	}
-             }
+
+        imageView.setOnKeyReleased((k) ->
+
+        {
+            String keyText = k.getText();
+            if (keyText.equals("")) {
+                // non textual
+                Key joypadKey = keyCodeMap.get(k.getCode());
+                if (joypadKey != null) {
+                    gb.joypad().keyReleased(joypadKey);
+                }
+            } else {
+                // textual
+                Key joypadKey = keyTextMap.get(keyText);
+                if (joypadKey != null) {
+                    gb.joypad().keyReleased(joypadKey);
+                }
+            }
         });
 
         BorderPane pane = new BorderPane(imageView);
