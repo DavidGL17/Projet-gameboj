@@ -70,19 +70,12 @@ public class Main extends Application {
                 Key joypadKey = keyCodeMap.get(k.getCode());
                 if (joypadKey != null) {
                     gb.joypad().keyReleased(joypadKey);
-                } else {
-                    System.out
-                            .println("Non textual, yet no equivalent in table");
                 }
             } else {
                 // textual
                 Key joypadKey = keyTextMap.get(keyText);
                 if (joypadKey != null) {
                     gb.joypad().keyReleased(joypadKey);
-                } else {
-                    System.out.println("Textual, yet no equivalent in table");
-                    System.out.println("Text is : "
-                            + (keyText == null ? "NULL" : keyText));
                 }
             }
         });
