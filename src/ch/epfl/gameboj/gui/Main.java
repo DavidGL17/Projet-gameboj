@@ -17,7 +17,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    private final static String ROM_FILE_NAME = "donkeyKong.gb";
+    private final static String ROM_FILE_NAME = "Kirby's Dream Land (USA, Europe).gb";
 
     Map<KeyCode, Key> keyCodeMap = Map.of(KeyCode.UP, Key.UP, KeyCode.DOWN,
             Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT, Key.LEFT);
@@ -46,7 +46,9 @@ public class Main extends Application {
 
         imageView.setOnKeyPressed((k) -> {
             String keyText = k.getText();
-            if (keyText.equals("")) {
+            if (keyText.equals("p")){
+            	gb.lcdController().test_PIsPressed=true;
+            } else if (keyText.equals("")) {
                 // non textual
                 Key joypadKey = keyCodeMap.get(k.getCode());
                 if (joypadKey != null) {
