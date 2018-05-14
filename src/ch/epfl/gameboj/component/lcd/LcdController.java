@@ -61,6 +61,7 @@ public final class LcdController implements Clocked, Component {
     private long previousCycle;
     
     private static boolean test_firstTime=true;
+    public boolean test_PIsPressed = false;
 
     private boolean oamCopy = false;
     private int addressToCopy = 0;
@@ -79,6 +80,9 @@ public final class LcdController implements Clocked, Component {
         Arrays.fill(lines, LcdImageLine.ZERO_OF_SIZE_160);
         currentImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
                 LCD_HEIGHT);
+        regs.set(Reg.OBP0,0b11100100);
+        regs.set(Reg.OBP1,0b11100100);
+        regs.set(Reg.BGP,0b11100100);
     }
 
     /**
@@ -213,6 +217,7 @@ public final class LcdController implements Clocked, Component {
                         firstLineDrawn = false;
                         setMode(2, cycle);
                         ++imagesDrawn;
+                        test_PIsPressed = false;
                         winY=0;
                         if(imagesDrawn==1&&test_firstTime) {
                             int ly = regs.get(Reg.LY);
@@ -429,6 +434,14 @@ public final class LcdController implements Clocked, Component {
                         .below(foregroundLine);
             }
         }
+        
+        if (test_PIsPressed&&filled>0) {
+        	System.out.println();
+        	System.out.println( "line :" + line);
+        	System.out.println("0BP0 is : " + Integer.toBinaryString(regs.get(Reg.OBP0)) + " --- 0BP1 is : " + Integer.toBinaryString(regs.get(Reg.OBP1)));
+        	System.out.println();
+        	System.out.println();
+        }
 
         return new LcdImageLine[] { behindBgLine, foregroundLine };
     }
@@ -459,9 +472,15 @@ public final class LcdController implements Clocked, Component {
         int lsb = isHFlipped ? read(tileAddress + relativeAddress + 1)
                 : Bits.reverse8(read(tileAddress + relativeAddress + 1));
 
+        if (test_PIsPressed) {
+        	System.out.print((Bits.test(objectAttributeMemory.read((4 * index) + 3),
+                    SpriteBit.PALETTE) ? " 0BP1 " : " 0BP0 " ) + " ");
+        }
+        
         return res.setBytes(0, msb, lsb).build()
                 .shift(Bits.extract(xindexy, 16, 8) - 8)
                 .mapColors(spriteGetPalette(index));
+        
     }
 
     private enum SpriteBit implements Bit {

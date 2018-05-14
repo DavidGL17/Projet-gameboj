@@ -160,6 +160,7 @@ public final class Cpu implements Component, Clocked {
      */
     @Override
     public void cycle(long cycle) {
+    	boolean noneRaisedAndActive = false; //Only if no Interrupt is raisedAndActive
         if (nextNonIdleCycle == Long.MAX_VALUE) {
             int RaisedAndActive = registerIE & registerIF;
             int toManage = 31 - Integer.numberOfLeadingZeros(
@@ -168,12 +169,13 @@ public final class Cpu implements Component, Clocked {
                 nextNonIdleCycle = cycle;   
                 interruptHandler(toManage);
             } else {
+            	noneRaisedAndActive=true;
                 return;
             }
 
         }
         if (cycle >= nextNonIdleCycle) {
-            reallyCycle(cycle);
+            reallyCycle(cycle,noneRaisedAndActive);
         }
     }
 
@@ -183,8 +185,8 @@ public final class Cpu implements Component, Clocked {
      * @param cycle
      *            - the cycle to execute
      */
-    private void reallyCycle(long cycle) {
-        if (IME) {
+    private void reallyCycle(long cycle, boolean noneRaisedAndActive) {
+        if (IME&&!noneRaisedAndActive) {
             int RaisedAndActive = registerIE & registerIF;
             int toManage = 31 - Integer.numberOfLeadingZeros(
                     Integer.lowestOneBit(RaisedAndActive));
