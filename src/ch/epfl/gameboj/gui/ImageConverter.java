@@ -8,7 +8,7 @@ import javafx.scene.image.WritableImage;
 
 public class ImageConverter {
 
-    private static final int[] MAP_COLORS = new int[] {0xFFFFFFFF, 0xD3D3D3D3, 0xA9A9A9A9, 0x00000000};
+    private static final int[] MAP_COLORS = new int[] {0xFFFFFFFF, 0xFFD3D3D3, 0xFFA9A9A9, 0xFF000000};
     
     public static Image convert(LcdImage image) {
         WritableImage finalImage = new WritableImage(LcdController.LCD_WIDTH, LcdController.LCD_HEIGHT);
