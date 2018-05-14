@@ -25,13 +25,15 @@ public final class Cartridge implements Component {
     private Cartridge(Component MBC) {
         this.MBC = MBC;
     }
-    
+
     /**
      * Builds a Cartridge accordingly to a file containing the Rom
-     * @param romFile, the file
+     * 
+     * @param romFile,
+     *            the file
      * @return the built Cartridge
      * @throws IOException
-     * 			if the reading of romFile causes an IOException
+     *             if the reading of romFile causes an IOException
      */
     public static Cartridge ofFile(File romFile) throws IOException {
         try (FileInputStream input = new FileInputStream(romFile)) {
@@ -43,16 +45,34 @@ public final class Cartridge implements Component {
                 ++i;
             }
             Rom rom = new Rom(data);
-            if(data[MBC_IDENTIFICATION_ADDRESS] == 0) {
-	            return new Cartridge(new MBC0(rom));
-            } else if (data[MBC_IDENTIFICATION_ADDRESS] > 0 && data[MBC_IDENTIFICATION_ADDRESS] <= 3) {
-            	System.out.println("Cartridge type :" + data[MBC_IDENTIFICATION_ADDRESS]);
-	            return new Cartridge(new MBC1(rom, data[MBC_SIZE_RAM_IDENTIFICATION_ADDRESS]));
+            if (data[MBC_IDENTIFICATION_ADDRESS] == 0) {
+                return new Cartridge(new MBC0(rom));
+            } else if (data[MBC_IDENTIFICATION_ADDRESS] > 0
+                    && data[MBC_IDENTIFICATION_ADDRESS] <= 3) {
+                return new Cartridge(new MBC1(rom,
+                        getRamSize(data[MBC_SIZE_RAM_IDENTIFICATION_ADDRESS])));
             } else {
-            	throw new IllegalArgumentException("not recongnized cartridge, data is : " + data[MBC_IDENTIFICATION_ADDRESS]);
+                throw new IllegalArgumentException(
+                        "not recongnized cartridge, data is : "
+                                + data[MBC_IDENTIFICATION_ADDRESS]);
             }
         } catch (FileNotFoundException i) {
             throw new IOException();
+        }
+    }
+
+    private static int getRamSize(int ramSizeIdentification) {
+        switch (ramSizeIdentification) {
+        case 0:
+            return 0;
+        case 1:
+            return 2048;
+        case 2:
+            return 8192;
+        case 3:
+            return 32768;
+        default:
+            return 0;
         }
     }
 
