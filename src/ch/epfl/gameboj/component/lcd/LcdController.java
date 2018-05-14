@@ -8,7 +8,6 @@ import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.bits.Bit;
-import ch.epfl.gameboj.bits.BitVector;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
@@ -51,6 +50,7 @@ public final class LcdController implements Clocked, Component {
     private final RegisterFile<Reg> regs = new RegisterFile<>(Reg.values());
     private Bus bus;
 
+    private final LcdImage DEFAULT_IMAGE;
     private LcdImage currentImage;
     private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH,
             LCD_HEIGHT);
@@ -59,7 +59,6 @@ public final class LcdController implements Clocked, Component {
     private boolean firstLineDrawn = false;
     private int winY = 0;
     private long imagesDrawn = 0;
-    private long previousCycle;
     
     private static boolean test_firstTime=true;
 
@@ -78,8 +77,9 @@ public final class LcdController implements Clocked, Component {
         objectAttributeMemory = new Ram(AddressMap.OAM_RAM_SIZE);
         LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
         Arrays.fill(lines, LcdImageLine.ZERO_OF_SIZE_160);
-        currentImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
+        DEFAULT_IMAGE = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
                 LCD_HEIGHT);
+        currentImage = DEFAULT_IMAGE;
     }
 
     /**
@@ -155,6 +155,7 @@ public final class LcdController implements Clocked, Component {
                     checkIfLYEqualsLYC();
                     setMode(0, 0);
                     nextNonIdleCycle = Long.MAX_VALUE;
+                    currentImage = DEFAULT_IMAGE;
                 }
                 regs.set(Reg.LCDC, data);
                 break;
@@ -234,7 +235,6 @@ public final class LcdController implements Clocked, Component {
                     break;
                 }
                 reallyCycle(cycle);
-                previousCycle = cycle;
             } 
         }
         if (oamCopy) {
