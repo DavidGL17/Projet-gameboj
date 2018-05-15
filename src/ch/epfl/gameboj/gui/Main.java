@@ -24,7 +24,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     private final static String ROM_FILE_NAME = "Kirby's Dream Land (USA, Europe).gb";
-private static final int[] COLOR_MAP = null;
+    private static final int[] COLOR_MAP = null;
 
     Map<KeyCode, Key> keyCodeMap = Map.of(KeyCode.UP, Key.UP, KeyCode.DOWN,
             Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT, Key.LEFT);
@@ -54,7 +54,7 @@ private static final int[] COLOR_MAP = null;
 
         imageView.setOnKeyPressed((k) -> {
             String keyText = k.getText();
-            if (keyText.equals("s")) {
+            if (keyText.equals("y")) {
             	//screenshot
             	int [] COLOR_MAP = new int[] { 0xFF_FF_FF, 0xD3_D3_D3,
                         0xA9_A9_A9, 0x00_00_00 };
@@ -86,6 +86,19 @@ private static final int[] COLOR_MAP = null;
 	                    gb.joypad().keyPressed(joypadKey);
 	                }
 	            }
+            if (keyText.equals("")) {
+                // non textual
+                Key joypadKey = keyCodeMap.get(k.getCode());
+                if (joypadKey != null) {
+                    gb.joypad().keyPressed(joypadKey);
+                }
+            } else {
+                // textual
+                Key joypadKey = keyTextMap.get(keyText);
+                if (joypadKey != null) {
+                    gb.joypad().keyPressed(joypadKey);
+                }
+            }
         });
 
         imageView.setOnKeyReleased((k) ->

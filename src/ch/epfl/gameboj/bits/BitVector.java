@@ -197,7 +197,9 @@ public final class BitVector {
         return extractZeroExtended(-start, size());
     }
     
+
 //    public BitVector xor (BitVector that) {
+//        Preconditions.checkArgument(that.size() ==size());
 //    	 int[] xorTable = new int[table.length];
 //         for (int i = 0; i < table.length; ++i) {
 //             xorTable[i] = that.table[i]^table[i];
@@ -210,7 +212,7 @@ public final class BitVector {
      * writing of the two methods
      *
      */
-    protected enum ExtensionType {
+    private enum ExtensionType {
         BYZERO, WRAPPED
     }
 
