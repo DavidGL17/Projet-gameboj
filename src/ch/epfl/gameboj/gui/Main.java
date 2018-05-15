@@ -23,15 +23,14 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    private final static String ROM_FILE_NAME = "Kirby's Dream Land (USA, Europe).gb";
-    private static final int[] COLOR_MAP = null;
+    private final static String ROM_FILE_NAME = "snake.gb";
 
     Map<KeyCode, Key> keyCodeMap = Map.of(KeyCode.UP, Key.UP, KeyCode.DOWN,
             Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT, Key.LEFT);
 
     Map<String, Key> keyTextMap = Map.of("a", Key.A, "b", Key.B, "s", Key.START,
             " ", Key.SELECT);
-    private int screenIndex=0;
+    private int screenIndex = 0;
 
     public static void main(String[] args) {
         Application.launch(new String[] { ROM_FILE_NAME });
@@ -55,37 +54,41 @@ public class Main extends Application {
         imageView.setOnKeyPressed((k) -> {
             String keyText = k.getText();
             if (keyText.equals("y")) {
-            	//screenshot
-            	int [] COLOR_MAP = new int[] { 0xFF_FF_FF, 0xD3_D3_D3,
+                // screenshot
+                int[] COLOR_MAP = new int[] { 0xFF_FF_FF, 0xD3_D3_D3,
                         0xA9_A9_A9, 0x00_00_00 };
-            	try {
-	                LcdImage li = gb.lcdController().currentImage();
-	                BufferedImage i = new BufferedImage(LcdController.LCD_WIDTH,
-	                        LcdController.LCD_HEIGHT, BufferedImage.TYPE_INT_RGB);
-	                for (int y = 0; y < LcdController.LCD_HEIGHT; ++y)
-	                    for (int x = 0; x < LcdController.LCD_WIDTH; ++x)
-	                        i.setRGB(x, y, COLOR_MAP[li.get(x, y)]);
-	                ImageIO.write(i, "png", new File("screen (" + screenIndex + ")" + gb.lcdController().test_getPalettes() + ".png"));
-	                screenIndex++;
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	            }
-            } else if (keyText.equals("p")){
-            	//get sprites'palettes and palettes
-	            	gb.lcdController().test_PIsPressed=true;
-	            } else if (keyText.equals("")) {
-	                // non textual
-	                Key joypadKey = keyCodeMap.get(k.getCode());
-	                if (joypadKey != null) {
-	                    gb.joypad().keyPressed(joypadKey);
-	                }
-	            } else {
-	                // textual
-	                Key joypadKey = keyTextMap.get(keyText);
-	                if (joypadKey != null) {
-	                    gb.joypad().keyPressed(joypadKey);
-	                }
-	            }
+                try {
+                    LcdImage li = gb.lcdController().currentImage();
+                    BufferedImage i = new BufferedImage(LcdController.LCD_WIDTH,
+                            LcdController.LCD_HEIGHT,
+                            BufferedImage.TYPE_INT_RGB);
+                    for (int y = 0; y < LcdController.LCD_HEIGHT; ++y)
+                        for (int x = 0; x < LcdController.LCD_WIDTH; ++x)
+                            i.setRGB(x, y, COLOR_MAP[li.get(x, y)]);
+                    ImageIO.write(i, "png",
+                            new File("screen (" + screenIndex + ")"
+                                    + gb.lcdController().test_getPalettes()
+                                    + ".png"));
+                    screenIndex++;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (keyText.equals("p")) {
+                // get sprites'palettes and palettes
+                gb.lcdController().test_PIsPressed = true;
+            } else if (keyText.equals("")) {
+                // non textual
+                Key joypadKey = keyCodeMap.get(k.getCode());
+                if (joypadKey != null) {
+                    gb.joypad().keyPressed(joypadKey);
+                }
+            } else {
+                // textual
+                Key joypadKey = keyTextMap.get(keyText);
+                if (joypadKey != null) {
+                    gb.joypad().keyPressed(joypadKey);
+                }
+            }
             if (keyText.equals("")) {
                 // non textual
                 Key joypadKey = keyCodeMap.get(k.getCode());
