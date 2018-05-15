@@ -190,13 +190,13 @@ class LcdImageLineTest {
     
     @Test
     void MapColorsWorks() {
-    	for (int j=0 ; j<50 ; j++) {
+    	for (int j=0 ; j<300 ; j++) {
 	    	Random random = new Random();
 	    	BitVector msb = BitVectorTest.randomBitVectorInstantiation();
 	    	BitVector lsb = BitVectorTest.randomBitVectorInstantiation(msb.size());
 	    	BitVector opacity = BitVectorTest.randomBitVectorInstantiation(msb.size());
 	    	LcdImageLine line = new LcdImageLine( msb, lsb, opacity);
-	    	int palette = random.nextInt(0xFF);
+	    	int palette = j%256;
 	    	LcdImageLine changedLine = line.mapColors(palette);		
 	    	
 	    	for (int i = 0 ; i<line.size(); i++ ) {
@@ -209,7 +209,7 @@ class LcdImageLineTest {
     }
 
     @Test
-    void MapColorsDoesNothingIfColorsSame() {
+    void MapColorsDoesNothingIfColorsSameBasic() {
         LcdImageLine line = new LcdImageLine(
                 BitVectorTest.BitVectorInstantiation(new int[] { 0xFFFF0000 }),
                 BitVectorTest.BitVectorInstantiation(new int[] { 0xFF00FF00 }),
