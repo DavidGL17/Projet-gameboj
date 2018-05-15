@@ -191,7 +191,8 @@ public final class LcdController implements Clocked, Component {
                 checkIfLYEqualsLYC();
                 break;
             case 0xFF46:
-            	System.out.print("Oam copy");
+            	if (oamCopy==false)
+            		System.out.print("Oam copy");
                 oamCopy = true;
                 octetsCopiedToOam = 0;
                 addressToCopy = data << 8;
@@ -492,11 +493,11 @@ public final class LcdController implements Clocked, Component {
 
         LcdImageLine.Builder res = new LcdImageLine.Builder(LCD_WIDTH);
 
-        int msb = isHFlipped ? read(tileAddress + relativeAddress)
-                : Bits.reverse8(read(tileAddress + relativeAddress));
+        int msb = isHFlipped ? read(tileAddress + relativeAddress+1)
+                : Bits.reverse8(read(tileAddress + relativeAddress+1));
 
-        int lsb = isHFlipped ? read(tileAddress + relativeAddress + 1)
-                : Bits.reverse8(read(tileAddress + relativeAddress + 1));
+        int lsb = isHFlipped ? read(tileAddress + relativeAddress)
+                : Bits.reverse8(read(tileAddress + relativeAddress));
 
         if (test_PIsPressed) {
         	System.out.print((Bits.test(objectAttributeMemory.read((4 * index) + 3),
