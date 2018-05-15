@@ -355,24 +355,24 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine buildBgLine(int line) {
-        return buildLine(line, true)
+        return buildLine(line, true, BG_SIZE)
                 .extractWrapped(regs.get(Reg.SCX), LCD_WIDTH)
                 .mapColors(regs.get(Reg.BGP));
     }
 
     private LcdImageLine buildWindowLine() {
-        LcdImageLine res = buildLine(winY, false)
-                .extractWrapped(regs.get(Reg.WX) - 7, LCD_WIDTH)
+        LcdImageLine res = buildLine(winY, false, LCD_WIDTH)
+                .shift(regs.get(Reg.WX) - 7)
                 .mapColors(regs.get(Reg.BGP));
         winY++;
         return res;
     }
 
-    private LcdImageLine buildLine(int line, boolean background) {
-        LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(BG_SIZE);
+    private LcdImageLine buildLine(int line, boolean background, int size) {
+        LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(size);
         boolean plage = background ? regs.testBit(Reg.LCDC, LCDCBit.BG_AREA)
                 : regs.testBit(Reg.LCDC, LCDCBit.WIN_AREA);
-        for (int i = 0; i < BG_SIZE / 8; ++i) {
+        for (int i = 0; i < size / 8; ++i) {
             int tileIndex = read(AddressMap.BG_DISPLAY_DATA[plage ? 1 : 0]
                     + Math.floorDiv(line, 8) * 32 + i);
             int tileAddress = 0;
