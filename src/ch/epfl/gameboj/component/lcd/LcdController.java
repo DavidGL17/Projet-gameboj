@@ -98,6 +98,21 @@ public final class LcdController implements Clocked, Component {
     public int height() {
         return LCD_HEIGHT;
     }
+    
+    public String test_getPalettes() {
+    	StringBuilder res = new StringBuilder();
+    	String BGPString = Integer.toBinaryString(regs.get(Reg.BGP));
+    	res.append(("00000000"+BGPString).substring(BGPString.length()));
+    	res.append("_");
+    	String OBP0String = Integer.toBinaryString(regs.get(Reg.OBP0));
+    	res.append(("00000000"+OBP0String).substring(OBP0String.length()));
+    	res.append("_");
+    	String OBP1String = Integer.toBinaryString(regs.get(Reg.OBP1));
+    	res.append(("00000000"+OBP1String).substring(OBP1String.length()));
+    	
+    	return res.toString();
+    	
+    }
 
     /*
      * (non-Javadoc)
@@ -221,7 +236,7 @@ public final class LcdController implements Clocked, Component {
                         winY=0;
                         if(imagesDrawn==1&&test_firstTime) {
                             int ly = regs.get(Reg.LY);
-                            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+ly+" -> "+0);
+//                            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+ly+" -> "+0);
                         }
                         if (imagesDrawn==2) {
                         	test_firstTime=false;
@@ -265,7 +280,7 @@ public final class LcdController implements Clocked, Component {
         case 1:
             // mode 1 //Completed
             if(imagesDrawn==1) {
-                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+(ly)+" -> "+(ly+1));
+//                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+(ly)+" -> "+(ly+1));
             }
             regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             checkIfLYEqualsLYC();
@@ -281,7 +296,7 @@ public final class LcdController implements Clocked, Component {
             // mode 2 // Completed
             if (firstLineDrawn) { // if vient de commencer une image
                 if(imagesDrawn==1) {
-                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+(ly)+" -> "+(ly+1));
+//                    System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*17556-lcdOnCycle)+" | LY :"+(ly)+" -> "+(ly+1));
                 }
                 regs.set(Reg.LY, regs.get(Reg.LY) + 1);
             }
@@ -357,13 +372,15 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine buildBgLine(int line) {
         return buildLine(line, true)
                 .extractWrapped(regs.get(Reg.SCX), LCD_WIDTH)
-                .mapColors(regs.get(Reg.BGP));
+//                .mapColors(regs.get(Reg.BGP));
+                ;
     }
 
     private LcdImageLine buildWindowLine() {
         LcdImageLine res = buildLine(winY, false)
                 .extractWrapped(regs.get(Reg.WX) - 7, LCD_WIDTH)
-                .mapColors(regs.get(Reg.BGP));
+//                .mapColors(regs.get(Reg.BGP))
+                ;
         winY++;
         return res;
     }
@@ -436,9 +453,13 @@ public final class LcdController implements Clocked, Component {
         }
         
         if (test_PIsPressed&&filled>0) {
+        	String OBP0String = Integer.toBinaryString(regs.get(Reg.OBP0));
+        	String OBP1String = Integer.toBinaryString(regs.get(Reg.OBP1));
+        	String BGPString = Integer.toBinaryString(regs.get(Reg.BGP));
         	System.out.println();
         	System.out.println( "line :" + line);
-        	System.out.println("0BP0 is : " + Integer.toBinaryString(regs.get(Reg.OBP0)) + " --- 0BP1 is : " + Integer.toBinaryString(regs.get(Reg.OBP1)));
+        	System.out.println("0BP0 is : " + ("00000000"+OBP0String).substring(OBP0String.length()) + " --- 0BP1 is : " +  ("00000000"+OBP1String).substring(OBP1String.length()));
+        	System.out.println("BGP is : " +  ("00000000"+BGPString).substring(BGPString.length()));
         	System.out.println();
         	System.out.println();
         }
@@ -477,9 +498,11 @@ public final class LcdController implements Clocked, Component {
                     SpriteBit.PALETTE) ? " 0BP1 " : " 0BP0 " ) + " ");
         }
         
-        return res.setBytes(0, msb, lsb).build()
-                .shift(Bits.extract(xindexy, 16, 8) - 8)
-                .mapColors(spriteGetPalette(index));
+        return (res.setBytes(0, msb, lsb).build()
+                .shift(Bits.extract(xindexy, 16, 8) - 8))
+//        		.mapColors(spriteGetPalette(index))
+        		;
+                
         
     }
 
@@ -525,6 +548,10 @@ public final class LcdController implements Clocked, Component {
                 SpriteBit.PALETTE) ? regs.get(Reg.OBP1) : regs.get(Reg.OBP0);
 
     }
+    
+    private int actualPalette(int palette) {
+    	return Bits.clip(2, palette)<<6 | Bits.extract(palette,2,2)<<4 | Bits.extract(palette,4,2)<<2| Bits.extract(palette,6,2);
+    }
 
     /// Manages the current mode of the LCD controller
 
@@ -532,14 +559,14 @@ public final class LcdController implements Clocked, Component {
         int statValue = regs.get(Reg.STAT);
         int previousMode = Bits.clip(2, statValue);
         if(imagesDrawn==1)  {
-            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+" | mode :"+previousMode+" -> "+mode);
+//            System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+" | mode :"+previousMode+" -> "+mode);
         }
         regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
                 1, Bits.test(mode, 1)));
         if (previousMode != 1 && mode == 1) {
             cpu.requestInterrupt(Interrupt.VBLANK);
             if(imagesDrawn==1) {
-                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+" | request Vblank interrupt");
+//                System.out.println("cycles :  "+cycle +"  since frame :    "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+" | request Vblank interrupt");
             }
         }
         if (mode != 3) {

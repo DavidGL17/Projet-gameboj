@@ -197,13 +197,13 @@ public final class BitVector {
         return extractZeroExtended(-start, size());
     }
     
-    public BitVector xor (BitVector that) {
-    	 int[] xorTable = new int[table.length];
-         for (int i = 0; i < table.length; ++i) {
-             xorTable[i] = that.table[i]^table[i];
-         }
-         return new BitVector(xorTable);
-    }
+//    public BitVector xor (BitVector that) {
+//    	 int[] xorTable = new int[table.length];
+//         for (int i = 0; i < table.length; ++i) {
+//             xorTable[i] = that.table[i]^table[i];
+//         }
+//         return new BitVector(xorTable);
+//    }
 
     /**
      * This enum is used in the extract methods and allows us to simplify the
@@ -333,4 +333,5 @@ public final class BitVector {
             return Arrays.toString(table);
         }
     }
+
 }
