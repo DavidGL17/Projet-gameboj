@@ -171,7 +171,7 @@ public final class LcdImageLine {
     	int size = this.size();
     	BitVector newMsb=BitVector.ZERO_OF_SIZE_160;
     	BitVector newLsb=BitVector.ZERO_OF_SIZE_160;
-    	int msbReplacement = palette & 0b10101010;
+    	int msbReplacement = Preconditions.checkBits8(palette) & 0b10101010;
     	int lsbReplacement = palette & 0b01010101;
     	
     	switch (msbReplacement) {
@@ -188,7 +188,7 @@ public final class LcdImageLine {
     		}
     		break;
     	case 0b10:
-    		newMsb=msb.or(lsb).not();
+    		newMsb=(msb.or(lsb)).not();
     		break;
     	case 0b1000:
     		newMsb=msb.not().and(lsb);
@@ -203,18 +203,19 @@ public final class LcdImageLine {
     		newMsb=lsb.not();
     		break;
     	case 0b101000:
-    		newMsb=msb.xor(lsb);
-//    		newMsb=msb.and(lsb.not()).or(msb.not().and(lsb));
+//    		newMsb=msb.xor(lsb);
+    		newMsb=msb.and(lsb.not()).or(msb.not().and(lsb));
+//    		newMsb=((msb.and(lsb).or(msb.or(lsb).not())).not());
     		break;
     	case 0b101010:
     		newMsb=msb.and(lsb).not();
-//    		newMsb=msb.and(lsb).or(msb.not().and(lsb.not()));
     		break;
     	case 0b10000000:
     		newMsb=msb.and(lsb);
     		break;
     	case 0b10000010:
-    		newMsb=msb.xor(lsb.not());
+//    		newMsb=msb.xor(lsb.not());
+    		newMsb=msb.and(lsb).or((msb.or(lsb)).not());
     		break;
     	case 0b10001000:
     		newMsb=lsb;
@@ -264,8 +265,8 @@ public final class LcdImageLine {
     		newLsb=lsb.not();
     		break;
     	case 0b10100:
-    		newLsb=msb.xor(lsb);
-//    		newLsb=msb.and(lsb.not()).or(msb.not()).and(lsb);
+//    		newLsb=msb.xor(lsb);
+    		newLsb=msb.and(lsb.not()).or((msb.not()).and(lsb));
     		break;
     	case 0b10101:
     		newLsb=msb.and(lsb).not();
@@ -274,8 +275,8 @@ public final class LcdImageLine {
     		newLsb=msb.and(lsb);
     		break;
     	case 0b1000001:
-    		newLsb=msb.xor(lsb.not());
-//    		newLsb=msb.and(lsb).or(msb.not().and(lsb.not()));
+//    		newLsb=msb.xor(lsb.not());
+    		newLsb=msb.and(lsb).or(msb.or(lsb).not());
     		break;
     	case 0b1000100:
     		newLsb=lsb;
