@@ -198,6 +198,7 @@ public final class BitVector {
     }
     
     public BitVector xor (BitVector that) {
+        Preconditions.checkArgument(that.size() ==size());
     	 int[] xorTable = new int[table.length];
          for (int i = 0; i < table.length; ++i) {
              xorTable[i] = that.table[i]^table[i];
