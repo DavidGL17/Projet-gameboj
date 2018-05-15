@@ -53,6 +53,7 @@ public final class LcdController implements Clocked, Component {
     private LcdImage currentImage;
     private LcdImage.Builder nextImageBuilder = new Builder(LCD_WIDTH,
             LCD_HEIGHT);
+    private LcdImage DEFAULT_IMAGE;
     private long lcdOnCycle;
     private long nextNonIdleCycle = Long.MAX_VALUE;
     private boolean firstLineDrawn = false;
@@ -78,8 +79,9 @@ public final class LcdController implements Clocked, Component {
         objectAttributeMemory = new Ram(AddressMap.OAM_RAM_SIZE);
         LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
         Arrays.fill(lines, LcdImageLine.ZERO_OF_SIZE_160);
-        currentImage = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
+        DEFAULT_IMAGE = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
                 LCD_HEIGHT);
+        currentImage=DEFAULT_IMAGE;
         regs.set(Reg.OBP0,0b11100100);
         regs.set(Reg.OBP1,0b11100100);
         regs.set(Reg.BGP,0b11100100);
@@ -173,6 +175,8 @@ public final class LcdController implements Clocked, Component {
                     checkIfLYEqualsLYC();
                     setMode(0, 0);
                     nextNonIdleCycle = Long.MAX_VALUE;
+                    System.out.println("Extinction");
+                    currentImage=DEFAULT_IMAGE;
                 }
                 regs.set(Reg.LCDC, data);
                 break;
@@ -187,6 +191,7 @@ public final class LcdController implements Clocked, Component {
                 checkIfLYEqualsLYC();
                 break;
             case 0xFF46:
+            	System.out.print("Oam copy");
                 oamCopy = true;
                 octetsCopiedToOam = 0;
                 addressToCopy = data << 8;
@@ -372,14 +377,14 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine buildBgLine(int line) {
         return buildLine(line, true)
                 .extractWrapped(regs.get(Reg.SCX), LCD_WIDTH)
-//                .mapColors(regs.get(Reg.BGP));
+                .mapColors(regs.get(Reg.BGP))
                 ;
     }
 
     private LcdImageLine buildWindowLine() {
         LcdImageLine res = buildLine(winY, false)
                 .extractWrapped(regs.get(Reg.WX) - 7, LCD_WIDTH)
-//                .mapColors(regs.get(Reg.BGP))
+                .mapColors(regs.get(Reg.BGP))
                 ;
         winY++;
         return res;
@@ -500,7 +505,7 @@ public final class LcdController implements Clocked, Component {
         
         return (res.setBytes(0, msb, lsb).build()
                 .shift(Bits.extract(xindexy, 16, 8) - 8))
-//        		.mapColors(spriteGetPalette(index))
+        		.mapColors(spriteGetPalette(index))
         		;
                 
         
