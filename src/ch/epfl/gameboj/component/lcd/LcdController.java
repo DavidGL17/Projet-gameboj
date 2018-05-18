@@ -59,7 +59,6 @@ public final class LcdController implements Clocked, Component {
     private boolean firstLineDrawn = false;
     private int winY = 0;
     private long imagesDrawn = 0;
-    private long previousCycle;
 
     private static boolean test_firstTime = true;
     public boolean test_PIsPressed = false;
@@ -262,7 +261,6 @@ public final class LcdController implements Clocked, Component {
                     break;
                 }
                 reallyCycle(cycle);
-                previousCycle = cycle;
             }
         }
         if (oamCopy) {
@@ -330,6 +328,55 @@ public final class LcdController implements Clocked, Component {
             firstLineDrawn = true;
             break;
         }
+    }
+
+    /// Manages the current mode of the LCD controller
+    
+    private void setMode(int mode, long cycle) {
+        int statValue = regs.get(Reg.STAT);
+        int previousMode = Bits.clip(2, statValue);
+        if (imagesDrawn == 1) {
+            // System.out.println("cycles : "+cycle +" since frame :
+            // "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+"
+            // | mode :"+previousMode+" -> "+mode);
+        }
+        regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
+                1, Bits.test(mode, 1)));
+        if (previousMode != 1 && mode == 1) {
+            cpu.requestInterrupt(Interrupt.VBLANK);
+            if (imagesDrawn == 1) {
+                // System.out.println("cycles : "+cycle +" since frame :
+                // "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+"
+                // | request Vblank interrupt");
+            }
+        }
+        if (mode != 3) {
+            if (checkStatBit(mode + 3)) {
+                cpu.requestInterrupt(Interrupt.LCD_STAT);
+            }
+        }
+    }
+
+    private int getMode() {
+        int statValue = regs.get(Reg.STAT);
+        return (Bits.test(statValue, STATBit.MODE1) ? 1 << 1 : 0)
+                | (Bits.test(statValue, STATBit.MODE0) ? 1 : 0);
+    }
+
+    /// Manages the Bits in Stat
+    
+    private void checkIfLYEqualsLYC() {
+        int statValue = regs.get(Reg.STAT);
+        boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
+        regs.set(Reg.STAT,
+                Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
+        if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
+            cpu.requestInterrupt(Interrupt.LCD_STAT);
+        }
+    }
+
+    private boolean checkStatBit(int index) {
+        return Bits.test(regs.get(Reg.STAT), index);
     }
 
     /**
@@ -574,51 +621,8 @@ public final class LcdController implements Clocked, Component {
 
     /// Manages the current mode of the LCD controller
 
-    private void setMode(int mode, long cycle) {
-        int statValue = regs.get(Reg.STAT);
-        int previousMode = Bits.clip(2, statValue);
-        if (imagesDrawn == 1) {
-            // System.out.println("cycles : "+cycle +" since frame :
-            // "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+"
-            // | mode :"+previousMode+" -> "+mode);
-        }
-        regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
-                1, Bits.test(mode, 1)));
-        if (previousMode != 1 && mode == 1) {
-            cpu.requestInterrupt(Interrupt.VBLANK);
-            if (imagesDrawn == 1) {
-                // System.out.println("cycles : "+cycle +" since frame :
-                // "+(cycle-imagesDrawn*(LINE_CYCLES)*(LCD_HEIGHT+10)-lcdOnCycle)+"
-                // | request Vblank interrupt");
-            }
-        }
-        if (mode != 3) {
-            if (checkStatBit(mode + 3)) {
-                cpu.requestInterrupt(Interrupt.LCD_STAT);
-            }
-        }
-    }
-
-    private int getMode() {
-        int statValue = regs.get(Reg.STAT);
-        return (Bits.test(statValue, STATBit.MODE1) ? 1 << 1 : 0)
-                | (Bits.test(statValue, STATBit.MODE0) ? 1 : 0);
-    }
 
     /// Manages the Bits in Stat
 
-    private void checkIfLYEqualsLYC() {
-        int statValue = regs.get(Reg.STAT);
-        boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
-        regs.set(Reg.STAT,
-                Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
-        if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
-            cpu.requestInterrupt(Interrupt.LCD_STAT);
-        }
-    }
-
-    private boolean checkStatBit(int index) {
-        return Bits.test(regs.get(Reg.STAT), index);
-    }
 
 }
