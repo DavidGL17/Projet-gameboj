@@ -194,9 +194,9 @@ public final class Cpu implements Component, Clocked {
     public void cycle(long cycle) {
     	if (test_stopPrinting) {
     		try (PrintWriter out = new PrintWriter("Opening.txt")) {
-    			opcodes.append(" Loop A was done : " + test_totalALoops + " times +\n");
-    			opcodes.append(" Loop B was done : " + test_totalBLoops + " times +\n");
-    			opcodes.append(" Loop C was done : " + test_totalCLoops + " times +\n");
+//    			opcodes.append(" Loop A was done : " + test_totalALoops + " times +\n");
+//    			opcodes.append(" Loop B was done : " + test_totalBLoops + " times +\n");
+//    			opcodes.append(" Loop C was done : " + test_totalCLoops + " times +\n");
     		    out.println(opcodes.toString());
     			test_stopPrinting=false;
     			test_notBootRom=false;
@@ -314,7 +314,7 @@ public final class Cpu implements Component, Clocked {
     		}
     		else  //opcode n'est pas prochain dans séquence boucleA
     			if (test_consecutiveALoops!=0&&test_consecutiveALoops!=1750) {
-    				opcodes.append("\n" + " " + "Loop A executed " + test_consecutiveALoops + " times" + "\n" + "\n");
+//    				opcodes.append("\n" + " " + "Loop A executed " + test_consecutiveALoops + " times" + "\n" + "\n");
     				test_precededBy1750ALoops=false;
     			} else if (test_consecutiveALoops==1750&&test_loopAIterator==0) {
     				test_precededBy1750ALoops=true;
@@ -322,7 +322,7 @@ public final class Cpu implements Component, Clocked {
 	    				if (opcode.equals(test_loopB[4])){
 	    					if (test_loopBIterator==0&&test_precededBy1750ALoops) {
 	    						test_totalCLoops++;
-	    						opcodes.append("\n" + " " + "Loop C executed " + "\n" + "\n");
+//	    						opcodes.append("\n" + " " + "Loop C executed " + "\n" + "\n");
 	    					} else {
 	    						test_consecutiveBLoops++;
 	    					}
@@ -338,7 +338,7 @@ public final class Cpu implements Component, Clocked {
     				for (int j=0 ; j<=i ; j++) {
     					delay+=test_loopA[j].cycles;
     				}
-    				opcodes.append(" " + test_loopA[i].toString() + " cycle " + (cycle-delay) + "\n" );
+//    				opcodes.append(" " + test_loopA[i].toString() + " cycle " + (cycle-delay) + "\n" );
     				
     			}
 
@@ -347,13 +347,13 @@ public final class Cpu implements Component, Clocked {
     				for (int j=0 ; j<=i ; j++) {
     					delay+=test_loopA[j].cycles;
     				}
-    				opcodes.append(" " + test_loopA[i].toString() + " cycle " + (cycle-delay) + "\n" );
+//    				opcodes.append(" " + test_loopA[i].toString() + " cycle " + (cycle-delay) + "\n" );
     				
     			}
     			test_totalALoops+=test_consecutiveALoops;
     			test_totalBLoops+=test_consecutiveBLoops;
     			test_consecutiveALoops=0;
-    			opcodes.append(" " + opcode.toString() + " cycle " + cycle + "\n");
+//    			opcodes.append(" " + opcode.toString() + " cycle " + cycle + "\n");
     			}
     	
     		
