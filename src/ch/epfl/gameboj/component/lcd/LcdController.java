@@ -231,8 +231,8 @@ public final class LcdController implements Clocked, Component {
                 case 1:
                     if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
                         firstLineDrawn = false;
-                        setMode(2);
                         ++imagesDrawn;
+                        setMode(2);
                         winY = 0;
                         regs.set(Reg.LY, 0);
                         checkIfLYEqualsLYC();
@@ -307,10 +307,12 @@ public final class LcdController implements Clocked, Component {
                 1, Bits.test(mode, 1)));
         if (previousMode != 1 && mode == 1) {
             cpu.requestInterrupt(Interrupt.VBLANK);
+//            System.out.println("Interuption VBLANK lancée");
         }
         if (mode != 3) {
             if (checkStatBit(mode + 3)) {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
+                System.out.println("Interuption LCD_STAT lancée : mode "+mode+" a le bit actif");
             }
         }
     }
@@ -326,10 +328,10 @@ public final class LcdController implements Clocked, Component {
     private void checkIfLYEqualsLYC() {
         int statValue = regs.get(Reg.STAT);
         boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
-        regs.set(Reg.STAT,
-                Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
+        regs.set(Reg.STAT, Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
         if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
+            System.out.println("Interuption LCD_STAT lancée : LY equals LYC");
         }
     }
 
