@@ -23,7 +23,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    private final static String ROM_FILE_NAME = "snake.gb";
+    private final static String ROM_FILE_NAME = "donkeyKong.gb";
 
     Map<KeyCode, Key> keyCodeMap = Map.of(KeyCode.UP, Key.UP, KeyCode.DOWN,
             Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT, Key.LEFT);
@@ -53,7 +53,10 @@ public class Main extends Application {
 
         imageView.setOnKeyPressed((k) -> {
             String keyText = k.getText();
-            if (keyText.equals("y")) {
+            if (keyText.equals("x")) {
+            	gb.cpu().test_stopPrinting=true;
+            }
+            else if (keyText.equals("y")) {
                 // screenshot
                 int[] COLOR_MAP = new int[] { 0xFF_FF_FF, 0xD3_D3_D3,
                         0xA9_A9_A9, 0x00_00_00 };

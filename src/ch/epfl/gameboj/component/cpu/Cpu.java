@@ -1,6 +1,9 @@
 package ch.epfl.gameboj.component.cpu;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
@@ -61,6 +64,32 @@ public final class Cpu implements Component, Clocked {
     
     public boolean test_PIsPressed;
     private int PCDispDelay;
+    
+    
+    public boolean test_stopPrinting;
+    private boolean test_notBootRom;
+    private StringBuilder opcodes = new StringBuilder();
+    
+    private Opcode[] test_loopA = {
+    		Opcode.NOP,Opcode.NOP,Opcode.NOP,Opcode.DEC_DE,
+    		Opcode.LD_A_D,Opcode.OR_A_E,Opcode.JR_NZ_E8
+    };
+    private int test_loopAIterator;
+    private int test_consecutiveALoops;
+    private int test_totalALoops;
+    
+    private Opcode[] test_loopB = {
+    		Opcode.RET,Opcode.DEC_B,Opcode.JR_NZ_E8,
+    		Opcode.LD_DE_N16,Opcode.CALL_N16
+    };
+    private int test_loopBIterator;
+    private int test_consecutiveBLoops;
+    private int test_totalBLoops;
+    
+    private int test_consecutiveCLoops;
+    private int test_totalCLoops;
+    private boolean test_precededBy1750ALoops;
+    
 
     /**
      * Builds a table of opcodes of the specified kind
@@ -163,6 +192,21 @@ public final class Cpu implements Component, Clocked {
      */
     @Override
     public void cycle(long cycle) {
+    	if (test_stopPrinting) {
+    		try (PrintWriter out = new PrintWriter("Opening.txt")) {
+    			opcodes.append(" Loop A was done : " + test_totalALoops + " times +\n");
+    			opcodes.append(" Loop B was done : " + test_totalBLoops + " times +\n");
+    			opcodes.append(" Loop C was done : " + test_totalCLoops + " times +\n");
+    		    out.println(opcodes.toString());
+    			test_stopPrinting=false;
+    			test_notBootRom=false;
+    		} catch (FileNotFoundException e) {
+    		}
+    	}
+    	if (registerPC==0x100) {
+    		test_notBootRom=true;
+    		test_loopAIterator= 0;
+    	}
     	boolean noneRaisedAndActive = false; //Only if no Interrupt is raisedAndActive
         if (nextNonIdleCycle == Long.MAX_VALUE) {
             int RaisedAndActive = registerIE & registerIF;
@@ -207,7 +251,6 @@ public final class Cpu implements Component, Clocked {
                 return;
             }
         }
-
         if (read8(registerPC) == PREFIX) {
             dispatch(PREFIXED_OPCODE_TABLE[read8AfterOpcode()], cycle);
         } else {
@@ -262,6 +305,59 @@ public final class Cpu implements Component, Clocked {
      *            - the cycle being executed
      */
     private void dispatch(Opcode opcode, long cycle) {
+    	if (test_notBootRom && !test_stopPrinting) { //Opcode est prochain dasn séquence boucleA
+    		if (opcode.equals(test_loopA[test_loopAIterator])) {
+    			if (opcode.equals(test_loopA[6])){
+    				test_consecutiveALoops+=1;
+    			}
+    			test_loopAIterator=(test_loopAIterator+1)%7;
+    		}
+    		else  //opcode n'est pas prochain dans séquence boucleA
+    			if (test_consecutiveALoops!=0&&test_consecutiveALoops!=1750) {
+    				opcodes.append("\n" + " " + "Loop A executed " + test_consecutiveALoops + " times" + "\n" + "\n");
+    				test_precededBy1750ALoops=false;
+    			} else if (test_consecutiveALoops==1750&&test_loopAIterator==0) {
+    				test_precededBy1750ALoops=true;
+	    			if (opcode.equals(test_loopB[test_loopBIterator])) {
+	    				if (opcode.equals(test_loopB[4])){
+	    					if (test_loopBIterator==0&&test_precededBy1750ALoops) {
+	    						test_totalCLoops++;
+	    						opcodes.append("\n" + " " + "Loop C executed " + "\n" + "\n");
+	    					} else {
+	    						test_consecutiveBLoops++;
+	    					}
+	    					test_precededBy1750ALoops=false;
+	    				}
+	    				test_loopBIterator=(test_loopBIterator+1)%5;
+	    				
+	    			} 
+    			} else {
+    			
+    			for (int i=0 ; i<test_loopAIterator; i++) {
+    				int delay=0;
+    				for (int j=0 ; j<=i ; j++) {
+    					delay+=test_loopA[j].cycles;
+    				}
+    				opcodes.append(" " + test_loopA[i].toString() + " cycle " + (cycle-delay) + "\n" );
+    				
+    			}
+
+    			for (int i=0 ; i<test_loopBIterator; i++) {
+    				int delay=0;
+    				for (int j=0 ; j<=i ; j++) {
+    					delay+=test_loopA[j].cycles;
+    				}
+    				opcodes.append(" " + test_loopA[i].toString() + " cycle " + (cycle-delay) + "\n" );
+    				
+    			}
+    			test_totalALoops+=test_consecutiveALoops;
+    			test_totalBLoops+=test_consecutiveBLoops;
+    			test_consecutiveALoops=0;
+    			opcodes.append(" " + opcode.toString() + " cycle " + cycle + "\n");
+    			}
+    	
+    		
+    	}
     	if (test_PIsPressed) {
     		if (PCDispDelay == 0) {
 	    		System.out.println("Opcode is : " + opcode.toString());
