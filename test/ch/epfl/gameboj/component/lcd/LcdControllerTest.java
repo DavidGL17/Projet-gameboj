@@ -55,7 +55,7 @@ public class LcdControllerTest {
         int cycle = 0;
         while (cycle < 160) {
             lcd.cycle(cycle);
-            assertEquals(cycle, bus.read(AddressMap.OAM_START + cycle));
+            assertEquals(ram.read(cycle), bus.read(AddressMap.OAM_START + cycle));
             ++cycle;
         }
     }
