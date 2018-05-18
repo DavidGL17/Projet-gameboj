@@ -212,7 +212,7 @@ public final class BitVector {
      * writing of the two methods
      *
      */
-    private enum ExtensionType {
+    public enum ExtensionType {
         BYZERO, WRAPPED
     }
 
