@@ -58,6 +58,9 @@ public final class Cpu implements Component, Clocked {
             Opcode.Kind.DIRECT);
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(
             Opcode.Kind.PREFIXED);
+    
+    public boolean test_PIsPressed;
+    private int PCDispDelay;
 
     /**
      * Builds a table of opcodes of the specified kind
@@ -186,6 +189,14 @@ public final class Cpu implements Component, Clocked {
      *            - the cycle to execute
      */
     private void reallyCycle(long cycle, boolean noneRaisedAndActive) {
+//    	if (test_PIsPressed) {
+//    		if (PCDispDelay == 0) {
+//	    		System.out.println("PC is : " + Integer.toHexString(registerPC));
+//	    		PCDispDelay = 100;
+//    		} else {
+//    			PCDispDelay --;
+//    		}
+//    	}
         if (IME&&!noneRaisedAndActive) {
             int RaisedAndActive = registerIE & registerIF;
             int toManage = 31 - Integer.numberOfLeadingZeros(
@@ -251,6 +262,14 @@ public final class Cpu implements Component, Clocked {
      *            - the cycle being executed
      */
     private void dispatch(Opcode opcode, long cycle) {
+    	if (test_PIsPressed) {
+    		if (PCDispDelay == 0) {
+	    		System.out.println("Opcode is : " + opcode.toString());
+	    		PCDispDelay = 100;
+    		} else {
+    			PCDispDelay --;
+    		}
+    	}
         int nextPC = Bits.clip(16, registerPC + opcode.totalBytes);
         setNextNonIdleCycle(cycle, opcode);
         switch (opcode.family) {
