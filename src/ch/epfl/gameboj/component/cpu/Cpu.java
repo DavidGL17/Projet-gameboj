@@ -213,7 +213,8 @@ public final class Cpu implements Component, Clocked {
             int toManage = 31 - Integer.numberOfLeadingZeros(
                     Integer.lowestOneBit(RaisedAndActive));
             if ((toManage >= 0) && (toManage <= 4)) {
-                nextNonIdleCycle = cycle;   
+                nextNonIdleCycle = cycle; 
+                System.out.println("At cycle "+cycle+", handling interrupt "+Interrupt.values()[toManage]);
                 interruptHandler(toManage);
             } else {
             	noneRaisedAndActive=true;
@@ -271,6 +272,7 @@ public final class Cpu implements Component, Clocked {
             registerIF = Bits.set(registerIF, toManage, false);
             push16(registerPC);
             registerPC = AddressMap.INTERRUPTS[toManage];
+            
         }
     }
 

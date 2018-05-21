@@ -59,6 +59,7 @@ public final class LcdController implements Clocked, Component {
     private boolean firstLineDrawn = false;
     private int winY = 0;
     private long imagesDrawn = 0;
+    private long currentCycle;
 
     public boolean test_PIsPressed = false;
 
@@ -175,6 +176,12 @@ public final class LcdController implements Clocked, Component {
                     setMode(0);
                     nextNonIdleCycle = Long.MAX_VALUE;
                     currentImage = DEFAULT_IMAGE;
+                    System.out.println(currentCycle+": write "+data+" to LCDC (screen now off)");
+                } else {
+                    if(!regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)
+                        && Bits.test(data, LCDCBit.LCD_STATUS.index())) {
+                        System.out.println(currentCycle+": write "+data+" to LCDC (screen now on)");
+                    }
                 }
                 regs.set(Reg.LCDC, data);
                 break;
@@ -208,6 +215,7 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public void cycle(long cycle) {
+        currentCycle = cycle;
         if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)) {
             if (nextNonIdleCycle == Long.MAX_VALUE) {
                 lcdOnCycle = cycle;
@@ -307,12 +315,10 @@ public final class LcdController implements Clocked, Component {
                 1, Bits.test(mode, 1)));
         if (previousMode != 1 && mode == 1) {
             cpu.requestInterrupt(Interrupt.VBLANK);
-//            System.out.println("Interuption VBLANK lancée");
         }
         if (mode != 3) {
             if (checkStatBit(mode + 3)) {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
-                System.out.println("Interuption LCD_STAT lancée : mode "+mode+" a le bit actif");
             }
         }
     }
@@ -331,7 +337,6 @@ public final class LcdController implements Clocked, Component {
         regs.set(Reg.STAT, Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
         if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
-            System.out.println("Interuption LCD_STAT lancée : LY equals LYC");
         }
     }
 
