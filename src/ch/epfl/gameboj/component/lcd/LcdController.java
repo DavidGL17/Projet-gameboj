@@ -240,10 +240,10 @@ public final class LcdController implements Clocked, Component {
                     if (regs.get(Reg.LY) == LCD_HEIGHT + 9) {
                         firstLineDrawn = false;
                         ++imagesDrawn;
-                        setMode(2);
-                        winY = 0;
                         regs.set(Reg.LY, 0);
                         checkIfLYEqualsLYC();
+                        setMode(2);
+                        winY = 0;
                     }
                     break;
                 case 2:
@@ -273,8 +273,8 @@ public final class LcdController implements Clocked, Component {
         case 0:
             if (firstLineDrawn) {
                 regs.set(Reg.LY, regs.get(Reg.LY) + 1);
-                checkIfLYEqualsLYC();
             }
+            checkIfLYEqualsLYC();
             nextNonIdleCycle = lcdOnCycle
                     + imagesDrawn * LINE_CYCLES * (LCD_HEIGHT + 10)
                     + (regs.get(Reg.LY) + 1) * LINE_CYCLES;
