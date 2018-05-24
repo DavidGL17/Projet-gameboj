@@ -494,11 +494,9 @@ public final class Alu {
 
         Objects.requireNonNull(d);
         
-        int result = checkBits8(v);
+        int result = checkBits8(v)+(c?Bits.mask(8):0);
         
-        if (c)
-            result += Bits.mask(8);
-
+        
         result = Bits.rotate(9, result, (d == RotDir.LEFT) ? 1 : -1);
         int clippedResult=Bits.clip(8,result);
 
