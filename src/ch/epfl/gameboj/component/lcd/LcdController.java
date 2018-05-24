@@ -399,7 +399,7 @@ public final class LcdController implements Clocked, Component {
 
     private LcdImageLine buildWindowLine() {
         LcdImageLine res = buildLine(winY, false,LCD_WIDTH)
-                .shift(regs.get(Reg.WX)-7)
+                .shift(regs.get(Reg.WX)-8)
                 .mapColors(regs.get(Reg.BGP))
                 ;
         winY++;

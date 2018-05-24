@@ -3,7 +3,6 @@ package ch.epfl.gameboj.component.cpu;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
