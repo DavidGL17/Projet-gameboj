@@ -176,11 +176,9 @@ public final class LcdController implements Clocked, Component {
                     setMode(0);
                     nextNonIdleCycle = Long.MAX_VALUE;
                     currentImage = DEFAULT_IMAGE;
-                    System.out.println(currentCycle+": write "+data+" to LCDC (screen now off)");
                 } else {
                     if(!regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)
                         && Bits.test(data, LCDCBit.LCD_STATUS.index())) {
-                        System.out.println(currentCycle+": write "+data+" to LCDC (screen now on)");
                     }
                 }
                 regs.set(Reg.LCDC, data);

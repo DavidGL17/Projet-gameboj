@@ -214,7 +214,6 @@ public final class Cpu implements Component, Clocked {
                     Integer.lowestOneBit(RaisedAndActive));
             if ((toManage >= 0) && (toManage <= 4)) {
                 nextNonIdleCycle = cycle; 
-                System.out.println("At cycle "+cycle+", handling interrupt "+Interrupt.values()[toManage]);
                 interruptHandler(toManage);
             } else {
             	noneRaisedAndActive=true;

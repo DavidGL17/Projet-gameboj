@@ -119,6 +119,6 @@ public final class Joypad implements Component {
         if (Bits.test(line2, 5)) {
             return Bits.complement8(line2);
         }
-        return 0xC0;
+        return 0xFF;
     }
 }
