@@ -104,19 +104,25 @@ public final class Bits {
      */
     public static int set(int bits, int index, boolean newValue) {
         Objects.checkIndex(index, Integer.SIZE);
-        if (test(bits, index)) {
-            if (newValue) {
-                return bits;
-            } else {
-                return bits & (~mask(index));
-            }
-        } else {
-            if (newValue) {
-                return bits | mask(index);
-            } else {
-                return bits;
-            }
-        }
+        
+        
+        return (newValue^(test(bits, index))) ?
+        		( (newValue) ? bits | mask(index) : bits & (~mask(index)))
+        		: bits;
+        		
+//        if (test(bits, index)) {
+//            if (newValue) {
+//                return bits;
+//            } else {
+//                return bits & (~mask(index));
+//            }
+//        } else {
+//            if (newValue) {
+//                return bits | mask(index);
+//            } else {
+//                return bits;
+//            }
+//        }
     }
 
     /**
@@ -131,11 +137,8 @@ public final class Bits {
      */
     public static int clip(int size, int bits) {
 
-        if ((size < 0) || (size > 32)) {
-            System.out.print(size);
-            throw new IllegalArgumentException();
-        }
-
+        Preconditions.checkArgument(size>=0 && size<=Integer.SIZE);
+        
         int mask = 0;
         for (int i = 0; i < size; i++) {
             mask += mask(i);
@@ -178,21 +181,16 @@ public final class Bits {
      *             if size isn't within [0,32]
      */
     public static int rotate(int size, int bits, int distance) {
-        if ((size <= 0) || (size > Integer.SIZE)) {
-            throw new IllegalArgumentException();
-        }
+        Preconditions.checkArgument((size > 0) && (size <= Integer.SIZE)) ;
 
         if (size < 31) {
-            if (bits >= (0b1 << size)) {
-                throw new IllegalArgumentException();
-            }
+            Preconditions.checkArgument(bits < (0b1 << size)); 
+  
         } else if (size == 31) {
-            if (bits >>> 1 >= 0b1 << (size - 1)) {
-                throw new IllegalArgumentException();
-            }
+            Preconditions.checkArgument(bits >>> 1 < 0b1 << (size - 1)) ;
         }
         int res = 0;
-        int decalage = distance % size;
+        int decalage = Math.floorMod(distance, size);
 
         for (int i = 0; i < size; i++) {
             if (test(bits, ((i + size - decalage) % size))) {
