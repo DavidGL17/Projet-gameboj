@@ -296,20 +296,7 @@ public final class LcdImageLine {
     	default:
 			System.out.println("Failed" + palette);
     	}
-    	
-    	try {
     	return new LcdImageLine(newMsb, newLsb, opacity);
-    	} catch(IllegalArgumentException e) {
-    		System.out.println("newMsb == ZERO_OF_SIZE_160 : " + (newMsb.equals(BitVector.ZERO_OF_SIZE_160)));
-    		System.out.println("newMsb size = " + newMsb.size());
-    		System.out.println("newLsb == ZERO_OF_SIZE_160 : " + (newLsb.equals(BitVector.ZERO_OF_SIZE_160)));
-    		System.out.println("newLsb size = " + newLsb.size());
-    		System.out.println("opacity size = " + opacity.size());
-    		System.out.println("palette is : " + Integer.toBinaryString(palette));
-    		throw new IllegalArgumentException();
-    	}
-    	
-    	
     }
 
     /**
