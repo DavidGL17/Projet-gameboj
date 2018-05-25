@@ -34,6 +34,7 @@ public final class MBC1 implements Component {
         this.ramMask = ramSize - 1;
     }
 
+    @Override
     public int read(int address) {
         switch (Bits.extract(checkBits16(address), 13, 3)) {
         case 0: case 1:

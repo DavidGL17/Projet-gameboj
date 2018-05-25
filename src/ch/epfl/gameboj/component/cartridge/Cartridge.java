@@ -63,8 +63,6 @@ public final class Cartridge implements Component {
 
     private static int getRamSize(int ramSizeIdentification) {
         switch (ramSizeIdentification) {
-        case 0:
-            return 0;
         case 1:
             return 2048;
         case 2:
