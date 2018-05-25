@@ -16,7 +16,8 @@ import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 public final class Joypad implements Component {
 
     /**
-     * Represents the different keys of the gameboy
+     * Represents the different keys of the gameboy.
+     * The attributes line and index represent the position of each key in the "lines" of P1
      */
     public enum Key {
         RIGHT(0, 1), LEFT(1, 1), UP(2, 1), DOWN(3, 1), A(0, 2), B(1,
@@ -67,8 +68,8 @@ public final class Joypad implements Component {
     }
 
     /**
-     * Presses the given key, updates P1 accodringly, and requests the JOYPAD
-     * interupt in the cpu if necessary
+     * Presses the given key, updates P1 accordingly, and requests the JOYPAD
+     * interrupt in the cpu if necessary
      * 
      * @param key,
      *            the key to press
