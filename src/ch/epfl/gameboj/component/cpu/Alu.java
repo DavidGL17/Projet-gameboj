@@ -17,7 +17,7 @@ import ch.epfl.gameboj.bits.Bits;
 
 public final class Alu {
 
-    /*
+    /**
      * Represents the bits of Register F as well as the flags that can be raised
      * while performing arithmetic operations
      */
@@ -25,7 +25,7 @@ public final class Alu {
         UNUSED_0, UNUSED_1, UNUSED_2, UNUSED_3, C, H, N, Z;
     }
 
-    /*
+    /**
      * Represents a Direction of rotation
      */
     public static enum RotDir {
@@ -466,8 +466,8 @@ public final class Alu {
      */
     public static int rotate(RotDir d, int v) {
 
-        Objects.requireNonNull(d);
-
+    	checkArgument(d!=null);
+    	
         boolean c = false;
 
         c = Bits.test(checkBits8(v), (7 + d.ordinal()) % 8);
@@ -492,7 +492,7 @@ public final class Alu {
      */
     public static int rotate(RotDir d, int v, boolean c) {
 
-        Objects.requireNonNull(d);
+        checkArgument(d!=null);
         
         int result = checkBits8(v)+(c?Bits.mask(8):0);
         

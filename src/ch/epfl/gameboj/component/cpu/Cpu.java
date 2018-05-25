@@ -60,41 +60,13 @@ public final class Cpu implements Component, Clocked {
             Opcode.Kind.DIRECT);
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(
             Opcode.Kind.PREFIXED);
-    
-    public boolean test_PIsPressed;
-    private int PCDispDelay;
-    
-    
-    public boolean test_stopPrinting;
-    private boolean test_notBootRom;
-    private StringBuilder opcodes = new StringBuilder();
-    
-    private Opcode[] test_loopA = {
-    		Opcode.NOP,Opcode.NOP,Opcode.NOP,Opcode.DEC_DE,
-    		Opcode.LD_A_D,Opcode.OR_A_E,Opcode.JR_NZ_E8
-    };
-    private int test_loopAIterator;
-    private int test_consecutiveALoops;
-    private int test_totalALoops;
-    
-    private Opcode[] test_loopB = {
-    		Opcode.RET,Opcode.DEC_B,Opcode.JR_NZ_E8,
-    		Opcode.LD_DE_N16,Opcode.CALL_N16
-    };
-    private int test_loopBIterator;
-    private int test_consecutiveBLoops;
-    private int test_totalBLoops;
-    
-    private int test_consecutiveCLoops;
-    private int test_totalCLoops;
-    private boolean test_precededBy1750ALoops;
-    
 
+    
     /**
      * Builds a table of opcodes of the specified kind
      */
     private static Opcode[] buildOpcodeTable(Opcode.Kind kind) {
-        Opcode[] table = new Opcode[0x200];
+        Opcode[] table = new Opcode[0x100];
         for (Opcode o : Opcode.values()) {
             if (o.kind == kind) {
                 table[o.encoding] = o;
@@ -191,21 +163,6 @@ public final class Cpu implements Component, Clocked {
      */
     @Override
     public void cycle(long cycle) {
-    	if (test_stopPrinting) {
-    		try (PrintWriter out = new PrintWriter("Opening.txt")) {
-//    			opcodes.append(" Loop A was done : " + test_totalALoops + " times +\n");
-//    			opcodes.append(" Loop B was done : " + test_totalBLoops + " times +\n");
-//    			opcodes.append(" Loop C was done : " + test_totalCLoops + " times +\n");
-    		    out.println(opcodes.toString());
-    			test_stopPrinting=false;
-    			test_notBootRom=false;
-    		} catch (FileNotFoundException e) {
-    		}
-    	}
-    	if (registerPC==0x100) {
-    		test_notBootRom=true;
-    		test_loopAIterator= 0;
-    	}
     	boolean noneRaisedAndActive = false; //Only if no Interrupt is raisedAndActive
         if (nextNonIdleCycle == Long.MAX_VALUE) {
             int RaisedAndActive = registerIE & registerIF;
@@ -305,67 +262,7 @@ public final class Cpu implements Component, Clocked {
      *            - the cycle being executed
      */
     private void dispatch(Opcode opcode, long cycle) {
-    	if (test_notBootRom && !test_stopPrinting) { //Opcode est prochain dasn séquence boucleA
-    		if (opcode.equals(test_loopA[test_loopAIterator])) {
-    			if (opcode.equals(test_loopA[6])){
-    				test_consecutiveALoops+=1;
-    			}
-    			test_loopAIterator=(test_loopAIterator+1)%7;
-    		}
-    		else  //opcode n'est pas prochain dans séquence boucleA
-    			if (test_consecutiveALoops!=0&&test_consecutiveALoops!=1750) {
-//    				opcodes.append("\n" + " " + "Loop A executed " + test_consecutiveALoops + " times" + "\n" + "\n");
-    				test_precededBy1750ALoops=false;
-    			} else if (test_consecutiveALoops==1750&&test_loopAIterator==0) {
-    				test_precededBy1750ALoops=true;
-	    			if (opcode.equals(test_loopB[test_loopBIterator])) {
-	    				if (opcode.equals(test_loopB[4])){
-	    					if (test_loopBIterator==0&&test_precededBy1750ALoops) {
-	    						test_totalCLoops++;
-//	    						opcodes.append("\n" + " " + "Loop C executed " + "\n" + "\n");
-	    					} else {
-	    						test_consecutiveBLoops++;
-	    					}
-	    					test_precededBy1750ALoops=false;
-	    				}
-	    				test_loopBIterator=(test_loopBIterator+1)%5;
-	    				
-	    			} 
-    			} else {
-    			
-    			for (int i=0 ; i<test_loopAIterator; i++) {
-    				int delay=0;
-    				for (int j=0 ; j<=i ; j++) {
-    					delay+=test_loopA[j].cycles;
-    				}
-//    				opcodes.append(" " + test_loopA[i].toString() + " cycle " + (cycle-delay) + "\n" );
-    				
-    			}
-
-    			for (int i=0 ; i<test_loopBIterator; i++) {
-    				int delay=0;
-    				for (int j=0 ; j<=i ; j++) {
-    					delay+=test_loopA[j].cycles;
-    				}
-//    				opcodes.append(" " + test_loopA[i].toString() + " cycle " + (cycle-delay) + "\n" );
-    				
-    			}
-    			test_totalALoops+=test_consecutiveALoops;
-    			test_totalBLoops+=test_consecutiveBLoops;
-    			test_consecutiveALoops=0;
-//    			opcodes.append(" " + opcode.toString() + " cycle " + cycle + "\n");
-    			}
     	
-    		
-    	}
-    	if (test_PIsPressed) {
-    		if (PCDispDelay == 0) {
-	    		System.out.println("Opcode is : " + opcode.toString());
-	    		PCDispDelay = 100;
-    		} else {
-    			PCDispDelay --;
-    		}
-    	}
         int nextPC = Bits.clip(16, registerPC + opcode.totalBytes);
         setNextNonIdleCycle(cycle, opcode);
         switch (opcode.family) {
@@ -948,18 +845,18 @@ public final class Cpu implements Component, Clocked {
     /// Access to the Bus
 
     /**
-     * Reads the byte at the given adress on the bus
+     * Reads the byte at the given address on the bus
      * 
-     * @param adress
+     * @param address
      *            a 16 bits integer
      * @return the stored 8-bits value
      */
-    private int read8(int adress) {
-        return bus.read(Preconditions.checkBits16(adress));
+    private int read8(int address) {
+        return bus.read(Preconditions.checkBits16(address));
     }
 
     /**
-     * Reads the byte at the adress stored in HL on the bus
+     * Reads the byte at the address stored in HL on the bus
      * 
      * @return the stored 8-bits value
      */
@@ -977,15 +874,15 @@ public final class Cpu implements Component, Clocked {
     }
 
     /**
-     * Reads the 16 bits value stored at an adress
+     * Reads the 16 bits value stored at an address
      * 
-     * @param adress
+     * @param address
      *            a 16-bits integer
      * @return the 16-bits value represented
      */
-    private int read16(int adress) {
-        return Bits.make16(read8(Preconditions.checkBits16(adress + 1)),
-                read8(adress));
+    private int read16(int address) {
+        return Bits.make16(read8(Preconditions.checkBits16(address + 1)),
+                read8(address));
     }
 
     /**
@@ -998,34 +895,34 @@ public final class Cpu implements Component, Clocked {
     }
 
     /**
-     * Writes a 8-bit value at the desired adress
+     * Writes a 8-bit value at the desired address
      * 
-     * @param adress
+     * @param address
      *            a 16-bits value
      * @param v
      *            the 8-bits value to represent
      */
-    private void write8(int adress, int v) {
-        bus.write(Preconditions.checkBits16(adress),
+    private void write8(int address, int v) {
+        bus.write(Preconditions.checkBits16(address),
                 Preconditions.checkBits8(v));
     }
 
     /**
-     * Writes a 16-bits value at the desired adress
+     * Writes a 16-bits value at the desired address
      * 
-     * @param adress
+     * @param address
      *            a 16-bits value
      * @param v
      *            the 16-bits value to represent
      */
-    private void write16(int adress, int v) {
-        write8(Preconditions.checkBits16(adress + 1),
+    private void write16(int address, int v) {
+        write8(Preconditions.checkBits16(address + 1),
                 Bits.extract(Preconditions.checkBits16(v), 8, 8));
-        write8(adress, Bits.clip(8, v));
+        write8(address, Bits.clip(8, v));
     }
 
     /**
-     * Writes a 8-bits value at the adress stored in HL
+     * Writes a 8-bits value at the address stored in HL
      * 
      * @param v
      *            the 8-bits value to represent
@@ -1389,49 +1286,21 @@ public final class Cpu implements Component, Clocked {
      */
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h,
             FlagSrc c) {
-        int toEnable = 0, toDisable = 0, toKeep = 0, toTake = 0;
-        if (z == FlagSrc.V0) {
-            toDisable += Alu.Flag.Z.mask();
-        } else if (z == FlagSrc.V1) {
-            toEnable += Alu.Flag.Z.mask();
-        } else if (z == FlagSrc.CPU) {
-            toKeep += Alu.Flag.Z.mask();
-        } else if (z == FlagSrc.ALU) {
-            toTake += Alu.Flag.Z.mask();
-        }
-        if (n == FlagSrc.V0) {
-            toDisable += Alu.Flag.N.mask();
-        } else if (n == FlagSrc.V1) {
-            toEnable += Alu.Flag.N.mask();
-        } else if (n == FlagSrc.CPU) {
-            toKeep += Alu.Flag.N.mask();
-        } else if (n == FlagSrc.ALU) {
-            toTake += Alu.Flag.N.mask();
-        }
-        if (h == FlagSrc.V0) {
-            toDisable += Alu.Flag.H.mask();
-        } else if (h == FlagSrc.V1) {
-            toEnable += Alu.Flag.H.mask();
-        } else if (h == FlagSrc.CPU) {
-            toKeep += Alu.Flag.H.mask();
-        } else if (h == FlagSrc.ALU) {
-            toTake += Alu.Flag.H.mask();
-        }
-        if (c == FlagSrc.V0) {
-            toDisable += Alu.Flag.C.mask();
-        } else if (c == FlagSrc.V1) {
-            toEnable += Alu.Flag.C.mask();
-        } else if (c == FlagSrc.CPU) {
-            toKeep += Alu.Flag.C.mask();
-        } else if (c == FlagSrc.ALU) {
-            toTake += Alu.Flag.C.mask();
-        }
-
-        int res = vf & toTake;
-        res = res | (Regs.get(Reg.F) & toKeep);
-        res = res | toEnable;
-        res = res & Bits.complement8(toDisable);
-
-        Regs.set(Reg.F, res);
+    	
+    	FlagSrc ref = FlagSrc.ALU;
+    	int toTake = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
+    	ref = FlagSrc.CPU;
+    	int toKeep = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
+    	ref = FlagSrc.V1;
+    	int toEnable = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
+    	ref = FlagSrc.V0;
+    	int toDisable = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
+    	
+    	int res = Alu.unpackFlags(vf) & toTake;
+    	res = res | (Regs.get(Reg.F) & toKeep);
+    	res = res | toEnable;
+    	res = res & Bits.complement8(toDisable);
+    	
+    	Regs.set(Reg.F, res);
     }
 }

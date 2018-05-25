@@ -171,15 +171,14 @@ public final class LcdController implements Clocked, Component {
                         && !Bits.test(data, LCDCBit.LCD_STATUS.index())) {
                     regs.set(Reg.LY, 0);
                     imagesDrawn = 0;
+                    winY=0;
+                    nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
                     checkIfLYEqualsLYC();
                     setMode(0);
                     nextNonIdleCycle = Long.MAX_VALUE;
                     currentImage = DEFAULT_IMAGE;
-                } else {
-                    if(!regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)
-                        && Bits.test(data, LCDCBit.LCD_STATUS.index())) {
-                    }
-                }
+                    System.out.println("extinction");
+                } 
                 regs.set(Reg.LCDC, data);
                 break;
             case 1:

@@ -665,7 +665,7 @@ class AluTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Alu.rotate(Alu.RotDir.LEFT, 0x100));
         assertThrows(IllegalArgumentException.class,
-                () -> Alu.rotate(null, 0)); //---- Sure qu'il faut lancer IllegalArgumentException ????
+                () -> Alu.rotate(null, 0)); 
     }
     @Test
     void rotateReturnsGoodFlags() {

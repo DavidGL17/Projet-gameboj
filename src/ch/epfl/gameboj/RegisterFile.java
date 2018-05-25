@@ -12,15 +12,11 @@ import ch.epfl.gameboj.bits.Bits;
  */
 public final class RegisterFile<E extends Register> {
 
-    private final ArrayList<E> allRegs = new ArrayList<>();
-    private final int[] registers;
+    private final byte[] registers;
 
     public RegisterFile(E[] allRegs) {
         Preconditions.checkArgument(allRegs.length > 0);
-        for (int i = 0; i < allRegs.length; ++i) {
-            this.allRegs.add(allRegs[i]);
-        }
-        registers = new int[allRegs.length];
+        registers = new byte[allRegs.length];
     }
 
     /**
@@ -31,7 +27,7 @@ public final class RegisterFile<E extends Register> {
      * @return value, the value stored in the given register
      */
     public int get(E reg) {
-        return registers[getIndex(reg)];
+        return Byte.toUnsignedInt(registers[reg.index()]);
     }
 
     /**
@@ -45,7 +41,7 @@ public final class RegisterFile<E extends Register> {
      *             if the new value is not an 8 bit value
      */
     public void set(E reg, int newValue) {
-        registers[getIndex(reg)] = Preconditions.checkBits8(newValue);
+        registers[reg.index()] = (byte)Preconditions.checkBits8(newValue);
     }
 
     /**
@@ -58,7 +54,7 @@ public final class RegisterFile<E extends Register> {
      * @return 1 if the bit waas 1, false otherwise
      */
     public boolean testBit(E reg, Bit b) {
-        return Bits.test(registers[getIndex(reg)], b);
+        return Bits.test(registers[reg.index()], b);
     }
 
     /**
@@ -72,15 +68,8 @@ public final class RegisterFile<E extends Register> {
      *            the new value
      */
     public void setBit(E reg, Bit bit, boolean newValue) {
-        set(reg, Bits.set(registers[getIndex(reg)], bit.index(), newValue));
+        set(reg, Bits.set(registers[reg.index()], bit.index(), newValue));
     }
 
-    private int getIndex(E reg) {
-        for (int i = 0; i < allRegs.size(); ++i) {
-            if (allRegs.get(i) == reg) {
-                return i;
-            }
-        }
-        throw new IllegalArgumentException();
-    }
+   
 }

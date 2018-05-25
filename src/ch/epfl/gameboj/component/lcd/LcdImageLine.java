@@ -293,8 +293,6 @@ public final class LcdImageLine {
     	case 0b1010100:
     		newLsb=msb.or(lsb);
     		break;
-    	default:
-			System.out.println("Failed" + palette);
     	}
     	return new LcdImageLine(newMsb, newLsb, opacity);
     }

@@ -13,5 +13,5 @@ public interface Register {
         return this.ordinal();
     }
 
-    int ordinal();
+    abstract int ordinal();
 }

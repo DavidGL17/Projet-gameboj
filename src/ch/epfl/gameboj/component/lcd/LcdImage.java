@@ -138,7 +138,7 @@ public final class LcdImage {
          *             if the builder has already built the lcdImage
          */
         public LcdImage build() {
-            return new LcdImage(Arrays.asList(lines.clone()), width,
+            return new LcdImage(Arrays.asList(lines), width,
                     lines.length);
         }
     }
