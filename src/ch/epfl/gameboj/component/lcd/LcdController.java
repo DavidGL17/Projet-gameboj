@@ -392,14 +392,14 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine buildBgLine(int line) {
-        return buildLine(line, true, BG_SIZE)
+        return buildLine(line, true)
                 .extractWrapped(regs.get(Reg.SCX), LCD_WIDTH)
                 .mapColors(regs.get(Reg.BGP))
                 ;
     }
 
     private LcdImageLine buildWindowLine() {
-        LcdImageLine res = buildLine(winY, false,LCD_WIDTH)
+        LcdImageLine res = buildLine(winY, false)
                 .shift(regs.get(Reg.WX)-7)
                 .mapColors(regs.get(Reg.BGP))
                 ;
@@ -407,7 +407,8 @@ public final class LcdController implements Clocked, Component {
         return res;
     }
 
-    private LcdImageLine buildLine(int line, boolean background, int size) {
+    private LcdImageLine buildLine(int line, boolean background) {
+    	int size = background? BG_SIZE :LCD_WIDTH ;
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(size);
         boolean plage = background ? regs.testBit(Reg.LCDC, LCDCBit.BG_AREA)
                 : regs.testBit(Reg.LCDC, LCDCBit.WIN_AREA);
@@ -550,7 +551,9 @@ public final class LcdController implements Clocked, Component {
     }
 
     private int spriteGetTileAddress(int index) {
-        return 0x8000 + 16 * objectAttributeMemory.read((4 * index) + 2);
+    	if (regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE))
+    		return 0x8000 + 16 * Bits.set(objectAttributeMemory.read((4 * index) + 2),0,false);
+    	return 0x8000 + 16 * objectAttributeMemory.read((4 * index) + 2);
     }
 
     private boolean spriteIsVFlipped(int index) {

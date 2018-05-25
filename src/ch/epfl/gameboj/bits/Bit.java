@@ -1,10 +1,7 @@
 package ch.epfl.gameboj.bits;
 
-
 /*
- * 
  * @author Melvin Malonga-Matouba (288405)
- * 
  * 
  */
 

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.epfl.gameboj.component.memory;
 
 import java.util.Objects;
