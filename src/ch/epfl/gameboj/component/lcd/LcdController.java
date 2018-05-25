@@ -59,7 +59,6 @@ public final class LcdController implements Clocked, Component {
     private boolean firstLineDrawn = false;
     private int winY = 0;
     private long imagesDrawn = 0;
-    private long currentCycle;
 
     public boolean test_PIsPressed = false;
 
@@ -213,7 +212,6 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public void cycle(long cycle) {
-        currentCycle = cycle;
         if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)) {
             if (nextNonIdleCycle == Long.MAX_VALUE) {
                 lcdOnCycle = cycle;
