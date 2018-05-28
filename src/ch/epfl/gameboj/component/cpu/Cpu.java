@@ -187,19 +187,7 @@ public final class Cpu implements Component, Clocked {
      *            - the cycle to execute
      */
     private void reallyCycle(long cycle, boolean noneRaisedAndActive) {
-<<<<<<< HEAD
         if (IME&&!noneRaisedAndActive) {
-=======
-        // if (test_PIsPressed) {
-        // if (PCDispDelay == 0) {
-        // System.out.println("PC is : " + Integer.toHexString(registerPC));
-        // PCDispDelay = 100;
-        // } else {
-        // PCDispDelay --;
-        // }
-        // }
-        if (IME && !noneRaisedAndActive) {
->>>>>>> 30275ea865e04474b64e2e812815aa44d3fd3a8c
             int RaisedAndActive = registerIE & registerIF;
             int toManage = 31 - Integer.numberOfLeadingZeros(
                     Integer.lowestOneBit(RaisedAndActive));
@@ -723,12 +711,8 @@ public final class Cpu implements Component, Clocked {
         case SCCF: {
             int res = 0;
             if (Bits.test(opcode.encoding, 3)) {
-<<<<<<< HEAD
                 res += (Bits.test(regs.get(Reg.F), Flag.C)) ? 0
                         : Flag.C.mask();
-=======
-                res += (Bits.test(Regs.get(Reg.F), Flag.C)) ? 0 : Flag.C.mask();
->>>>>>> 30275ea865e04474b64e2e812815aa44d3fd3a8c
             } else {
                 res += Flag.C.mask();
 
@@ -1277,7 +1261,6 @@ public final class Cpu implements Component, Clocked {
      */
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h,
             FlagSrc c) {
-<<<<<<< HEAD
     	
     	FlagSrc ref = FlagSrc.ALU;
     	int toTake = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
@@ -1294,23 +1277,5 @@ public final class Cpu implements Component, Clocked {
     	res = res & Bits.complement8(toDisable);
     	
     	regs.set(Reg.F, res);
-=======
-
-        FlagSrc ref = FlagSrc.ALU;
-        int toTake = Alu.maskZNHC(z == ref, n == ref, h == ref, c == ref);
-        ref = FlagSrc.CPU;
-        int toKeep = Alu.maskZNHC(z == ref, n == ref, h == ref, c == ref);
-        ref = FlagSrc.V1;
-        int toEnable = Alu.maskZNHC(z == ref, n == ref, h == ref, c == ref);
-        ref = FlagSrc.V0;
-        int toDisable = Alu.maskZNHC(z == ref, n == ref, h == ref, c == ref);
-
-        int res = Alu.unpackFlags(vf) & toTake;
-        res = res | (Regs.get(Reg.F) & toKeep);
-        res = res | toEnable;
-        res = res & Bits.complement8(toDisable);
-
-        Regs.set(Reg.F, res);
->>>>>>> 30275ea865e04474b64e2e812815aa44d3fd3a8c
     }
 }
