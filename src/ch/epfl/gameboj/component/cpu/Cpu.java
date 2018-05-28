@@ -1,7 +1,5 @@
 package ch.epfl.gameboj.component.cpu;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 
 import ch.epfl.gameboj.AddressMap;
@@ -61,7 +59,6 @@ public final class Cpu implements Component, Clocked {
     private static final Opcode[] PREFIXED_OPCODE_TABLE = buildOpcodeTable(
             Opcode.Kind.PREFIXED);
 
-    
     /**
      * Builds a table of opcodes of the specified kind
      */
@@ -139,7 +136,7 @@ public final class Cpu implements Component, Clocked {
     /// Visibility for test purposes
 
     /**
-     * Allows the state of the Cpu to be known for test purposes
+     * Allows the state of the CPU to be known for test purposes
      * 
      * @return an array containing the values contained by each Register or pair
      *         of Registers
@@ -154,31 +151,32 @@ public final class Cpu implements Component, Clocked {
     /// Method imposed by Clocked
 
     /**
-     * Determines wether the gameboy should be functionning or waiting in order
-     * to simulate a gameboy if the gameboy is in HALT, determines wether the
-     * GameBoy should start functionning again
+     * Determines whether the CPU should be functioning or waiting in order
+     * to simulate a CPU if the CPU is in HALT, determines whether the
+     * CPU should start functioning again
      * 
      * @param cycle
      *            - the cycle to execute
      */
     @Override
     public void cycle(long cycle) {
-    	boolean noneRaisedAndActive = false; //Only if no Interrupt is raisedAndActive
+        boolean noneRaisedAndActive = false; // Only if no Interrupt is
+        // raisedAndActive
         if (nextNonIdleCycle == Long.MAX_VALUE) {
             int RaisedAndActive = registerIE & registerIF;
             int toManage = 31 - Integer.numberOfLeadingZeros(
                     Integer.lowestOneBit(RaisedAndActive));
             if ((toManage >= 0) && (toManage <= 4)) {
-                nextNonIdleCycle = cycle; 
+                nextNonIdleCycle = cycle;
                 interruptHandler(toManage);
             } else {
-            	noneRaisedAndActive=true;
+                noneRaisedAndActive = true;
                 return;
             }
 
         }
         if (cycle >= nextNonIdleCycle) {
-            reallyCycle(cycle,noneRaisedAndActive);
+            reallyCycle(cycle, noneRaisedAndActive);
         }
     }
 
@@ -189,21 +187,21 @@ public final class Cpu implements Component, Clocked {
      *            - the cycle to execute
      */
     private void reallyCycle(long cycle, boolean noneRaisedAndActive) {
-//    	if (test_PIsPressed) {
-//    		if (PCDispDelay == 0) {
-//	    		System.out.println("PC is : " + Integer.toHexString(registerPC));
-//	    		PCDispDelay = 100;
-//    		} else {
-//    			PCDispDelay --;
-//    		}
-//    	}
-        if (IME&&!noneRaisedAndActive) {
+        // if (test_PIsPressed) {
+        // if (PCDispDelay == 0) {
+        // System.out.println("PC is : " + Integer.toHexString(registerPC));
+        // PCDispDelay = 100;
+        // } else {
+        // PCDispDelay --;
+        // }
+        // }
+        if (IME && !noneRaisedAndActive) {
             int RaisedAndActive = registerIE & registerIF;
             int toManage = 31 - Integer.numberOfLeadingZeros(
                     Integer.lowestOneBit(RaisedAndActive));
             if ((toManage >= 0) && (toManage <= 4)) {
                 interruptHandler(toManage);
-                nextNonIdleCycle = cycle + 5;  
+                nextNonIdleCycle = cycle + 5;
                 return;
             }
         }
@@ -227,7 +225,7 @@ public final class Cpu implements Component, Clocked {
             registerIF = Bits.set(registerIF, toManage, false);
             push16(registerPC);
             registerPC = AddressMap.INTERRUPTS[toManage];
-            
+
         }
     }
 
@@ -249,7 +247,7 @@ public final class Cpu implements Component, Clocked {
                     ? opcode.additionalCycles
                             : 0;
         }
-        nextNonIdleCycle = cycle + opcode.cycles + additional;   
+        nextNonIdleCycle = cycle + opcode.cycles + additional;
     }
 
     /**
@@ -262,7 +260,7 @@ public final class Cpu implements Component, Clocked {
      *            - the cycle being executed
      */
     private void dispatch(Opcode opcode, long cycle) {
-    	
+
         int nextPC = Bits.clip(16, registerPC + opcode.totalBytes);
         setNextNonIdleCycle(cycle, opcode);
         switch (opcode.family) {
@@ -732,8 +730,7 @@ public final class Cpu implements Component, Clocked {
         case SCCF: {
             int res = 0;
             if (Bits.test(opcode.encoding, 3)) {
-                res += (Bits.test(Regs.get(Reg.F), Flag.C)) ? 0
-                        : Flag.C.mask();
+                res += (Bits.test(Regs.get(Reg.F), Flag.C)) ? 0 : Flag.C.mask();
             } else {
                 res += Flag.C.mask();
 
@@ -832,7 +829,7 @@ public final class Cpu implements Component, Clocked {
 
         // Misc control
         case HALT: {
-            nextNonIdleCycle = Long.MAX_VALUE;  
+            nextNonIdleCycle = Long.MAX_VALUE;
             nextPC = registerPC + 1;
         }
         break;
@@ -1286,21 +1283,21 @@ public final class Cpu implements Component, Clocked {
      */
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h,
             FlagSrc c) {
-    	
-    	FlagSrc ref = FlagSrc.ALU;
-    	int toTake = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
-    	ref = FlagSrc.CPU;
-    	int toKeep = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
-    	ref = FlagSrc.V1;
-    	int toEnable = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
-    	ref = FlagSrc.V0;
-    	int toDisable = Alu.maskZNHC(z==ref,n==ref,h==ref,c==ref);
-    	
-    	int res = Alu.unpackFlags(vf) & toTake;
-    	res = res | (Regs.get(Reg.F) & toKeep);
-    	res = res | toEnable;
-    	res = res & Bits.complement8(toDisable);
-    	
-    	Regs.set(Reg.F, res);
+
+        FlagSrc ref = FlagSrc.ALU;
+        int toTake = Alu.maskZNHC(z == ref, n == ref, h == ref, c == ref);
+        ref = FlagSrc.CPU;
+        int toKeep = Alu.maskZNHC(z == ref, n == ref, h == ref, c == ref);
+        ref = FlagSrc.V1;
+        int toEnable = Alu.maskZNHC(z == ref, n == ref, h == ref, c == ref);
+        ref = FlagSrc.V0;
+        int toDisable = Alu.maskZNHC(z == ref, n == ref, h == ref, c == ref);
+
+        int res = Alu.unpackFlags(vf) & toTake;
+        res = res | (Regs.get(Reg.F) & toKeep);
+        res = res | toEnable;
+        res = res & Bits.complement8(toDisable);
+
+        Regs.set(Reg.F, res);
     }
 }
