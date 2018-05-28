@@ -125,43 +125,6 @@ public final class LcdImageLine {
         return new LcdImageLine(newMSB, newLSB, newOpacity);
     }
 
-
-//    jusqu'à 16 parcours de BitVector de taille size
-//    public LcdImageLine mapColors(int palette) {
-//        if (checkAllColorsSame(palette)) {
-//            return new LcdImageLine(msb, lsb, opacity);
-//        }
-//        BitVector[] bitsAtColor = new BitVector[] { msb.not().and(lsb.not()),
-//                msb.not().and(lsb), msb.and(lsb.not()), msb.and(lsb) };
-//        int i = 0;
-//        
-//        BitVector newMsb ,newLsb;
-//        if (msb.size()==256) {
-//        	newMsb=BitVector.ZERO_OF_SIZE_256;
-//        } else {
-//        	newMsb = new BitVector(msb.size());
-//        }
-//        if (lsb.size()==256) {
-//        	newLsb=BitVector.ZERO_OF_SIZE_256;
-//        } else {
-//        	newLsb = new BitVector(msb.size());
-//        }
-//        
-//        for (BitVector colorVector : bitsAtColor) {
-//            if (Bits.test(palette, i)) {
-//                newLsb = newLsb.or(colorVector);
-//            }
-//            ++i;
-//            if (Bits.test(palette, i)) {
-//                newMsb = newMsb.or(colorVector);
-//            }
-//            ++i;
-//        }
-//        return new LcdImageLine(newMsb, newLsb, opacity);
-//    }
-    
-    //Max 4 parcours de LcdImageLine !En utilisant xor! Autrement 10
-    
     /**
      * Changes the color of each bit of the line according to the given palette
      * 
@@ -171,137 +134,36 @@ public final class LcdImageLine {
      *         given palette
      */
     public LcdImageLine mapColors(int palette) {
-    	
-    	if (checkAllColorsSame(palette)) {
-    		return this;
-    	}
-    	int size = this.size();
-    	BitVector newMsb=BitVector.ZERO_OF_SIZE_160;
-    	BitVector newLsb=BitVector.ZERO_OF_SIZE_160;
-    	int msbReplacement = Preconditions.checkBits8(palette) & 0b10101010;
-    	int lsbReplacement = palette & 0b01010101;
-    	
-    	switch (msbReplacement) {
-    	case 0b10101010:
-    			newMsb=new BitVector(this.size(),true);
-    		break;
-    	case 0b00000000:
-    		if (size==256) {
-    			newMsb= BitVector.ZERO_OF_SIZE_256;
-    		} else if (size == 160) {
-    			;
-    		} else {
-    			newMsb=new BitVector(this.size(),false);
-    		}
-    		break;
-    	case 0b10:
-    		newMsb=(msb.or(lsb)).not();
-    		break;
-    	case 0b1000:
-    		newMsb=msb.not().and(lsb);
-    		break;
-    	case 0b1010:
-    		newMsb=msb.not();
-    		break;
-    	case 0b100000:
-    		newMsb=msb.and(lsb.not());
-    		break;
-    	case 0b100010:
-    		newMsb=lsb.not();
-    		break;
-    	case 0b101000:
-//    		newMsb=msb.xor(lsb);
-    		newMsb=msb.and(lsb.not()).or(msb.not().and(lsb));
-//    		newMsb=((msb.and(lsb).or(msb.or(lsb).not())).not());
-    		break;
-    	case 0b101010:
-    		newMsb=msb.and(lsb).not();
-    		break;
-    	case 0b10000000:
-    		newMsb=msb.and(lsb);
-    		break;
-    	case 0b10000010:
-//    		newMsb=msb.xor(lsb.not());
-    		newMsb=msb.and(lsb).or((msb.or(lsb)).not());
-    		break;
-    	case 0b10001000:
-    		newMsb=lsb;
-    		break;
-    	case 0b10001010:
-    		newMsb=msb.not().or(lsb);
-    		break;
-    	case 0b10100000:
-    		newMsb=msb;
-    		break;
-    	case 0b10100010:
-    		newMsb=msb.or(lsb.not());
-    		break;
-    	case 0b10101000:
-    		newMsb=msb.or(lsb);
-    		break;
-    	default:
-    			System.out.println("Failed");
-    	}
-    	
-    	switch (lsbReplacement) {
-    	case 0b1010101:
-    			newLsb=new BitVector(this.size(),true);
-    		break;
-    	case 0b0000000:
-    		if (size==256) {
-    			newLsb= BitVector.ZERO_OF_SIZE_256;
-    		} else if (size == 160) {
-    			;
-    		} else {
-    			newLsb=new BitVector(this.size(),false);
-    		}
-    		break;
-    	case 0b1:
-    		newLsb=msb.or(lsb).not();
-    		break;
-    	case 0b100:
-    		newLsb=msb.not().and(lsb);;
-    		break;
-    	case 0b101:
-    		newLsb=msb.not();
-    		break;
-    	case 0b10000:
-    		newLsb=msb.and(lsb.not());
-    		break;
-    	case 0b10001:
-    		newLsb=lsb.not();
-    		break;
-    	case 0b10100:
-//    		newLsb=msb.xor(lsb);
-    		newLsb=msb.and(lsb.not()).or((msb.not()).and(lsb));
-    		break;
-    	case 0b10101:
-    		newLsb=msb.and(lsb).not();
-    		break;
-    	case 0b1000000:
-    		newLsb=msb.and(lsb);
-    		break;
-    	case 0b1000001:
-//    		newLsb=msb.xor(lsb.not());
-    		newLsb=msb.and(lsb).or(msb.or(lsb).not());
-    		break;
-    	case 0b1000100:
-    		newLsb=lsb;
-    		break;
-    	case 0b1000101:
-    		newLsb=msb.not().or(lsb);
-    		break;
-    	case 0b1010000:
-    		newLsb=msb;
-    		break;
-    	case 0b1010001:
-    		newLsb=msb.or(lsb.not());
-    		break;
-    	case 0b1010100:
-    		newLsb=msb.or(lsb);
-    		break;
-    	}
-    	return new LcdImageLine(newMsb, newLsb, opacity);
+        if (checkAllColorsSame(palette)) {
+            return new LcdImageLine(msb, lsb, opacity);
+        }
+        BitVector[] bitsAtColor = new BitVector[] { msb.not().and(lsb.not()),
+                msb.not().and(lsb), msb.and(lsb.not()), msb.and(lsb) };
+        int i = 0;
+
+        BitVector newMsb, newLsb;
+        if (msb.size() == 256) {
+            newMsb = BitVector.ZERO_OF_SIZE_256;
+        } else {
+            newMsb = new BitVector(msb.size());
+        }
+        if (lsb.size() == 256) {
+            newLsb = BitVector.ZERO_OF_SIZE_256;
+        } else {
+            newLsb = new BitVector(msb.size());
+        }
+
+        for (BitVector colorVector : bitsAtColor) {
+            if (Bits.test(palette, i)) {
+                newLsb = newLsb.or(colorVector);
+            }
+            ++i;
+            if (Bits.test(palette, i)) {
+                newMsb = newMsb.or(colorVector);
+            }
+            ++i;
+        }
+        return new LcdImageLine(newMsb, newLsb, opacity);
     }
 
     /**
