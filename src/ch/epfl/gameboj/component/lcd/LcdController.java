@@ -171,14 +171,14 @@ public final class LcdController implements Clocked, Component {
                         && !Bits.test(data, LCDCBit.LCD_STATUS.index())) {
                     regs.set(Reg.LY, 0);
                     imagesDrawn = 0;
-                    winY=0;
-                    nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
+                    winY = 0;
+                    nextImageBuilder = new LcdImage.Builder(LCD_WIDTH,
+                            LCD_HEIGHT);
                     checkIfLYEqualsLYC();
                     setMode(0);
                     nextNonIdleCycle = Long.MAX_VALUE;
                     currentImage = DEFAULT_IMAGE;
-                    System.out.println("extinction");
-                } 
+                }
                 regs.set(Reg.LCDC, data);
                 break;
             case 1:
@@ -225,7 +225,7 @@ public final class LcdController implements Clocked, Component {
             if (cycle >= nextNonIdleCycle) {
                 switch (getMode()) {
                 case 0:
-                    if (regs.get(Reg.LY) == LCD_HEIGHT - 1) {
+                    if (regs.get(Reg.LY) == LCD_HEIGHT) {
                         setMode(1);
                     } else if (regs.get(Reg.LY) < LCD_HEIGHT) {
                         setMode(2);
@@ -329,7 +329,8 @@ public final class LcdController implements Clocked, Component {
     private void checkIfLYEqualsLYC() {
         int statValue = regs.get(Reg.STAT);
         boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
-        regs.set(Reg.STAT, Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
+        regs.set(Reg.STAT,
+                Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
         if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
         }
@@ -366,7 +367,8 @@ public final class LcdController implements Clocked, Component {
 
         LcdImageLine bgAndWindow;
 
-        if (regs.testBit(Reg.LCDC, LCDCBit.WIN) && line >= regs.get(Reg.WY)&& (regs.get(Reg.WX)<167 && regs.get(Reg.WX)>=6))  {
+        if (regs.testBit(Reg.LCDC, LCDCBit.WIN) && line >= regs.get(Reg.WY)
+                && (regs.get(Reg.WX) < 167 && regs.get(Reg.WX) >= 6)) {
             LcdImageLine windowLine = buildWindowLine();
             bgAndWindow = bgLine.join(windowLine,
                     Math.max(0, regs.get(Reg.WX) - 8));
@@ -393,21 +395,18 @@ public final class LcdController implements Clocked, Component {
     private LcdImageLine buildBgLine(int line) {
         return buildLine(line, true)
                 .extractWrapped(regs.get(Reg.SCX), LCD_WIDTH)
-                .mapColors(regs.get(Reg.BGP))
-                ;
+                .mapColors(regs.get(Reg.BGP));
     }
 
     private LcdImageLine buildWindowLine() {
-        LcdImageLine res = buildLine(winY, false)
-                .shift(regs.get(Reg.WX)-7)
-                .mapColors(regs.get(Reg.BGP))
-                ;
+        LcdImageLine res = buildLine(winY, false).shift(regs.get(Reg.WX) - 7)
+                .mapColors(regs.get(Reg.BGP));
         winY++;
         return res;
     }
 
     private LcdImageLine buildLine(int line, boolean background) {
-    	int size = background? BG_SIZE :LCD_WIDTH ;
+        int size = background ? BG_SIZE : LCD_WIDTH;
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(size);
         boolean plage = background ? regs.testBit(Reg.LCDC, LCDCBit.BG_AREA)
                 : regs.testBit(Reg.LCDC, LCDCBit.WIN_AREA);
@@ -550,9 +549,10 @@ public final class LcdController implements Clocked, Component {
     }
 
     private int spriteGetTileAddress(int index) {
-    	if (regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE))
-    		return 0x8000 + 16 * Bits.set(objectAttributeMemory.read((4 * index) + 2),0,false);
-    	return 0x8000 + 16 * objectAttributeMemory.read((4 * index) + 2);
+        if (regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE))
+            return 0x8000 + 16 * Bits
+                    .set(objectAttributeMemory.read((4 * index) + 2), 0, false);
+        return 0x8000 + 16 * objectAttributeMemory.read((4 * index) + 2);
     }
 
     private boolean spriteIsVFlipped(int index) {

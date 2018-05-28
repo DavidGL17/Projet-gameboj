@@ -50,11 +50,8 @@ public final class Alu {
      * @return an 8 bits int with the flags encoded in their respective bit
      */
     public static int maskZNHC(boolean z, boolean n, boolean h, boolean c) {
-       return ( (z ? Flag.Z.mask() : 0) +
-    		   (n ? Flag.N.mask() : 0) +
-    		   (h ? Flag.H.mask() : 0) +
-    		   (c ? Flag.C.mask() : 0)
-    		   );
+        return ((z ? Flag.Z.mask() : 0) + (n ? Flag.N.mask() : 0)
+                + (h ? Flag.H.mask() : 0) + (c ? Flag.C.mask() : 0));
     }
 
     /**
@@ -88,7 +85,7 @@ public final class Alu {
      *             if valueFlags isn't valid
      */
     public static int unpackValue(int valueFlags) {
-        return Bits.extract(checkFlagValueIsValid(valueFlags),8,16);
+        return Bits.extract(checkFlagValueIsValid(valueFlags), 8, 16);
     }
 
     /**
@@ -115,12 +112,10 @@ public final class Alu {
      *             if valueFlags isn't valid
      */
     private static int checkFlagValueIsValid(int valueFlags) {
-        checkArgument(
-                !((valueFlags & 0x0F) != 0 || valueFlags > 0xFFFFF0));
+        checkArgument(!((valueFlags & 0x0F) != 0 || valueFlags > 0xFFFFF0));
         return valueFlags;
     }
 
-    
     /**
      * Returns the sum of the two 8 bits ints and of the initial carry bit and
      * the flags Z0HC
@@ -136,19 +131,15 @@ public final class Alu {
      *             if one of the ints is not an 8 bit value
      */
     public static int add(int l, int r, boolean c0) {
-    	int sum = checkBits8(l)+checkBits8(r)+(c0?1:0);
-    	int clippedSum=Bits.clip(8,sum);
-    	return packValueFlags(
-    			clippedSum,
-    			(clippedSum==0),
-    			false,
-    			(Bits.test(sum,4)!=(Bits.test(l,4)^Bits.test(r,4))),
-    			Bits.test(sum,8)
-    			);
-//        int sum[] = addition(Preconditions.checkBits8(l),
-//                Preconditions.checkBits8(r), 8, 3, 7, c0);
-//        return packValueFlags(sum[0], (sum[0] == 0), false, sum[1] == 1,
-//                sum[2] == 1);
+        int sum = checkBits8(l) + checkBits8(r) + (c0 ? 1 : 0);
+        int clippedSum = Bits.clip(8, sum);
+        return packValueFlags(clippedSum, (clippedSum == 0), false,
+                (Bits.test(sum, 4) != (Bits.test(l, 4) ^ Bits.test(r, 4))),
+                Bits.test(sum, 8));
+        // int sum[] = addition(Preconditions.checkBits8(l),
+        // Preconditions.checkBits8(r), 8, 3, 7, c0);
+        // return packValueFlags(sum[0], (sum[0] == 0), false, sum[1] == 1,
+        // sum[2] == 1);
     }
 
     /**
@@ -179,18 +170,15 @@ public final class Alu {
      *             if one of the ints is not an 16 bit value
      */
     public static int add16L(int l, int r) {
-    	int sum = checkBits16(l)+checkBits16(r);
-    	int clippedSum=Bits.clip(16,sum);
-    	return packValueFlags(
-    			clippedSum,
-    			false,
-    			false,
-    			(Bits.test(sum,4)!=(Bits.test(l,4)^Bits.test(r,4))),
-    			Bits.test(sum,8)!=(Bits.test(l,8)^Bits.test(r,8))
-    			);
-//        int sum[] = addition(Preconditions.checkBits16(l),
-//                Preconditions.checkBits16(r), 16, 3, 7, false);
-//        return packValueFlags(sum[0], false, false, sum[1] == 1, sum[2] == 1);
+        int sum = checkBits16(l) + checkBits16(r);
+        int clippedSum = Bits.clip(16, sum);
+        return packValueFlags(clippedSum, false, false,
+                (Bits.test(sum, 4) != (Bits.test(l, 4) ^ Bits.test(r, 4))),
+                Bits.test(sum, 8) != (Bits.test(l, 8) ^ Bits.test(r, 8)));
+        // int sum[] = addition(Preconditions.checkBits16(l),
+        // Preconditions.checkBits16(r), 16, 3, 7, false);
+        // return packValueFlags(sum[0], false, false, sum[1] == 1, sum[2] ==
+        // 1);
     }
 
     /**
@@ -206,19 +194,16 @@ public final class Alu {
      *             if one of the ints is not an 16 bit value
      */
     public static int add16H(int l, int r) {
-    	int sum = checkBits16(l)+checkBits16(r);
-    	int clippedSum=Bits.clip(16,sum);
-    	
-    	return packValueFlags(
-    			clippedSum,
-    			false,
-    			false,
-    			(Bits.test(sum,12)!=(Bits.test(l,12)^Bits.test(r,12))),
-    			Bits.test(sum,16)
-    			);
-//        int sum[] = addition(Preconditions.checkBits16(l),
-//                Preconditions.checkBits16(r), 16, 11, 15, false);
-//        return packValueFlags(sum[0], false, false, sum[1] == 1, sum[2] == 1);
+        int sum = checkBits16(l) + checkBits16(r);
+        int clippedSum = Bits.clip(16, sum);
+
+        return packValueFlags(clippedSum, false, false,
+                (Bits.test(sum, 12) != (Bits.test(l, 12) ^ Bits.test(r, 12))),
+                Bits.test(sum, 16));
+        // int sum[] = addition(Preconditions.checkBits16(l),
+        // Preconditions.checkBits16(r), 16, 11, 15, false);
+        // return packValueFlags(sum[0], false, false, sum[1] == 1, sum[2] ==
+        // 1);
     }
 
     /**
@@ -236,48 +221,45 @@ public final class Alu {
      *             if one of the ints is not an 8 bit value
      */
     public static int sub(int l, int r, boolean b0) {
-    	int value = checkBits8(l)-checkBits8(r)-(b0?1:0);
-    	int clippedValue = Bits.clip(8,((value>=0)?value:value+0x100));
-    	
-    	return packValueFlags(
-    			clippedValue,
-    			clippedValue==0,
-    			true,
-    			(Bits.test(clippedValue,4)!=(Bits.test(l,4)^Bits.test(r,4))),
-    			(value<0)
-    			);
-    	
-    	
-//        if (Preconditions.checkBits8(l) == Preconditions.checkBits8(r) && !b0) {
-//            return packValueFlags(0, true, true, false, false);
-//        }
-//        int difference = 0;
-//        boolean carry = b0;
-//        boolean fanionH = false;
-//        for (int i = 0; i < 8; ++i) {
-//            if (!Bits.test(l, i) && Bits.test(r, i) && carry) {
-//                carry = true;
-//            } else {
-//                if ((Bits.test(r, i) && !Bits.test(l, i) && !carry)
-//                        || (carry && !Bits.test(r, i) && !Bits.test(l, i))
-//                        || (carry && Bits.test(r, i) && Bits.test(l, i))) {
-//                    carry = true;
-//                    difference += Bits.mask(i);
-//                } else {
-//                    if (!Bits.test(r, i) && Bits.test(l, i) && !carry) {
-//                        carry = false;
-//                        difference += Bits.mask(i);
-//                    } else {
-//                        carry = false;
-//                    }
-//                }
-//            }
-//            if (i == 3) {
-//                fanionH = carry;
-//            }
-//        }
-//        return packValueFlags(difference, (difference == 0), true, fanionH,
-//                carry);
+        int value = checkBits8(l) - checkBits8(r) - (b0 ? 1 : 0);
+        int clippedValue = Bits.clip(8, ((value >= 0) ? value : value + 0x100));
+
+        return packValueFlags(clippedValue, clippedValue == 0, true,
+                (Bits.test(clippedValue,
+                        4) != (Bits.test(l, 4) ^ Bits.test(r, 4))),
+                (value < 0));
+
+        // if (Preconditions.checkBits8(l) == Preconditions.checkBits8(r) &&
+        // !b0) {
+        // return packValueFlags(0, true, true, false, false);
+        // }
+        // int difference = 0;
+        // boolean carry = b0;
+        // boolean fanionH = false;
+        // for (int i = 0; i < 8; ++i) {
+        // if (!Bits.test(l, i) && Bits.test(r, i) && carry) {
+        // carry = true;
+        // } else {
+        // if ((Bits.test(r, i) && !Bits.test(l, i) && !carry)
+        // || (carry && !Bits.test(r, i) && !Bits.test(l, i))
+        // || (carry && Bits.test(r, i) && Bits.test(l, i))) {
+        // carry = true;
+        // difference += Bits.mask(i);
+        // } else {
+        // if (!Bits.test(r, i) && Bits.test(l, i) && !carry) {
+        // carry = false;
+        // difference += Bits.mask(i);
+        // } else {
+        // carry = false;
+        // }
+        // }
+        // }
+        // if (i == 3) {
+        // fanionH = carry;
+        // }
+        // }
+        // return packValueFlags(difference, (difference == 0), true, fanionH,
+        // carry);
     }
 
     /**
@@ -312,8 +294,7 @@ public final class Alu {
      *             if the value is not an 8 bit int
      */
     public static int bcdAdjust(int v, boolean n, boolean h, boolean c) {
-        boolean fixL = h
-                | (!n & ((Bits.clip(4, checkBits8(v))) > 9));
+        boolean fixL = h | (!n & ((Bits.clip(4, checkBits8(v))) > 9));
         boolean fixH = c | (!n & (v > 0x99));
         int fix = 0x60 * (fixH ? 1 : 0) + 0x06 * (fixL ? 1 : 0);
         int Va = Bits.clip(8, n ? v - fix : v + fix);
@@ -451,7 +432,6 @@ public final class Alu {
 
         return packValueFlags(result, (result == 0), false, false, c);
     }
-    
 
     /**
      * Computes the rotation in a direction and corresponding flags
@@ -466,8 +446,8 @@ public final class Alu {
      */
     public static int rotate(RotDir d, int v) {
 
-    	checkArgument(d!=null);
-    	
+        checkArgument(d != null);
+
         boolean c = false;
 
         c = Bits.test(checkBits8(v), (7 + d.ordinal()) % 8);
@@ -492,15 +472,15 @@ public final class Alu {
      */
     public static int rotate(RotDir d, int v, boolean c) {
 
-        checkArgument(d!=null);
-        
-        int result = checkBits8(v)+(c?Bits.mask(8):0);
-        
-        
-        result = Bits.rotate(9, result, (d == RotDir.LEFT) ? 1 : -1);
-        int clippedResult=Bits.clip(8,result);
+        checkArgument(d != null);
 
-        return packValueFlags(clippedResult, clippedResult==0, false, false, Bits.test(result, 8));
+        int result = checkBits8(v) + (c ? Bits.mask(8) : 0);
+
+        result = Bits.rotate(9, result, (d == RotDir.LEFT) ? 1 : -1);
+        int clippedResult = Bits.clip(8, result);
+
+        return packValueFlags(clippedResult, clippedResult == 0, false, false,
+                Bits.test(result, 8));
 
     }
 
@@ -515,12 +495,12 @@ public final class Alu {
      */
     public static int swap(int v) {
 
-
         final boolean N = false;
         final boolean H = false;
         final boolean C = false;
 
-        return packValueFlags(Bits.rotate(8,checkBits8(v),4), (v == 0), N, H, C);
+        return packValueFlags(Bits.rotate(8, checkBits8(v), 4), (v == 0), N, H,
+                C);
     }
 
     /**
@@ -539,9 +519,8 @@ public final class Alu {
      */
     public static int testBit(int v, int bitIndex) {
         Objects.checkIndex(bitIndex, 8);
-        return packValueFlags(0,
-                !Bits.test(checkBits8(v), bitIndex), false, true,
-                false);
+        return packValueFlags(0, !Bits.test(checkBits8(v), bitIndex), false,
+                true, false);
     }
 
 }

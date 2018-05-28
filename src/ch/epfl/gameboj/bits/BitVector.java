@@ -10,13 +10,17 @@ import ch.epfl.gameboj.Preconditions;
  * @author Melvin Malonga-Matouba (288405)
  */
 
-// Juste pour être au clair, poids d'un bit croissant de l'index de l'entier
-// dans lequel il se trouve
 public final class BitVector {
 
     private final int[] table;
-    public static final BitVector ZERO_OF_SIZE_256 = new BitVector(256,false);
-    public static final BitVector ZERO_OF_SIZE_160 = new BitVector(160,false);
+
+    /*
+     * This two BitVectors are used to accelerate the creation of default lines
+     * in LcdImageLine @see LcdImageLine
+     */
+    public static final BitVector ZERO_OF_SIZE_256 = new BitVector(256, false);
+    public static final BitVector ZERO_OF_SIZE_160 = new BitVector(160, false);
+
     /**
      * Builds a BitVector
      * 
@@ -93,13 +97,6 @@ public final class BitVector {
     public int size() {
         return table.length * Integer.SIZE;
     }
-
-    // Peut être intéressante ? Pas demandée pour le moment
-    // Je pense pas qu'on va devoir tester un Bit dans un vecteur (vu
-    // l'utilisation qu'on leur donne la maintenant
-    // public boolean testBit(Bit bit) {
-    // return testBit(bit.index());
-    // }
 
     /**
      * Checks if the bit at the given index is activated
@@ -196,16 +193,6 @@ public final class BitVector {
     public BitVector shift(int start) {
         return extractZeroExtended(-start, size());
     }
-    
-
-//    public BitVector xor (BitVector that) {
-//        Preconditions.checkArgument(that.size() ==size());
-//    	 int[] xorTable = new int[table.length];
-//         for (int i = 0; i < table.length; ++i) {
-//             xorTable[i] = that.table[i]^table[i];
-//         }
-//         return new BitVector(xorTable);
-//    }
 
     /**
      * This enum is used in the extract methods and allows us to simplify the
@@ -239,9 +226,9 @@ public final class BitVector {
             return (index < 0 || index >= size() / 32) ? 0 : table[index];
         case WRAPPED:
             return table[Math.floorMod(index, size() / 32)];
+        default:
+            return 0;
         }
-
-        throw new IllegalStateException("how");
     }
 
     /**
