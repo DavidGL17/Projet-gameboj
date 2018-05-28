@@ -27,7 +27,7 @@ public final class LcdImage {
      */
     public LcdImage(List<LcdImageLine> lines, int width, int height) {
         Preconditions
-                .checkArgument(height == Objects.requireNonNull(lines).size());
+        .checkArgument(height == Objects.requireNonNull(lines).size());
         this.lines = lines;
         this.width = width;
         this.height = height;
@@ -56,7 +56,7 @@ public final class LcdImage {
      */
     public int get(int x, int y) {
         Preconditions
-                .checkArgument(y <= lines.size() && x <= lines.get(0).size());
+        .checkArgument(y <= lines.size() && x <= lines.get(0).size());
         return (lines.get(y).getMsb().testBit(x) ? 1 << 1 : 0)
                 | (lines.get(y).getLsb().testBit(x) ? 1 : 0);
     }
@@ -118,8 +118,6 @@ public final class LcdImage {
          *             the given line is not equal to the width of the image
          * @throws NullPointerException
          *             if the given line is null
-         * @throws IllegalStateException
-         *             if the builder has already built the lcdImage
          */
         public Builder setLine(LcdImageLine line, int index) {
             Preconditions.checkArgument(index < lines.length && index >= 0
@@ -134,12 +132,9 @@ public final class LcdImage {
          * The builder is then unusable
          * 
          * @return a new LcdImage
-         * @throws IllegalStateException
-         *             if the builder has already built the lcdImage
          */
         public LcdImage build() {
-            return new LcdImage(Arrays.asList(lines), width,
-                    lines.length);
+            return new LcdImage(Arrays.asList(lines), width, lines.length);
         }
     }
 
