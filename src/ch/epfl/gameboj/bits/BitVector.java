@@ -13,6 +13,11 @@ import ch.epfl.gameboj.Preconditions;
 public final class BitVector {
 
     private final int[] table;
+
+    /*
+     * This two BitVectors are used to accelerate the creation of default lines
+     * in LcdImageLine @see LcdImageLine
+     */
     public static final BitVector ZERO_OF_SIZE_256 = new BitVector(256, false);
     public static final BitVector ZERO_OF_SIZE_160 = new BitVector(160, false);
 
@@ -92,7 +97,6 @@ public final class BitVector {
     public int size() {
         return table.length * Integer.SIZE;
     }
-
 
     /**
      * Checks if the bit at the given index is activated
@@ -190,15 +194,6 @@ public final class BitVector {
         return extractZeroExtended(-start, size());
     }
 
-    // public BitVector xor (BitVector that) {
-    // Preconditions.checkArgument(that.size() ==size());
-    // int[] xorTable = new int[table.length];
-    // for (int i = 0; i < table.length; ++i) {
-    // xorTable[i] = that.table[i]^table[i];
-    // }
-    // return new BitVector(xorTable);
-    // }
-
     /**
      * This enum is used in the extract methods and allows us to simplify the
      * writing of the two methods
@@ -231,9 +226,9 @@ public final class BitVector {
             return (index < 0 || index >= size() / 32) ? 0 : table[index];
         case WRAPPED:
             return table[Math.floorMod(index, size() / 32)];
+        default:
+            return 0;
         }
-
-        throw new IllegalStateException("how");
     }
 
     /**
