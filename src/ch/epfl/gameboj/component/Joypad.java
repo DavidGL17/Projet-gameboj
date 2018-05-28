@@ -16,8 +16,8 @@ import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 public final class Joypad implements Component {
 
     /**
-     * Represents the different keys of the gameboy.
-     * The attributes line and index represent the position of each key in the "lines" of P1
+     * Represents the different keys of the gameboy. The attributes line and
+     * index represent the position of each key in the "lines" of P1
      */
     public enum Key {
         RIGHT(0, 1), LEFT(1, 1), UP(2, 1), DOWN(3, 1), A(0, 2), B(1,
@@ -75,7 +75,8 @@ public final class Joypad implements Component {
      *            the key to press
      */
     public void keyPressed(Key key) {
-        if (Bits.test(getP1(), key.index)&&Bits.test((key.line==1?line1:line2), key.line+3)) {
+        if (Bits.test(getP1(), key.index)
+                && Bits.test((key.line == 1 ? line1 : line2), key.line + 3)) {
             cpu.requestInterrupt(Interrupt.JOYPAD);
         }
         switch (key.line) {
@@ -106,7 +107,7 @@ public final class Joypad implements Component {
     }
 
     /**
-     * Computes P1 according to which line is on, and which key is pressed
+     * Computes P1 according to which line is active, and which key is pressed
      * 
      * @return P1
      */
