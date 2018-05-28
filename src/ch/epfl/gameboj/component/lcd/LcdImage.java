@@ -27,7 +27,7 @@ public final class LcdImage {
      */
     public LcdImage(List<LcdImageLine> lines, int width, int height) {
         Preconditions
-        .checkArgument(height == Objects.requireNonNull(lines).size());
+                .checkArgument(height == Objects.requireNonNull(lines).size());
         this.lines = lines;
         this.width = width;
         this.height = height;
@@ -56,7 +56,7 @@ public final class LcdImage {
      */
     public int get(int x, int y) {
         Preconditions
-        .checkArgument(y <= lines.size() && x <= lines.get(0).size());
+                .checkArgument(y <= lines.size() && x <= lines.get(0).size());
         return (lines.get(y).getMsb().testBit(x) ? 1 << 1 : 0)
                 | (lines.get(y).getLsb().testBit(x) ? 1 : 0);
     }
@@ -128,8 +128,6 @@ public final class LcdImage {
 
         /**
          * Builds a new LcdImage containing the lines previously added
-         * 
-         * The builder is then unusable
          * 
          * @return a new LcdImage
          */
