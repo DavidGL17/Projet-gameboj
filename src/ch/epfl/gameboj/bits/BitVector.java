@@ -206,15 +206,23 @@ public final class BitVector {
         Preconditions
                 .checkArgument((size > 0) && (Math.floorMod(size, 32) == 0));
         int[] newTable = new int[size / 32];
-        int internalShift = Math.floorMod(start, Integer.SIZE);
         int cellShift = Math.floorDiv(start, 32);
-        int value;
-        for (int i = 0; i < newTable.length; i++) {
-            value = Bits.extract(getIntAtIndexOfExtension(cellShift + i, ext),
-                    internalShift, Integer.SIZE - internalShift)
-                    | (Bits.clip(internalShift, getIntAtIndexOfExtension(
-                            cellShift + i + 1, ext)) << (32 - internalShift));
-            newTable[i] = value;
+        if (Math.floorMod(start, 32) == 0) {
+            for (int i = 0;i<newTable.length;++i) {
+                newTable[i] = getIntAtIndexOfExtension(i + cellShift, ext);
+            }
+        } else {
+            int internalShift = Math.floorMod(start, Integer.SIZE);
+            int value;
+            for (int i = 0; i < newTable.length; ++i) {
+                value = Bits.extract(
+                        getIntAtIndexOfExtension(cellShift + i, ext),
+                        internalShift, Integer.SIZE - internalShift)
+                        | (Bits.clip(internalShift,
+                                getIntAtIndexOfExtension(cellShift + i + 1,
+                                        ext)) << (32 - internalShift));
+                newTable[i] = value;
+            }
         }
         return new BitVector(newTable);
     }
