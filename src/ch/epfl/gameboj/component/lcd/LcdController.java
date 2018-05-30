@@ -60,8 +60,6 @@ public final class LcdController implements Clocked, Component {
     private int winY = 0;
     private long imagesDrawn = 0;
 
-    public boolean test_PIsPressed = false;
-
     private boolean oamCopy = false;
     private int addressToCopy = 0;
     private int octetsCopiedToOam = 0;
@@ -98,21 +96,6 @@ public final class LcdController implements Clocked, Component {
      */
     public int height() {
         return LCD_HEIGHT;
-    }
-
-    public String test_getPalettes() {
-        StringBuilder res = new StringBuilder();
-        String BGPString = Integer.toBinaryString(regs.get(Reg.BGP));
-        res.append(("00000000" + BGPString).substring(BGPString.length()));
-        res.append("_");
-        String OBP0String = Integer.toBinaryString(regs.get(Reg.OBP0));
-        res.append(("00000000" + OBP0String).substring(OBP0String.length()));
-        res.append("_");
-        String OBP1String = Integer.toBinaryString(regs.get(Reg.OBP1));
-        res.append(("00000000" + OBP1String).substring(OBP1String.length()));
-
-        return res.toString();
-
     }
 
     /*
@@ -227,6 +210,7 @@ public final class LcdController implements Clocked, Component {
                 case 0:
                     if (regs.get(Reg.LY) == LCD_HEIGHT) {
                         setMode(1);
+                        System.out.println("Vblank requesteed at " + cycle);
                     } else if (regs.get(Reg.LY) < LCD_HEIGHT) {
                         setMode(2);
                     }
@@ -362,7 +346,6 @@ public final class LcdController implements Clocked, Component {
         if (regs.testBit(Reg.LCDC, LCDCBit.BG)) {
             bgLine = buildBgLine(
                     Math.floorMod(line + regs.get(Reg.SCY), BG_SIZE));
-
         }
 
         LcdImageLine bgAndWindow;
@@ -415,10 +398,10 @@ public final class LcdController implements Clocked, Component {
                     + Math.floorDiv(line, 8) * 32 + i);
             int tileAddress = 0;
             if (tileIndex > 0x7F) {
-                tileAddress = 0x8800 + 16 * (tileIndex - 0x80);
+                tileAddress = AddressMap.TILE_SOURCE[0] + 16 * (tileIndex - 0x80);
             } else {
                 if (regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)) {
-                    tileAddress = 0x8000 + 16 * tileIndex;
+                    tileAddress = AddressMap.TILE_SOURCE[1] + 16 * tileIndex;
                 } else {
                     tileAddress = 0x9000 + 16 * tileIndex;
                 }
@@ -472,23 +455,6 @@ public final class LcdController implements Clocked, Component {
                         .below(foregroundLine);
             }
         }
-
-        if (test_PIsPressed && filled > 0) {
-            String OBP0String = Integer.toBinaryString(regs.get(Reg.OBP0));
-            String OBP1String = Integer.toBinaryString(regs.get(Reg.OBP1));
-            String BGPString = Integer.toBinaryString(regs.get(Reg.BGP));
-            System.out.println();
-            System.out.println("line :" + line);
-            System.out.println("0BP0 is : "
-                    + ("00000000" + OBP0String).substring(OBP0String.length())
-                    + " --- 0BP1 is : "
-                    + ("00000000" + OBP1String).substring(OBP1String.length()));
-            System.out.println("BGP is : "
-                    + ("00000000" + BGPString).substring(BGPString.length()));
-            System.out.println();
-            System.out.println();
-        }
-
         return new LcdImageLine[] { behindBgLine, foregroundLine };
     }
 
@@ -517,12 +483,6 @@ public final class LcdController implements Clocked, Component {
 
         int lsb = isHFlipped ? read(tileAddress + relativeAddress)
                 : Bits.reverse8(read(tileAddress + relativeAddress));
-
-        if (test_PIsPressed) {
-            System.out.print(
-                    (Bits.test(objectAttributeMemory.read((4 * index) + 3),
-                            SpriteBit.PALETTE) ? " 0BP1 " : " 0BP0 ") + " ");
-        }
 
         return (res.setBytes(0, msb, lsb).build()
                 .shift(Bits.extract(xindexy, 16, 8) - 8))
@@ -574,11 +534,5 @@ public final class LcdController implements Clocked, Component {
         return Bits.test(objectAttributeMemory.read((4 * index) + 3),
                 SpriteBit.PALETTE) ? regs.get(Reg.OBP1) : regs.get(Reg.OBP0);
 
-    }
-
-    private int actualPalette(int palette) {
-        return Bits.clip(2, palette) << 6 | Bits.extract(palette, 2, 2) << 4
-                | Bits.extract(palette, 4, 2) << 2
-                | Bits.extract(palette, 6, 2);
     }
 }

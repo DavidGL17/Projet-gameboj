@@ -197,7 +197,6 @@ public final class BitVector {
     /**
      * This enum is used in the extract methods and allows us to simplify the
      * writing of the two methods
-     *
      */
     public enum ExtensionType {
         BYZERO, WRAPPED
