@@ -1,13 +1,15 @@
-/**
- * 
- */
 package ch.epfl.gameboj.component;
 
-import ch.epfl.gameboj.AddressMap;
-import ch.epfl.gameboj.Preconditions;
-import ch.epfl.gameboj.bits.Bits;
+import static ch.epfl.gameboj.Preconditions.checkBits16;
+import static ch.epfl.gameboj.Preconditions.checkBits8;
+
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
+
+import static ch.epfl.gameboj.bits.Bits.test;
+import static ch.epfl.gameboj.bits.Bits.set;
+import static ch.epfl.gameboj.bits.Bits.complement8;
+import static ch.epfl.gameboj.AddressMap.REG_P1;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -46,7 +48,7 @@ public final class Joypad implements Component {
      */
     @Override
     public int read(int address) {
-        if (AddressMap.REG_P1 == Preconditions.checkBits16(address)) {
+        if (REG_P1 == checkBits16(address)) {
             return getP1();
         }
         return NO_DATA;
@@ -59,10 +61,10 @@ public final class Joypad implements Component {
      */
     @Override
     public void write(int address, int data) {
-        if (AddressMap.REG_P1 == Preconditions.checkBits16(address)) {
-            line1 = Bits.set(line1, 4,
-                    !Bits.test(Preconditions.checkBits8(data), 4));
-            line2 = Bits.set(line2, 5, !Bits.test(data, 5));
+        if (REG_P1 == checkBits16(address)) {
+            line1 = set(line1, 4,
+                    !test(checkBits8(data), 4));
+            line2 = set(line2, 5, !test(data, 5));
             ;
         }
     }
@@ -75,16 +77,16 @@ public final class Joypad implements Component {
      *            the key to press
      */
     public void keyPressed(Key key) {
-        if (Bits.test(getP1(), key.index)
-                && Bits.test((key.line == 1 ? line1 : line2), key.line + 3)) {
+        if (test(getP1(), key.index)
+                && test((key.line == 1 ? line1 : line2), key.line + 3)) {
             cpu.requestInterrupt(Interrupt.JOYPAD);
         }
         switch (key.line) {
         case 1:
-            line1 = Bits.set(line1, key.index, true);
+            line1 = set(line1, key.index, true);
             break;
         case 2:
-            line2 = Bits.set(line2, key.index, true);
+            line2 = set(line2, key.index, true);
             break;
         }
     }
@@ -98,10 +100,10 @@ public final class Joypad implements Component {
     public void keyReleased(Key key) {
         switch (key.line) {
         case 1:
-            line1 = Bits.set(line1, key.index, false);
+            line1 = set(line1, key.index, false);
             break;
         case 2:
-            line2 = Bits.set(line2, key.index, false);
+            line2 = set(line2, key.index, false);
             break;
         }
     }
@@ -112,14 +114,14 @@ public final class Joypad implements Component {
      * @return P1
      */
     private int getP1() {
-        if (Bits.test(line1, 4) && Bits.test(line2, 5)) {
-            return Bits.complement8(line1 | line2);
+        if (test(line1, 4) && test(line2, 5)) {
+            return complement8(line1 | line2);
         }
-        if (Bits.test(line1, 4)) {
-            return Bits.complement8(line1);
+        if (test(line1, 4)) {
+            return complement8(line1);
         }
-        if (Bits.test(line2, 5)) {
-            return Bits.complement8(line2);
+        if (test(line2, 5)) {
+            return complement8(line2);
         }
         return 0xFF;
     }

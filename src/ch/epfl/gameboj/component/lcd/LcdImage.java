@@ -1,11 +1,14 @@
 package ch.epfl.gameboj.component.lcd;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+import static java.util.Objects.hash;
+import static ch.epfl.gameboj.Preconditions.checkArgument;
 
-import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.BitVector;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static java.util.Arrays.fill;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -26,8 +29,7 @@ public final class LcdImage {
      *            the height of the image
      */
     public LcdImage(List<LcdImageLine> lines, int width, int height) {
-        Preconditions
-                .checkArgument(height == Objects.requireNonNull(lines).size());
+       checkArgument(height == requireNonNull(lines).size());
         this.lines = lines;
         this.width = width;
         this.height = height;
@@ -55,8 +57,7 @@ public final class LcdImage {
      * @return the pixel at that index
      */
     public int get(int x, int y) {
-        Preconditions
-                .checkArgument(y <= lines.size() && x <= lines.get(0).size());
+    	checkArgument(y <= lines.size() && x <= lines.get(0).size());
         return (lines.get(y).getMsb().testBit(x) ? 1 << 1 : 0)
                 | (lines.get(y).getLsb().testBit(x) ? 1 : 0);
     }
@@ -68,7 +69,7 @@ public final class LcdImage {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(lines, height, width);
+        return hash(lines, height, width);
     }
 
     /*
@@ -102,7 +103,7 @@ public final class LcdImage {
          */
         public Builder(int width, int height) {
             lines = new LcdImageLine[height];
-            Arrays.fill(lines, new LcdImageLine(new BitVector(width),
+            fill(lines, new LcdImageLine(new BitVector(width),
                     new BitVector(width), new BitVector(width)));
             this.width = width;
         }
@@ -120,8 +121,8 @@ public final class LcdImage {
          *             if the given line is null
          */
         public Builder setLine(LcdImageLine line, int index) {
-            Preconditions.checkArgument(index < lines.length && index >= 0
-                    && Objects.requireNonNull(line).size() == width);
+            checkArgument(index < lines.length && index >= 0
+                    && requireNonNull(line).size() == width);
             lines[index] = line;
             return this;
         }
@@ -132,7 +133,7 @@ public final class LcdImage {
          * @return a new LcdImage
          */
         public LcdImage build() {
-            return new LcdImage(Arrays.asList(lines), width, lines.length);
+            return new LcdImage(asList(lines), width, lines.length);
         }
     }
 

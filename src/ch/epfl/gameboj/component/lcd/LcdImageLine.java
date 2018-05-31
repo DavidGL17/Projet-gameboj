@@ -1,10 +1,14 @@
 package ch.epfl.gameboj.component.lcd;
 
-import java.util.Objects;
+import static java.util.Objects.checkIndex;
+import static ch.epfl.gameboj.Preconditions.checkArgument;
 
-import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.BitVector;
-import ch.epfl.gameboj.bits.Bits;
+
+import static ch.epfl.gameboj.bits.Bits.test;
+import static ch.epfl.gameboj.bits.Bits.clip;
+import static ch.epfl.gameboj.bits.Bits.extract;
+import static java.util.Objects.hash;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -39,7 +43,7 @@ public final class LcdImageLine {
      *            the opacity vector
      */
     public LcdImageLine(BitVector msb, BitVector lsb, BitVector opacity) {
-        Preconditions.checkArgument(
+        checkArgument(
                 msb.size() == lsb.size() && lsb.size() == opacity.size());
         this.msb = msb;
         this.lsb = lsb;
@@ -81,7 +85,7 @@ public final class LcdImageLine {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(msb, lsb, opacity);
+        return hash(msb, lsb, opacity);
     }
 
     /*
@@ -154,11 +158,11 @@ public final class LcdImageLine {
         }
 
         for (BitVector colorVector : bitsAtColor) {
-            if (Bits.test(palette, i)) {
+            if (test(palette, i)) {
                 newLsb = newLsb.or(colorVector);
             }
             ++i;
-            if (Bits.test(palette, i)) {
+            if (test(palette, i)) {
                 newMsb = newMsb.or(colorVector);
             }
             ++i;
@@ -221,7 +225,7 @@ public final class LcdImageLine {
      *             not within the bounds
      */
     public LcdImageLine join(LcdImageLine that, int index) {
-        Preconditions.checkArgument(
+        checkArgument(
                 that.size() == size() && index >= 0 && index <= size());
         if (index == size()) {
             return this;
@@ -236,7 +240,7 @@ public final class LcdImageLine {
                     index -= 8;
                     i++;
                 }
-                builder.setByte(i, Bits.clip(index, -1));
+                builder.setByte(i, clip(index, -1));
                 BitVector mask = builder.build();
 
                 BitVector newMsb = (mask.and(this.msb))
@@ -257,7 +261,7 @@ public final class LcdImageLine {
                     i++;
                 }
                 builder.setByte(size() / 8 - 1 - i,
-                        Bits.extract(-1, 31 - index, index));
+                        extract(-1, 31 - index, index));
 
                 BitVector mask = builder.build();
 

@@ -1,20 +1,24 @@
 package ch.epfl.gameboj.component.lcd;
 
-import java.util.Arrays;
+import static ch.epfl.gameboj.bits.Bits.*;
+import static ch.epfl.gameboj.Preconditions.checkBits16;
+import static ch.epfl.gameboj.Preconditions.checkBits8;
 
-import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
-import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.bits.Bit;
-import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
 import ch.epfl.gameboj.component.lcd.LcdImage.Builder;
 import ch.epfl.gameboj.component.memory.Ram;
+
+import static java.util.Arrays.fill;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.sort;
+import static ch.epfl.gameboj.AddressMap.*;
 
 /**
  * @author David Gonzalez leon (270845)
@@ -71,11 +75,11 @@ public final class LcdController implements Clocked, Component {
      */
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
-        videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
-        objectAttributeMemory = new Ram(AddressMap.OAM_RAM_SIZE);
+        videoRam = new Ram(VIDEO_RAM_SIZE);
+        objectAttributeMemory = new Ram(OAM_RAM_SIZE);
         LcdImageLine[] lines = new LcdImageLine[LCD_HEIGHT];
-        Arrays.fill(lines, LcdImageLine.ZERO_OF_SIZE_160);
-        DEFAULT_IMAGE = new LcdImage(Arrays.asList(lines), LCD_WIDTH,
+        fill(lines, LcdImageLine.ZERO_OF_SIZE_160);
+        DEFAULT_IMAGE = new LcdImage(asList(lines), LCD_WIDTH,
                 LCD_HEIGHT);
         currentImage = DEFAULT_IMAGE;
         regs.set(Reg.OBP0, 0b11100100);
@@ -116,17 +120,17 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public int read(int address) {
-        if (Preconditions.checkBits16(address) >= AddressMap.VIDEO_RAM_START
-                && address < AddressMap.VIDEO_RAM_END) {
-            return videoRam.read(address - AddressMap.VIDEO_RAM_START);
+        if (checkBits16(address) >= VIDEO_RAM_START
+                && address < VIDEO_RAM_END) {
+            return videoRam.read(address - VIDEO_RAM_START);
         }
-        if (Preconditions.checkBits16(address) >= AddressMap.OAM_START
-                && address < AddressMap.OAM_END) {
-            return objectAttributeMemory.read(address - AddressMap.OAM_START);
+        if (checkBits16(address) >= OAM_START
+                && address < OAM_END) {
+            return objectAttributeMemory.read(address - OAM_START);
         }
-        if (address >= AddressMap.REGS_LCDC_START
-                && address < AddressMap.REGS_LCDC_END) {
-            return regs.get(Reg.values()[address - AddressMap.REGS_LCDC_START]);
+        if (address >= REGS_LCDC_START
+                && address < REGS_LCDC_END) {
+            return regs.get(Reg.values()[address - REGS_LCDC_START]);
         }
         return NO_DATA;
     }
@@ -138,20 +142,20 @@ public final class LcdController implements Clocked, Component {
      */
     @Override
     public void write(int address, int data) {
-        Preconditions.checkBits8(data);
-        if (Preconditions.checkBits16(address) >= AddressMap.VIDEO_RAM_START
-                && address < AddressMap.VIDEO_RAM_END) {
-            videoRam.write(address - AddressMap.VIDEO_RAM_START, data);
+        checkBits8(data);
+        if (checkBits16(address) >= VIDEO_RAM_START
+                && address < VIDEO_RAM_END) {
+            videoRam.write(address - VIDEO_RAM_START, data);
         }
-        if (address >= AddressMap.OAM_START && address < AddressMap.OAM_END) {
-            objectAttributeMemory.write(address - AddressMap.OAM_START, data);
+        if (address >= OAM_START && address < OAM_END) {
+            objectAttributeMemory.write(address - OAM_START, data);
         }
-        if (address >= AddressMap.REGS_LCDC_START
-                && address < AddressMap.REGS_LCDC_END) {
-            switch (address - AddressMap.REGS_LCDC_START) {
+        if (address >= REGS_LCDC_START
+                && address < REGS_LCDC_END) {
+            switch (address - REGS_LCDC_START) {
             case 0:
                 if (regs.testBit(Reg.LCDC, LCDCBit.LCD_STATUS)
-                        && !Bits.test(data, LCDCBit.LCD_STATUS.index())) {
+                        && !test(data, LCDCBit.LCD_STATUS.index())) {
                     regs.set(Reg.LY, 0);
                     imagesDrawn = 0;
                     winY = 0;
@@ -180,7 +184,7 @@ public final class LcdController implements Clocked, Component {
                 addressToCopy = data << 8;
                 break;
             default:
-                regs.set(Reg.values()[address - AddressMap.REGS_LCDC_START],
+                regs.set(Reg.values()[address - REGS_LCDC_START],
                         data);
                 break;
             }
@@ -208,9 +212,8 @@ public final class LcdController implements Clocked, Component {
             if (cycle >= nextNonIdleCycle) {
                 switch (getMode()) {
                 case 0:
-                    if (regs.get(Reg.LY) == LCD_HEIGHT) {
+                    if (regs.get(Reg.LY) == LCD_HEIGHT-1) {
                         setMode(1);
-                        System.out.println("Vblank requesteed at " + cycle);
                     } else if (regs.get(Reg.LY) < LCD_HEIGHT) {
                         setMode(2);
                     }
@@ -289,9 +292,9 @@ public final class LcdController implements Clocked, Component {
 
     private void setMode(int mode) {
         int statValue = regs.get(Reg.STAT);
-        int previousMode = Bits.clip(2, statValue);
-        regs.set(Reg.STAT, Bits.set(Bits.set(statValue, 0, Bits.test(mode, 0)),
-                1, Bits.test(mode, 1)));
+        int previousMode = clip(2, statValue);
+        regs.set(Reg.STAT, set(set(statValue, 0, test(mode, 0)),
+                1, test(mode, 1)));
         if (previousMode != 1 && mode == 1) {
             cpu.requestInterrupt(Interrupt.VBLANK);
         }
@@ -304,8 +307,8 @@ public final class LcdController implements Clocked, Component {
 
     private int getMode() {
         int statValue = regs.get(Reg.STAT);
-        return (Bits.test(statValue, STATBit.MODE1) ? 1 << 1 : 0)
-                | (Bits.test(statValue, STATBit.MODE0) ? 1 : 0);
+        return (test(statValue, STATBit.MODE1) ? 1 << 1 : 0)
+                | (test(statValue, STATBit.MODE0) ? 1 : 0);
     }
 
     /// Manages the Bits in Stat
@@ -314,14 +317,14 @@ public final class LcdController implements Clocked, Component {
         int statValue = regs.get(Reg.STAT);
         boolean equal = regs.get(Reg.LYC) == regs.get(Reg.LY);
         regs.set(Reg.STAT,
-                Bits.set(statValue, STATBit.LYC_EQ_LY.index(), equal));
-        if (equal && Bits.test(statValue, STATBit.INT_LYC)) {
+                set(statValue, STATBit.LYC_EQ_LY.index(), equal));
+        if (equal && test(statValue, STATBit.INT_LYC)) {
             cpu.requestInterrupt(Interrupt.LCD_STAT);
         }
     }
 
     private boolean checkStatBit(int index) {
-        return Bits.test(regs.get(Reg.STAT), index);
+        return test(regs.get(Reg.STAT), index);
     }
 
     /**
@@ -394,14 +397,14 @@ public final class LcdController implements Clocked, Component {
         boolean plage = background ? regs.testBit(Reg.LCDC, LCDCBit.BG_AREA)
                 : regs.testBit(Reg.LCDC, LCDCBit.WIN_AREA);
         for (int i = 0; i < size / 8; ++i) {
-            int tileIndex = read(AddressMap.BG_DISPLAY_DATA[plage ? 1 : 0]
+            int tileIndex = read(BG_DISPLAY_DATA[plage ? 1 : 0]
                     + Math.floorDiv(line, 8) * 32 + i);
             int tileAddress = 0;
             if (tileIndex > 0x7F) {
-                tileAddress = AddressMap.TILE_SOURCE[0] + 16 * (tileIndex - 0x80);
+                tileAddress = TILE_SOURCE[0] + 16 * (tileIndex - 0x80);
             } else {
                 if (regs.testBit(Reg.LCDC, LCDCBit.TILE_SOURCE)) {
-                    tileAddress = AddressMap.TILE_SOURCE[1] + 16 * tileIndex;
+                    tileAddress = TILE_SOURCE[1] + 16 * tileIndex;
                 } else {
                     tileAddress = 0x9000 + 16 * tileIndex;
                 }
@@ -409,7 +412,7 @@ public final class LcdController implements Clocked, Component {
             int lsbBg = read(tileAddress + Math.floorMod(line, 8) * 2);
             int msbBg = read(tileAddress + Math.floorMod(line, 8) * 2 + 1);
 
-            lineBuilder.setBytes(i, Bits.reverse8(msbBg), Bits.reverse8(lsbBg));
+            lineBuilder.setBytes(i, reverse8(msbBg), reverse8(lsbBg));
         }
         return lineBuilder.build();
 
@@ -432,7 +435,7 @@ public final class LcdController implements Clocked, Component {
         }
         res[10] = filled;
 
-        Arrays.sort(res, 0, filled);
+        sort(res, 0, filled);
 
         return res;
     }
@@ -446,7 +449,7 @@ public final class LcdController implements Clocked, Component {
 
         for (int i = 0; i < filled; ++i) {
             int xindexy = tab[i];
-            int index = Bits.extract(xindexy, 8, 8);
+            int index = extract(xindexy, 8, 8);
             if (spriteIsBehindBg(index)) {
                 behindBgLine = buildSpriteLine(xindexy, line)
                         .below(behindBgLine);
@@ -459,8 +462,8 @@ public final class LcdController implements Clocked, Component {
     }
 
     private LcdImageLine buildSpriteLine(int xindexy, int line) {
-        int index = Bits.extract(xindexy, 8, 8);
-        int yAbsolute = Bits.extract(xindexy, 0, 8) - 16;
+        int index = extract(xindexy, 8, 8);
+        int yAbsolute = extract(xindexy, 0, 8) - 16;
         boolean isHFlipped = spriteIsHFlipped(index);
         boolean isVFlipped = spriteIsVFlipped(index);
         int tileAddress = spriteGetTileAddress(index);
@@ -479,13 +482,13 @@ public final class LcdController implements Clocked, Component {
         LcdImageLine.Builder res = new LcdImageLine.Builder(LCD_WIDTH);
 
         int msb = isHFlipped ? read(tileAddress + relativeAddress + 1)
-                : Bits.reverse8(read(tileAddress + relativeAddress + 1));
+                : reverse8(read(tileAddress + relativeAddress + 1));
 
         int lsb = isHFlipped ? read(tileAddress + relativeAddress)
-                : Bits.reverse8(read(tileAddress + relativeAddress));
+                : reverse8(read(tileAddress + relativeAddress));
 
         return (res.setBytes(0, msb, lsb).build()
-                .shift(Bits.extract(xindexy, 16, 8) - 8))
+                .shift(extract(xindexy, 16, 8) - 8))
                         .mapColors(spriteGetPalette(index));
 
     }
@@ -510,28 +513,28 @@ public final class LcdController implements Clocked, Component {
 
     private int spriteGetTileAddress(int index) {
         if (regs.testBit(Reg.LCDC, LCDCBit.OBJ_SIZE))
-            return 0x8000 + 16 * Bits
-                    .set(objectAttributeMemory.read((4 * index) + 2), 0, false);
+            return 0x8000 + 16 * 
+                    set(objectAttributeMemory.read((4 * index) + 2), 0, false);
         return 0x8000 + 16 * objectAttributeMemory.read((4 * index) + 2);
     }
 
     private boolean spriteIsVFlipped(int index) {
-        return Bits.test(objectAttributeMemory.read((4 * index) + 3),
+        return test(objectAttributeMemory.read((4 * index) + 3),
                 SpriteBit.FLIP_V);
     }
 
     private boolean spriteIsHFlipped(int index) {
-        return Bits.test(objectAttributeMemory.read((4 * index) + 3),
+        return test(objectAttributeMemory.read((4 * index) + 3),
                 SpriteBit.FLIP_H);
     }
 
     private boolean spriteIsBehindBg(int index) {
-        return Bits.test(objectAttributeMemory.read((4 * index) + 3),
+        return test(objectAttributeMemory.read((4 * index) + 3),
                 SpriteBit.BEHIND_BG);
     }
 
     private int spriteGetPalette(int index) {
-        return Bits.test(objectAttributeMemory.read((4 * index) + 3),
+        return test(objectAttributeMemory.read((4 * index) + 3),
                 SpriteBit.PALETTE) ? regs.get(Reg.OBP1) : regs.get(Reg.OBP0);
 
     }

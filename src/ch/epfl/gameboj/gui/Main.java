@@ -3,10 +3,8 @@ package ch.epfl.gameboj.gui;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-
 import ch.epfl.gameboj.GameBoy;
 import ch.epfl.gameboj.component.Joypad.Key;
-import ch.epfl.gameboj.component.cartridge.Cartridge;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -15,9 +13,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+import static ch.epfl.gameboj.component.cartridge.Cartridge.ofFile;
 
-    private final static String ROM_FILE_NAME = "TasmaniaStory.gb";
+public class Main extends Application {
 
     Map<KeyCode, Key> keyCodeMap = Map.of(KeyCode.UP, Key.UP, KeyCode.DOWN,
             Key.DOWN, KeyCode.RIGHT, Key.RIGHT, KeyCode.LEFT, Key.LEFT);
@@ -26,7 +24,7 @@ public class Main extends Application {
             " ", Key.SELECT);
 
     public static void main(String[] args) {
-        Application.launch(new String[] { ROM_FILE_NAME });
+        Application.launch(args);
     }
 
     @Override
@@ -35,7 +33,7 @@ public class Main extends Application {
         if (romName.size() != 1) {
             System.exit(1);
         }
-        GameBoy gb = new GameBoy(Cartridge.ofFile(new File(romName.get(0))));
+        GameBoy gb = new GameBoy(ofFile(new File(romName.get(0))));
 
         ImageView imageView = new ImageView(
                 ImageConverter.convert(gb.lcdController().currentImage()));

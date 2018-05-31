@@ -1,6 +1,7 @@
 package ch.epfl.gameboj.gui;
 
-import ch.epfl.gameboj.component.lcd.LcdController;
+import static ch.epfl.gameboj.component.lcd.LcdController.LCD_WIDTH;
+import static ch.epfl.gameboj.component.lcd.LcdController.LCD_HEIGHT;
 import ch.epfl.gameboj.component.lcd.LcdImage;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
@@ -19,8 +20,8 @@ public class ImageConverter {
      * @return the LcdImage converted to Image
      */
     public static Image convert(LcdImage image) {
-        WritableImage finalImage = new WritableImage(LcdController.LCD_WIDTH,
-                LcdController.LCD_HEIGHT);
+        WritableImage finalImage = new WritableImage(LCD_WIDTH,
+                LCD_HEIGHT);
         PixelWriter pixelWriter = finalImage.getPixelWriter();
         for (int y = 0; y < finalImage.getHeight(); ++y) {
             for (int x = 0; x < finalImage.getWidth(); ++x) {

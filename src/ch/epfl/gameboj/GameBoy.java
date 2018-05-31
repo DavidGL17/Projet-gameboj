@@ -1,6 +1,7 @@
 package ch.epfl.gameboj;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+import static ch.epfl.gameboj.Preconditions.checkArgument;
 
 import ch.epfl.gameboj.component.Joypad;
 import ch.epfl.gameboj.component.Timer;
@@ -46,7 +47,7 @@ public final class GameBoy {
         cpu = new Cpu();
         timer = new Timer(cpu);
         bootRomController = new BootRomController(
-                Objects.requireNonNull(cartridge));
+                requireNonNull(cartridge));
         lcdController = new LcdController(cpu);
         joypad = new Joypad(cpu);
 
@@ -115,7 +116,7 @@ public final class GameBoy {
      *             cycles already simulated
      */
     public void runUntil(long cycle) {
-        Preconditions.checkArgument(cycle >= currentCycle);
+        checkArgument(cycle >= currentCycle);
         while (currentCycle < cycle) {
             timer.cycle(currentCycle);
             lcdController.cycle(currentCycle);

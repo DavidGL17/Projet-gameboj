@@ -1,9 +1,16 @@
 package ch.epfl.gameboj.bits;
 
-import java.util.Arrays;
-import java.util.Objects;
+import static java.util.Objects.checkIndex;
 
-import ch.epfl.gameboj.Preconditions;
+import java.util.Arrays;
+
+import static ch.epfl.gameboj.Preconditions.checkArgument;
+import static ch.epfl.gameboj.Preconditions.checkBits8;
+
+import static java.lang.Byte.toUnsignedInt;
+import static ch.epfl.gameboj.bits.Bits.clip;
+import static ch.epfl.gameboj.bits.Bits.test;
+
 
 /**
  * @author David Gonzalez leon (270845)
@@ -30,7 +37,7 @@ public final class BitVector {
      *            - wether the bits' value is one
      */
     public BitVector(int size, boolean initialValue) {
-        Preconditions.checkArgument(size > 0 && (size % 32) == 0);
+        checkArgument(size > 0 && (size % 32) == 0);
         table = new int[size / 32];
         Arrays.fill(table, initialValue ? -1 : 0);
     }
@@ -106,8 +113,8 @@ public final class BitVector {
      * @return whether the bit is activated or not, as a boolean value
      */
     public boolean testBit(int index) {
-        Objects.checkIndex(index, size());
-        return Bits.test(table[Math.floorDiv(index, 32)],
+        checkIndex(index, size());
+        return test(table[Math.floorDiv(index, 32)],
                 Math.floorMod(index, 32));
     }
 
@@ -132,7 +139,7 @@ public final class BitVector {
      * @return conjunction of the two BitVectors
      */
     public BitVector and(BitVector that) {
-        Preconditions.checkArgument(that.size() == size());
+        checkArgument(that.size() == size());
         int[] andTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
             andTable[i] = table[i] & that.table[i];
@@ -148,7 +155,7 @@ public final class BitVector {
      * @return disjunction of the two BitVector
      */
     public BitVector or(BitVector that) {
-        Preconditions.checkArgument(that.size() == size());
+        checkArgument(that.size() == size());
         int[] orTable = new int[table.length];
         for (int i = 0; i < table.length; ++i) {
             orTable[i] = table[i] | that.table[i];
@@ -203,8 +210,7 @@ public final class BitVector {
     }
 
     private BitVector extract(int start, int size, ExtensionType ext) {
-        Preconditions
-                .checkArgument((size > 0) && (Math.floorMod(size, 32) == 0));
+        checkArgument((size > 0) && (Math.floorMod(size, 32) == 0));
         int[] newTable = new int[size / 32];
         int cellShift = Math.floorDiv(start, 32);
         if (Math.floorMod(start, 32) == 0) {
@@ -218,7 +224,7 @@ public final class BitVector {
                 value = Bits.extract(
                         getIntAtIndexOfExtension(cellShift + i, ext),
                         internalShift, Integer.SIZE - internalShift)
-                        | (Bits.clip(internalShift,
+                        | (clip(internalShift,
                                 getIntAtIndexOfExtension(cellShift + i + 1,
                                         ext)) << (32 - internalShift));
                 newTable[i] = value;
@@ -253,7 +259,7 @@ public final class BitVector {
          *            the number of Bit of the desired BitVector
          */
         public Builder(int size) {
-            Preconditions.checkArgument(size > 0 && size % 32 == 0);
+            checkArgument(size > 0 && size % 32 == 0);
             table = new byte[Math.floorDiv(size, 8)];
             Arrays.fill(table, (byte) 0);
         }
@@ -272,11 +278,11 @@ public final class BitVector {
          *             if the builder has already built the bitVector
          */
         public Builder setByte(int index, int value) {
-            Preconditions.checkBits8(value);
+            checkBits8(value);
             if (table == null) {
                 throw new IllegalStateException();
             }
-            Objects.checkIndex(index, table.length);
+            checkIndex(index, table.length);
             table[index] = (byte) value;
 
             return this;
@@ -310,10 +316,10 @@ public final class BitVector {
             int[] res = new int[table.length / 4];
             Arrays.fill(res, 0);
             for (int rank = 0; rank < res.length; rank++) {
-                res[rank] = (Byte.toUnsignedInt(table[(rank * 4)]))
-                        + ((Byte.toUnsignedInt(table[(rank * 4) + 1]))
-                                + ((Byte.toUnsignedInt(table[(rank * 4) + 2]))
-                                        + ((Byte.toUnsignedInt(table[(rank * 4)
+                res[rank] = (toUnsignedInt(table[(rank * 4)]))
+                        + ((toUnsignedInt(table[(rank * 4) + 1]))
+                                + ((toUnsignedInt(table[(rank * 4) + 2]))
+                                        + ((toUnsignedInt(table[(rank * 4)
                                                 + 3])) << 8) << 8) << 8);
             }
             return res;
