@@ -212,7 +212,7 @@ public final class LcdController implements Clocked, Component {
             if (cycle >= nextNonIdleCycle) {
                 switch (getMode()) {
                 case 0:
-                    if (regs.get(Reg.LY) == LCD_HEIGHT-1) {
+                    if (regs.get(Reg.LY) == LCD_HEIGHT) {
                         setMode(1);
                     } else if (regs.get(Reg.LY) < LCD_HEIGHT) {
                         setMode(2);
